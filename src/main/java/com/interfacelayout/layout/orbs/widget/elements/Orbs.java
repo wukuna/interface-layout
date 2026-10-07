@@ -1,0 +1,484 @@
+/*
+ * Copyright (c) 2025, cue <https://github.com/its-cue>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package com.interfacelayout.layout.orbs.widget.elements;
+
+import com.interfacelayout.layout.orbs.OrbConstants.Layout.Horizontal;
+import com.interfacelayout.layout.orbs.OrbConstants.Layout.HorizontalWide;
+import com.interfacelayout.layout.orbs.OrbConstants.Layout.Original;
+import com.interfacelayout.layout.orbs.OrbConstants.Layout.Vertical;
+import com.interfacelayout.layout.orbs.OrbConstants.Script;
+import com.interfacelayout.layout.orbs.OrbConstants.Widgets.Modern;
+import com.interfacelayout.layout.orbs.OrbConstants.Widgets.Orb;
+import com.interfacelayout.util.SetValue;
+import com.interfacelayout.util.ValueKey;
+import static com.interfacelayout.util.ValueKey.HEIGHT;
+import static com.interfacelayout.util.ValueKey.X;
+import static com.interfacelayout.util.ValueKey.X_POSITION_MODE;
+import static com.interfacelayout.util.ValueKey.Y;
+import static com.interfacelayout.util.ValueKey.Y_POSITION_MODE;
+import com.interfacelayout.layout.orbs.widget.TargetWidget;
+import java.util.Map;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import net.runelite.api.widgets.WidgetPositionMode;
+
+@Getter
+@RequiredArgsConstructor
+public enum Orbs implements TargetWidget
+{
+	XP_DROPS_CONTAINER(
+		Orb.XP_DROPS,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		Map.of(
+			X, new SetValue(
+				Original.XP_DROPS_X,
+				Vertical.XP_DROPS_X,
+				Horizontal.XP_DROPS_X,
+				HorizontalWide.XP_DROPS_X
+			),
+			Y, new SetValue(
+				Original.XP_DROPS_Y,
+				Vertical.XP_DROPS_Y,
+				Horizontal.XP_DROPS_Y,
+				HorizontalWide.XP_DROPS_Y
+			)
+		)
+	),
+	HP_ORB_CONTAINER(
+		Orb.HP_ORB,
+		-1,
+		-1,
+		Orb.HP_ORB_BACKING,
+		Orb.HP_ORB_INDICATOR,
+		Orb.HP_ORB_BUTTON,
+		Orb.HP_ORB_ICON,
+		Orb.HP_ORB_EMPTY,
+		Map.of(
+			X, new SetValue(
+				Original.HP_ORB_X,
+				Vertical.HP_ORB_X,
+				Horizontal.HP_ORB_X,
+				HorizontalWide.HP_ORB_X
+			),
+			Y, new SetValue(
+				Original.HP_ORB_Y,
+				Vertical.HP_ORB_Y,
+				Horizontal.HP_ORB_Y,
+				HorizontalWide.HP_ORB_Y
+			)
+		)
+	),
+	PRAYER_ORB_CONTAINER(
+		Orb.PRAY_ORB,
+		-1,
+		-1,
+		Orb.PRAY_ORB_BACKING,
+		Orb.PRAY_ORB_INDICATOR,
+		Orb.PRAY_ORB_BUTTON,
+		Orb.PRAY_ORB_ICON,
+		Orb.PRAY_ORB_EMPTY,
+		Map.of(
+			X, new SetValue(
+				Original.PRAYER_ORB_X,
+				Vertical.PRAYER_ORB_X,
+				Horizontal.PRAYER_ORB_X,
+				HorizontalWide.PRAYER_ORB_X
+			),
+			Y, new SetValue(
+				Original.PRAYER_ORB_Y,
+				Vertical.PRAYER_ORB_Y,
+				Horizontal.PRAYER_ORB_Y,
+				HorizontalWide.PRAYER_ORB_Y
+			)
+		)
+	),
+	RUN_ORB_CONTAINER(
+		Orb.RUN_ORB,
+		-1,
+		-1,
+		Orb.RUN_ORB_BACKING,
+		Orb.RUN_ORB_INDICATOR,
+		Orb.RUN_ORB_BUTTON,
+		Orb.RUN_ORB_ICON,
+		Orb.RUN_ORB_EMPTY,
+		Map.of(
+			X, new SetValue(
+				Original.RUN_ORB_X,
+				Vertical.RUN_ORB_X,
+				Horizontal.RUN_ORB_X,
+				HorizontalWide.RUN_ORB_X
+			),
+			Y, new SetValue(
+				Original.RUN_ORB_Y,
+				Vertical.RUN_ORB_Y,
+				Horizontal.RUN_ORB_Y,
+				HorizontalWide.RUN_ORB_Y
+			)
+		)
+	),
+	SPEC_ORB_CONTAINER(
+		Orb.SPEC_ORB,
+		-1,
+		-1,
+		Orb.SPEC_ORB_BACKING,
+		Orb.SPEC_ORB_INDICATOR,
+		Orb.SPEC_ORB_BUTTON,
+		Orb.SPEC_ORB_ICON,
+		Orb.SPEC_ORB_EMPTY,
+		Map.of(
+			X, new SetValue(
+				Original.SPEC_ORB_X,
+				Vertical.SPEC_ORB_X,
+				Horizontal.SPEC_ORB_X,
+				HorizontalWide.SPEC_ORB_X
+			),
+			Y, new SetValue(
+				Original.SPEC_ORB_Y,
+				Vertical.SPEC_ORB_Y,
+				Horizontal.SPEC_ORB_Y,
+				HorizontalWide.SPEC_ORB_Y
+			)
+		)
+	),
+	STORE_ORB_CONTAINER(
+		Orb.STORE_ORB,
+		-1,
+		Script.ORBS_UPDATE_STORE,
+		Orb.STORE_ORB_BACKING,
+		Orb.STORE_ORB_INDICATOR,
+		-1,
+		Orb.STORE_ORB_ICON,
+		-1,
+		Map.of(
+			X, new SetValue(
+				Original.STORE_ORB_X,
+				Vertical.STORE_ORB_X,
+				Horizontal.STORE_ORB_X,
+				HorizontalWide.STORE_ORB_X
+			),
+			Y, new SetValue(
+				Original.STORE_ORB_Y,
+				Vertical.STORE_ORB_Y,
+				Horizontal.STORE_ORB_Y,
+				HorizontalWide.STORE_ORB_Y
+			)
+		)
+	),
+	ACTIVITY_ORB_CONTAINER(
+		Orb.ACTIVITY_ORB,
+		-1,
+		Script.ORBS_UPDATE_ACTIVITY,
+		Orb.ACTIVITY_ORB_BACKING,
+		Orb.ACTIVITY_ORB_INDICATOR,
+		-1,
+		Orb.ACTIVITY_ORB_ICON,
+		-1,
+		Map.of(
+			X, new SetValue(
+				Original.ACTIVITY_ORB_X,
+				Vertical.ACTIVITY_ORB_X,
+				Horizontal.ACTIVITY_ORB_X,
+				HorizontalWide.ACTIVITY_ORB_X
+			),
+			Y, new SetValue(
+				Original.ACTIVITY_ORB_Y,
+				Vertical.ACTIVITY_ORB_Y,
+				Horizontal.ACTIVITY_ORB_Y,
+				HorizontalWide.ACTIVITY_ORB_Y
+			)
+		)
+	),
+	WORLD_MAP_CONTAINER(
+		Orb.WORLD_MAP,
+		-1,
+		Script.WORLD_MAP_UPDATE,
+		Orb.WORLD_MAP_BACKING,
+		-1,
+		-1,
+		Orb.WORLD_MAP_ICON,
+		-1,
+		Map.of(
+			X, new SetValue(
+				Original.WORLD_MAP_X,
+				Vertical.WORLD_MAP_X,
+				Horizontal.WORLD_MAP_X,
+				HorizontalWide.WORLD_MAP_X
+			),
+			Y, new SetValue(
+				Original.WORLD_MAP_Y,
+				Vertical.WORLD_MAP_Y,
+				Horizontal.WORLD_MAP_Y,
+				HorizontalWide.WORLD_MAP_Y
+			),
+			X_POSITION_MODE, new SetValue(
+				WidgetPositionMode.ABSOLUTE_RIGHT,
+				WidgetPositionMode.ABSOLUTE_LEFT
+			)
+		)
+	),
+	WORLD_MAP_TOOLTIP(
+		Orb.WORLD_MAP_TOOLTIP,
+		-1,
+		Script.TOOLTIP_MOUSE_RELEASE,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		Map.of()
+	),
+	WIKI_ICON_CONTAINER(
+		Orb.WIKI_ICON,
+		-1,
+		Script.WIKI_ICON_UPDATE,
+		-1,
+		-1,
+		Orb.WIKI_ICON_VANILLA,
+		-1,
+		-1,
+		Map.of(
+			X, new SetValue(
+				Original.WIKI_ICON_X,
+				Vertical.WIKI_ICON_X,
+				Horizontal.WIKI_ICON_X,
+				HorizontalWide.WIKI_ICON_X
+			),
+			Y, new SetValue(
+				Original.WIKI_ICON_Y,
+				Vertical.WIKI_ICON_Y,
+				Horizontal.WIKI_ICON_Y,
+				HorizontalWide.WIKI_ICON_Y
+			),
+			HEIGHT, new SetValue(
+				Original.WIKI_HEIGHT,
+				Original.WIKI_HEIGHT - 20
+			),
+			X_POSITION_MODE, new SetValue(
+				WidgetPositionMode.ABSOLUTE_RIGHT,
+				WidgetPositionMode.ABSOLUTE_LEFT
+			)
+		)
+	),
+	WIKI_PLUGIN_ICON(
+		Orb.WIKI_ICON,
+		0,
+		Script.WIKI_ICON_UPDATE,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		Map.of(
+			X_POSITION_MODE, new SetValue(
+				WidgetPositionMode.ABSOLUTE_CENTER,
+				WidgetPositionMode.ABSOLUTE_LEFT
+			),
+			Y_POSITION_MODE, new SetValue(
+				WidgetPositionMode.ABSOLUTE_CENTER,
+				WidgetPositionMode.ABSOLUTE_TOP
+			)
+		)
+	),
+	WIKI_VANILLA_CONTAINER(
+		Orb.WIKI_CONTAINER_VANILLA,
+		-1,
+		Script.WIKI_ICON_UPDATE,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		Map.of(
+			HEIGHT, new SetValue(
+				Original.WIKI_HEIGHT - 10,
+				Original.WIKI_HEIGHT - 20
+			),
+			X_POSITION_MODE, new SetValue(
+				WidgetPositionMode.ABSOLUTE_CENTER,
+				WidgetPositionMode.ABSOLUTE_LEFT
+			),
+			Y_POSITION_MODE, new SetValue(
+				WidgetPositionMode.ABSOLUTE_CENTER,
+				WidgetPositionMode.ABSOLUTE_TOP
+			)
+		)
+	),
+	WIKI_VANILLA_ICON(
+		Orb.WIKI_ICON_VANILLA,
+		-1,
+		Script.WIKI_ICON_UPDATE,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		Map.of(
+			X_POSITION_MODE, new SetValue(
+				WidgetPositionMode.ABSOLUTE_CENTER,
+				WidgetPositionMode.ABSOLUTE_LEFT
+			),
+			Y_POSITION_MODE, new SetValue(
+				WidgetPositionMode.ABSOLUTE_CENTER,
+				WidgetPositionMode.ABSOLUTE_TOP
+			)
+		)
+	),
+	LOGOUT_X_ICON(
+		Modern.LOGOUT_X_ICON,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		Map.of(
+			X, new SetValue(
+				Original.LOGOUT_X,
+				Vertical.LOGOUT_X,
+				Horizontal.LOGOUT_X,
+				HorizontalWide.LOGOUT_X
+			),
+			Y, new SetValue(
+				Original.LOGOUT_Y,
+				Vertical.LOGOUT_Y,
+				Horizontal.LOGOUT_Y,
+				HorizontalWide.LOGOUT_Y
+			),
+			X_POSITION_MODE, new SetValue(
+				WidgetPositionMode.ABSOLUTE_RIGHT,
+				WidgetPositionMode.ABSOLUTE_LEFT
+			)
+		)
+	),
+	LOGOUT_X_STONE(
+		Modern.LOGOUT_X_STONE,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		Map.of(
+			X, new SetValue(
+				Original.LOGOUT_X,
+				Vertical.LOGOUT_X,
+				Horizontal.LOGOUT_X,
+				HorizontalWide.LOGOUT_X
+			),
+			Y, new SetValue(
+				Original.LOGOUT_Y,
+				Vertical.LOGOUT_Y,
+				Horizontal.LOGOUT_Y,
+				HorizontalWide.LOGOUT_Y
+			),
+			X_POSITION_MODE, new SetValue(
+				WidgetPositionMode.ABSOLUTE_RIGHT,
+				WidgetPositionMode.ABSOLUTE_LEFT
+			)
+		)
+	),
+	//TODO?
+	/*GRID_MASTER_ORB_CONTAINER(
+		Orb.UNIVERSE,
+		0,
+		-1,
+		Script.GRID_MASTER_ORB_UPDATE,
+		-1,
+		-1,
+		-1,
+		-1,
+		Map.of(
+			X, new SetValue(
+				Original.ACTIVITY_ORB_X,
+				Vertical.ACTIVITY_ORB_X,
+				Horizontal.ACTIVITY_ORB_X,
+				HorizontalWide.ACTIVITY_ORB_X
+			),
+			Y, new SetValue(
+				Original.ACTIVITY_ORB_Y,
+				Vertical.ACTIVITY_ORB_Y,
+				Horizontal.ACTIVITY_ORB_Y,
+				HorizontalWide.ACTIVITY_ORB_Y
+			)
+		)
+	)*/;
+
+	private final int componentId;
+	private final int arrayId;
+	private final int scriptId;
+	private final int backingId;
+	private final int indicatorId;
+	private final int buttonId;
+	private final int iconId;
+	private final int emptyId;
+
+	private final Map<ValueKey, SetValue> valueMap;
+
+	public static final TargetWidget[] SWAPPABLE_ORBS = {
+		HP_ORB_CONTAINER,
+		PRAYER_ORB_CONTAINER,
+		RUN_ORB_CONTAINER,
+		SPEC_ORB_CONTAINER
+	};
+
+	public static boolean isSwappableOrb(int componentId)
+	{
+		for (TargetWidget orb : SWAPPABLE_ORBS)
+		{
+			if (orb.getComponentId() == componentId)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean isLogoutX()
+	{
+		return this == LOGOUT_X_STONE || this == LOGOUT_X_ICON;
+	}
+
+	@Override
+	public boolean isWiki()
+	{
+		return this == WIKI_ICON_CONTAINER;
+	}
+
+	@Override
+	public boolean isSpec()
+	{
+		return this == SPEC_ORB_CONTAINER;
+	}
+}

@@ -1,0 +1,6 @@
+.gradle/
+build/
+.idea/
+*.iml
+Launch-InterfaceLayout.ps1
+*.log

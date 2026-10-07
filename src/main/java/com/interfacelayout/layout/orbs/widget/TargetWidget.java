@@ -1,0 +1,97 @@
+/*
+ * Copyright (c) 2025, cue <https://github.com/its-cue>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package com.interfacelayout.layout.orbs.widget;
+
+import com.interfacelayout.util.SetValue;
+import com.interfacelayout.util.ValueKey;
+import java.util.Map;
+
+public interface TargetWidget
+{
+	int getComponentId();
+
+	default int getArrayId()
+	{
+		return -1;
+	}
+
+	default int getScriptId()
+	{
+		return -1;
+	}
+
+	default int getBackingId()
+	{
+		return -1;
+	}
+
+	default int getIndicatorId()
+	{
+		return -1;
+	}
+
+	default int getButtonId()
+	{
+		return -1;
+	}
+
+	default int getIconId()
+	{
+		return -1;
+	}
+
+	default int getEmptyId()
+	{
+		return -1;
+	}
+
+	default boolean isMinimapButton()
+	{
+		return false;
+	}
+
+	default boolean isCompass()
+	{
+		return false;
+	}
+
+	default boolean isLogoutX()
+	{
+		return false;
+	}
+
+	default boolean isWiki()
+	{
+		return false;
+	}
+
+	default boolean isSpec()
+	{
+		return false;
+	}
+
+	Map<ValueKey, SetValue> getValueMap();
+}
