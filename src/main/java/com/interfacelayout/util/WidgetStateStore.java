@@ -36,6 +36,12 @@ public class WidgetStateStore
         if (widget != null && states.get(widget).opacity == null) states.get(widget).opacity = widget.getOpacity();
     }
 
+    public void restoreRendering(Widget widget)
+    {
+        State state = states.get(widget);
+        if (state != null) state.restoreRendering(widget);
+    }
+
     public void hide(Widget widget, boolean hidden)
     {
         if (widget == null || !hidden) return;
@@ -134,7 +140,7 @@ public class WidgetStateStore
             widget.setXPositionMode(xMode); widget.setYPositionMode(yMode);
             widget.setWidthMode(widthMode); widget.setHeightMode(heightMode);
             if (opacity != null) widget.setOpacity(opacity);
-            if (type != null) { widget.setType(type); widget.setContentType(contentType); widget.setSpriteId(sprite); }
+            restoreRendering(widget);
             restoreVisibility(widget); widget.setNoClickThrough(noClickThrough);
         }
         void restoreVisibility(Widget widget)
@@ -142,6 +148,12 @@ public class WidgetStateStore
             if (hidden == null) return;
             widget.setHidden(hidden);
             hidden = null;
+        }
+        void restoreRendering(Widget widget)
+        {
+            if (type == null) return;
+            widget.setType(type); widget.setContentType(contentType); widget.setSpriteId(sprite);
+            type = null; contentType = null; sprite = null;
         }
     }
 }

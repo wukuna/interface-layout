@@ -10,6 +10,19 @@ import static org.mockito.Mockito.*;
 
 public class WidgetStateStoreTest
 {
+    @Test public void editingRestoresCapturedRenderingInsteadOfAssumingDisplayModeDefaults()
+    {
+        Widget mask = mock(Widget.class);
+        when(mask.getType()).thenReturn(5); when(mask.getContentType()).thenReturn(1338);
+        when(mask.getSpriteId()).thenReturn(987);
+        WidgetStateStore journal = new WidgetStateStore(); journal.captureRendering(mask);
+        when(mask.getType()).thenReturn(0); when(mask.getContentType()).thenReturn(0);
+        when(mask.getSpriteId()).thenReturn(-1);
+        journal.restoreRendering(mask);
+        verify(mask).setType(5); verify(mask).setContentType(1338); verify(mask).setSpriteId(987);
+        clearInvocations(mask); journal.restoreRendering(mask);
+        verify(mask, never()).setType(anyInt());
+    }
     @Test public void bothJournalsRecognizeFreePositionMinimapHidingWithoutMistakingItForGameHiding()
     {
         Widget mask = mock(Widget.class);

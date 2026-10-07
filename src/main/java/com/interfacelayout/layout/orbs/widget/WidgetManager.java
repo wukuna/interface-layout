@@ -92,14 +92,15 @@ public class WidgetManager
 	//should only be called on shutdown with toDefault being true
 	public void remapTargets(boolean toDefault, int scriptId, TargetWidget... targets)
 	{
-		if (!toDefault && manager.getCurrentLayout() == OrbLayout.FREE_POSITION) return;
-		if (!toDefault)
+		boolean freePosition = !toDefault && manager.getCurrentLayout() == OrbLayout.FREE_POSITION;
+		if (!toDefault && !freePosition)
 		{
 			slotManager.updateCurrentLayoutMode();
 		}
 
 		for (TargetWidget target : targets)
 		{
+			if (freePosition && !target.isMinimapButton()) continue;
 			if (!shouldUpdateTarget(target, scriptId))
 			{
 				continue;
@@ -485,6 +486,13 @@ public class WidgetManager
 		children[child.getIndex()] = null;
 	}
 
+	public boolean isAttachedChild(Widget child)
+	{
+		if (child == null || child.getParent() == null || child.getIndex() < 0) return false;
+		Widget[] children = child.getParent().getChildren();
+		return children != null && child.getIndex() < children.length && children[child.getIndex()] == child;
+	}
+
 	public boolean hasChildren(Widget widget)
 	{
 		if (widget == null)
@@ -557,16 +565,12 @@ public class WidgetManager
 
 	public void restoreMinimapRendering()
 	{
-		Widget widget = getMinimapMask();
-		if (widget == null)
-		{
-			return;
-		}
-        nativeStates.captureRendering(widget);
+		restoreMinimapRendering(getMinimapMask());
+	}
 
-		widget.setType(WidgetType.GRAPHIC);
-		widget.setContentType(MinimapOverlay.MINIMAP_CONTENT);
-		widget.setSpriteId(manager.isFixedMode() ? Sprite.FIXED_MINIMAP_MASK : Sprite.MINIMAP_MASK);
+	public void restoreMinimapRendering(Widget widget)
+	{
+		if (widget != null) nativeStates.restoreRendering(widget);
 	}
 
 	public Widget createMinimapButton(Widget parent)

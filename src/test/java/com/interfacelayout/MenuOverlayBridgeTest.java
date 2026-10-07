@@ -54,6 +54,11 @@ public class MenuOverlayBridgeTest
         group.getBounds().setLocation(500, 300); group.render(null);
         verify(menu).saveGroup(0, new Point(500, 300)); verify(refresh).run();
         group.render(null); verify(refresh, times(1)).run();
+        actual.setSize(33, 112); group.revalidate();
+        group.getBounds().setLocation(500, 264); // Renderer may clamp after a size change.
+        group.render(null);
+        verify(menu, never()).resetGroup(anyInt());
+        verify(menu, times(1)).saveGroup(0, new Point(500, 300));
         bridge.stop();
         assertTrue(registered.contains(nativeTop)); assertTrue(registered.contains(nativeBottom));
         assertFalse(registered.contains(group)); assertTrue(registered.contains(unrelated));

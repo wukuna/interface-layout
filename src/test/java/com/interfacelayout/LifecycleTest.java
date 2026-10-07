@@ -21,6 +21,17 @@ import static org.mockito.Mockito.*;
 
 public class LifecycleTest
 {
+    @Test public void queuedEditingChangeCannotRunAfterPluginReenabled() throws Exception
+    {
+        Fixture f = new Fixture(); f.handler.startUp();
+        f.queue.forEach(Runnable::run); f.queue.clear();
+        net.runelite.client.events.ConfigChanged event = new net.runelite.client.events.ConfigChanged();
+        event.setGroup("interfacelayout"); event.setKey("editInterface");
+        f.handler.onConfigChanged(event);
+        f.handler.shutDown(); f.handler.startUp();
+        f.queue.forEach(Runnable::run);
+        verify(f.editor, never()).toggleEditMode(anyBoolean());
+    }
     @Test public void disableBeforeStartupRunsCancelsNativeInitialization() throws Exception
     {
         Fixture f = new Fixture();
@@ -50,11 +61,14 @@ public class LifecycleTest
         final OrbController manager = mock(OrbController.class);
         final GameframeCoordinator frame = mock(GameframeCoordinator.class);
         final SlotManager slots = mock(SlotManager.class);
+        final com.interfacelayout.layout.orbs.widget.layout.edit.EditManager editor =
+            mock(com.interfacelayout.layout.orbs.widget.layout.edit.EditManager.class);
         final OrbEventHandler handler;
         Fixture()
         {
             ClientThread thread = mock(ClientThread.class);
             doAnswer(i -> { queue.add(i.getArgument(0)); return null; }).when(thread).invoke(any(Runnable.class));
+            doAnswer(i -> { queue.add(i.getArgument(0)); return null; }).when(thread).invokeLater(any(Runnable.class));
             handler = Guice.createInjector(new AbstractModule() {
                 @Override protected void configure() {
                     bind(Client.class).toInstance(mock(Client.class));
@@ -69,6 +83,7 @@ public class LifecycleTest
                     bind(OrbController.class).toProvider(() -> manager);
                     bind(GameframeCoordinator.class).toProvider(() -> frame);
                     bind(SlotManager.class).toProvider(() -> slots);
+                    bind(com.interfacelayout.layout.orbs.widget.layout.edit.EditManager.class).toProvider(() -> editor);
                 }
             }).getInstance(OrbEventHandler.class);
         }

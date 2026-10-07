@@ -99,7 +99,12 @@ public class MenuOverlayBridge
             setMovable(true); setSnappable(true);
         }
         @Override public String getName() { return name; }
-        @Override public void revalidate() { reset = true; }
+        @Override public void revalidate()
+        {
+            // RuneLite also revalidates overlays when their size/settings change.
+            // Only an actual cleared preference represents an overlay reset.
+            reset = getPreferredLocation() == null && getPreferredPosition() == null && lastApplied != null;
+        }
         @Override public Dimension render(Graphics2D graphics)
         {
             Rectangle actual = menu.groups().get(id);
@@ -113,7 +118,8 @@ public class MenuOverlayBridge
             if (getPreferredLocation() != null || getPreferredPosition() != null)
             {
                 // OverlayRenderer has already resolved origins, snapping and clamping.
-                Point position = getBounds().getLocation();
+                Point position = getPreferredLocation() != null
+                    ? new Point(getPreferredLocation()) : getBounds().getLocation();
                 if (!position.equals(lastApplied))
                 {
                     lastApplied = new Point(position);

@@ -118,7 +118,9 @@ public class MenuStoneController
         boolean vertical = config.menuLayout() == Layout.VERTICAL_LEFT || config.menuLayout() == Layout.VERTICAL_RIGHT
             || config.menuLayout() == Layout.FREE_POSITION;
         boolean modern = !orbs.isFixedMode() && !orbs.isClassicResizable();
-        boolean[] compactRow = {false, false};
+        // Own both native rows consistently, so visibility does not switch between
+        // built-in and plugin overlay preferences (and lose the dragged origin).
+        boolean[] compactRow = {!vertical, !vertical};
         for (int i = 0; i < registry.length; i++)
             if (hidden(i) && !(modern && i == 10)) compactRow[i / 7] = true;
         if (!vertical)

@@ -85,6 +85,10 @@ public class EditManager
 	private Widget editBackground;
 	private Widget blackoutMinimapRight;
 	private Widget blackoutMinimapLeft;
+	private Widget editingParent;
+	private Widget editingMask;
+	private boolean parentNoClickThrough;
+	private boolean presetSession;
 	private final Map<TargetWidget, Widget> handlers = new HashMap<>();
 
 	//format: {modern, classic, fixed}
@@ -137,29 +141,57 @@ public class EditManager
 
 	public void toggleEditMode(boolean state)
 	{
-        if (state == manager.isEditingLayout) return;
-        manager.saveConfig("editInterface", state);
+        if (state == manager.isEditingLayout)
+        {
+            if (config.editInterface() != state) manager.saveConfig("editInterface", state);
+            return;
+        }
+        if (!state)
+        {
+            closeEditMode();
+            if (config.editInterface()) manager.saveConfig("editInterface", false);
+            return;
+        }
+        if (!manager.isLoggedIn())
+        {
+            if (config.editInterface()) manager.saveConfig("editInterface", false);
+            return;
+        }
         if (config.layout() == com.interfacelayout.layout.orbs.OrbLayout.FREE_POSITION)
         {
-            if (!state && !handlers.isEmpty()) { closeEditMode(); return; }
-            if (!state) clearEditChildren();
-            manager.isEditingLayout = state && manager.isLoggedIn();
+            clearEditChildren();
+            manager.isEditingLayout = true;
+            manager.saveConfig("editInterface", true);
+            manager.updateCustomChildren();
             return;
         }
 
 		final Widget parent = widgetManager.getMapParent();
-		if (parent == null || !state)
+		if (parent == null)
 		{
-			closeEditMode();
+			if (config.editInterface()) manager.saveConfig("editInterface", false);
 			return;
 		}
 
-		enableEditMode(parent);
+		try
+		{
+			enableEditMode(parent);
+			manager.saveConfig("editInterface", true);
+		}
+		catch (RuntimeException ex)
+		{
+			closeEditMode();
+			manager.saveConfig("editInterface", false);
+			throw ex;
+		}
 	}
 
 	private void enableEditMode(Widget parent)
 	{
 		bindingManager.clear();
+		presetSession = true;
+		editingParent = parent;
+		parentNoClickThrough = parent.getNoClickThrough();
 		manager.isEditingLayout = true;
 		disableMinimap();
 		manager.hideWorldMap = false;
@@ -302,6 +334,7 @@ public class EditManager
 			{
 				case MenuOp.HANDLER_TOGGLE_OP_INDEX:
 					binding.setHidden(!binding.isHidden());
+					manager.saveConfig(toggle.getConfigKey(), binding.isHidden());
 					handler.setAction(MenuOp.HANDLER_TOGGLE_OP_INDEX, manager.buildToggleOp(binding.isHidden(), toggle.getMenuName()));
 					widgetManager.setTargetOpacity(target, binding.isHidden() ? EDIT_MODE_HIDDEN_OPACITY : 0);
 					break;
@@ -329,48 +362,31 @@ public class EditManager
 		manager.hideWorldMap = config.hideWorld();
 		manager.hideLogoutX = config.hideLogout();
 
-		for (Binding binding : bindingManager.all())
-		{
-			final TargetWidget target = getBoundTarget(binding);
-			final HideOrbConfig toggle = hideConfig.getByTarget(target);
-			if (toggle != null)
-			{
-				if (binding.isHidden() != toggle.getGetter().get())
-				{
-					if (!manager.isUpdatingProfile)
-					{
-						manager.saveConfig(toggle.getConfigKey(), binding.isHidden());
-					}
-				}
-
-				manager.hideOrbByConfig(toggle.getConfigKey());
-			}
-
-			widgetManager.setTargetOpacity(target, target.isLogoutX() ? LOGOUT_X_ICON_OPACITY : 0);
-		}
-
 		cleanupEditMode();
 	}
 
 	//restore the minimap to a clean state post-edit
 	private void cleanupEditMode()
 	{
-		widgetManager.restoreMinimapRendering();
-		manager.rebuildLayout();
-		clearEditChildren();
-
-		Widget parent = widgetManager.getMapParent();
-		if (parent != null)
+		if (presetSession)
 		{
-			parent.setNoClickThrough(manager.isEditingLayout);
+			widgetManager.restoreMinimapRendering(editingMask);
+			if (editingParent != null) editingParent.setNoClickThrough(parentNoClickThrough);
 		}
-
+		presetSession = false;
+		editingMask = null;
+		editingParent = null;
+		clearEditChildren();
 		dragState.clear();
+		nativeStates.restore();
+		manager.hideAllOrbsByConfig();
+		manager.rebuildLayout();
 	}
 
 	//should probably not do this, but i cba with minimap clicks
 	private void disableMinimap()
 	{
+		editingMask = widgetManager.getMinimapMask();
 		widgetManager.removeMinimapRendering();
 
 		if (!manager.isFixedMode())
@@ -410,6 +426,7 @@ public class EditManager
 		}
 
 		handlers.clear();
+		bindingManager.clear();
 
 		widgetManager.clearChild(dragState.boundIndicator);
 		widgetManager.clearChild(editBackground);

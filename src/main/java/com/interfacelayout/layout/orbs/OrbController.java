@@ -166,10 +166,20 @@ public class OrbController
 	//rebuild the layout from state/config
 	public void rebuildLayout()
 	{
+		boolean swapping = getCurrentLayout() != OrbLayout.FREE_POSITION && config.enableOrbSwapping();
+		if (swapping != enableOrbSwapping)
+		{
+			enableOrbSwapping = swapping;
+			slotManager.update();
+		}
 		gameframe.prepareNativeLayout();
 		if (getCurrentLayout() == OrbLayout.FREE_POSITION)
 		{
 			nativeStates.restore();
+			hideAllOrbsByConfig();
+			createCustomChildren();
+			updateCustomChildren();
+			updateNoClickThrough();
 			gameframe.refresh();
 			return;
 		}
@@ -480,7 +490,7 @@ public class OrbController
 			return;
 		}
 
-		if (minimapButton != null && minimapButton.getParent() != parent)
+		if (minimapButton != null && (minimapButton.getParent() != parent || !widgetManager.isAttachedChild(minimapButton)))
 		{
 			widgetManager.clearChild(minimapButton);
             minimapButton = null;
@@ -504,10 +514,7 @@ public class OrbController
 							break;
 
 						case MenuOp.EDIT_MODE_OP_INDEX:
-							if (isFixedMode())
-							{
-								editManager.toggleEditMode(true);
-							}
+							editManager.toggleEditMode(!isEditingLayout);
 							break;
 					}
 				}
@@ -524,6 +531,7 @@ public class OrbController
 			);
 		}
 
+		updateMinimapToggleButton();
 		//compass frame moved to the compass container
 		parent = client.getWidget(isClassicResizable() ? Classic.COMPASS_PARENT : Modern.COMPASS_PARENT);
 		if (parent == null)
@@ -536,7 +544,7 @@ public class OrbController
 			return;
 		}
 
-		if (compassFrame != null && compassFrame.getParent() != parent || isFixedMode())
+		if (compassFrame != null && (compassFrame.getParent() != parent || !widgetManager.isAttachedChild(compassFrame)) || isFixedMode())
 		{
 			widgetManager.clearChild(compassFrame);
             compassFrame = null;
@@ -575,6 +583,7 @@ public class OrbController
 		}
 
 		minimapButton.setHidden(config.hideMinimapToggle() || isMinimapMinimized());
+		minimapButton.setSpriteId(widgetManager.getSpriteId(!isMinimapHidden()));
 		if (!config.rightClickToggleButtons() || isFixedMode())
 		{
 			int index = MenuOp.OP_INDEX_0;
@@ -589,7 +598,7 @@ public class OrbController
 
 			minimapButton.setAction(index,
 				isFixedMode()
-					? buildEditOp(false)
+					? buildEditOp(isEditingLayout)
 					: buildToggleOp(isMinimapHidden(), MenuOp.MINIMAP_OP));
 		}
 
@@ -821,12 +830,12 @@ public class OrbController
 
 				int index = isCompactLayout() && config.showToggleOnMinimapButton() ? -3 : -2;
 				menu.createMenuEntry(index)
-					.setOption(buildEditOp(false))
+					.setOption(buildEditOp(isEditingLayout))
 					.setForceLeftClick(false)
 					.setDeprioritized(config.rightClickToggleButtons())
 					.setType(MenuAction.RUNELITE_LOW_PRIORITY)
 					.onClick(e ->
-						editManager.toggleEditMode(true)
+						editManager.toggleEditMode(!isEditingLayout)
 					);
 			}
 		}
@@ -1154,6 +1163,11 @@ public class OrbController
 		{
 			case ConfigKeys.HIDE_WORLD:
 				hideWorldMap = config.hideWorld();
+				if (getCurrentLayout() == OrbLayout.FREE_POSITION)
+				{
+					widgetManager.setTargetsHidden(hideWorldMap, Orbs.WORLD_MAP_CONTAINER, Orbs.WORLD_MAP_TOOLTIP);
+					break;
+				}
 				widgetManager.remapTargets(Orbs.WORLD_MAP_CONTAINER);
 				break;
 

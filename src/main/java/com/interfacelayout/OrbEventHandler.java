@@ -132,6 +132,14 @@ public class OrbEventHandler implements KeyListener
 
     private volatile int lifecycleGeneration;
 
+    private void later(Runnable task)
+    {
+        final int generation = lifecycleGeneration;
+        clientThread.invokeLater(() -> {
+            if (manager.active && generation == lifecycleGeneration) task.run();
+        });
+    }
+
 	protected void startUp() throws Exception
 	{
         final int generation = ++lifecycleGeneration;
@@ -423,7 +431,7 @@ public class OrbEventHandler implements KeyListener
 		{
 			if (key.equals(ConfigKeys.Core.HIDE_MINIMAP))
 			{
-				clientThread.invokeLater(() -> manager.hideMinimapOnTabClose(config.hideMinimapWithSidePanel()));
+				later(() -> manager.hideMinimapOnTabClose(config.hideMinimapWithSidePanel()));
 			}
 		}
 
@@ -432,7 +440,7 @@ public class OrbEventHandler implements KeyListener
 			if (key.equals(ConfigKeys.Core.SHOW_WIKI_MINIMAP_BUTTON))
 			{
 				manager.warnWikiPluginConflict();
-				clientThread.invokeLater(() ->
+				later(() ->
 				{
 					if (manager.isEditingLayout)
 					{
@@ -447,7 +455,7 @@ public class OrbEventHandler implements KeyListener
 
 		                if (group.equals(GROUP_NAME) && key.equals("resetLayoutPositions"))
         {
-            if (config.resetLayoutPositions()) clientThread.invokeLater(() -> {
+            if (config.resetLayoutPositions()) later(() -> {
                 editManager.toggleEditMode(false);
                 gameframe.resetPositions();
                 configManager.setConfiguration(GROUP_NAME, "resetLayoutPositions", false);
@@ -459,7 +467,7 @@ if (group.equals(GROUP_NAME) && (key.startsWith("free_") || key.startsWith("menu
     || key.equals("hideLeftBar") || key.equals("hideRightBar") || key.equals("showMenuToggle") || key.equals("editGrid"))) return;
         if (group.equals(GROUP_NAME) && key.equals("editInterface"))
         {
-            clientThread.invokeLater(() -> editManager.toggleEditMode(config.editInterface()));
+            later(() -> editManager.toggleEditMode(config.editInterface()));
             return;
         }
 if (!group.equals(GROUP_NAME))
@@ -471,12 +479,12 @@ if (!group.equals(GROUP_NAME))
 		{
 			if (config.layout() == OrbLayout.FREE_POSITION)
 			{
-				clientThread.invokeLater(() -> { manager.hideOrbByConfig(key); gameframe.refresh(); });
+				later(() -> { manager.hideOrbByConfig(key); gameframe.refresh(); });
 				return;
 			}
 			if (!manager.isEditingLayout)
 			{
-				clientThread.invokeLater(() ->
+				later(() ->
 				{
 					manager.hideOrbByConfig(key);
 
@@ -486,13 +494,13 @@ if (!group.equals(GROUP_NAME))
 					}
 				});
 			}
-			else if (orbRegistry.isHideConfig(key)) clientThread.invokeLater(() -> editManager.syncVisibility(key));
+			else if (orbRegistry.isHideConfig(key)) later(() -> editManager.syncVisibility(key));
 			return;
 		}
 
 		if (manager.isEditingLayout && !manager.isUpdatingProfile)
 		{
-			clientThread.invokeLater(() ->
+			later(() ->
 			{
 				if (!key.contains(manager.getCurrentPrefix()))
 				{
@@ -504,7 +512,7 @@ if (!group.equals(GROUP_NAME))
 		switch (key)
 		{
 			case ConfigKeys.COMPASS:
-				clientThread.invokeLater(() ->
+				later(() ->
 				{
 					manager.setupMinimapContainer(false);
 					widgetManager.setTargetsHidden(manager.isCompassHidden(), Compass.values());
@@ -515,16 +523,16 @@ if (!group.equals(GROUP_NAME))
 
 			case ConfigKeys.MINIMAP_BUTTON_PLACEMENT:
 			case ConfigKeys.ENABLE_OVERLAY_TOGGLE_OPTION:
-				clientThread.invokeLater(manager::updateMinimapToggleButton);
+				later(manager::updateMinimapToggleButton);
 				break;
 
 			case ConfigKeys.RIGHT_CLICK_TOGGLE_BUTTONS:
-				clientThread.invokeLater(manager::updateCustomChildren);
+				later(manager::updateCustomChildren);
 				break;
 
 			case ConfigKeys.ENABLE_ORB_SWAPPING:
 			case ConfigKeys.ENABLE_NO_CLICKTHROUGH:
-				clientThread.invokeLater(() ->
+				later(() ->
 				{
 					if (key.equals(ConfigKeys.ENABLE_NO_CLICKTHROUGH))
 					{
@@ -547,7 +555,7 @@ if (!group.equals(GROUP_NAME))
 				break;
 
 			case ConfigKeys.ENABLE_MINIMAP_OVERLAY:
-				clientThread.invokeLater(() ->
+				later(() ->
 				{
 					widgetManager.setHidden(Widgets.MinimapOverlay.UNIVERSE, manager.hideMinimapOverlay());
 					manager.hideLogout();
@@ -557,7 +565,7 @@ if (!group.equals(GROUP_NAME))
 				break;
 
 			case ConfigKeys.ENABLE_LOGOUT_X_OVERLAY:
-				clientThread.invokeLater(() ->
+				later(() ->
 				{
 					manager.hideLogout();
 					manager.updateLogoutXPosition();
@@ -566,7 +574,7 @@ if (!group.equals(GROUP_NAME))
 				break;
 
 			case ConfigKeys.HIDE_MINIMAP_WITH_SIDE_PANEL:
-				clientThread.invokeLater(() -> manager.hideMinimapOnTabClose(config.hideMinimapWithSidePanel()));
+				later(() -> manager.hideMinimapOnTabClose(config.hideMinimapWithSidePanel()));
 				break;
 
 			case ConfigKeys.ORB_LAYOUT:
@@ -576,7 +584,7 @@ if (!group.equals(GROUP_NAME))
 			case ConfigKeys.VERTICAL_ANCHOR:
 			case ConfigKeys.DISABLE_REORDERING:
 			case ConfigKeys.LEAVE_EMPTY_SPACE:
-				clientThread.invokeLater(() ->
+				later(() ->
 				{
 					if (!manager.isFixedMode())
 					{
@@ -610,7 +618,7 @@ if (!group.equals(GROUP_NAME))
 		switch (name)
 		{
 			case ConfigGroup.Core.WIKI:
-				clientThread.invokeLater(() ->
+				later(() ->
 				{
 					if (manager.isEditingLayout)
 					{
@@ -626,7 +634,7 @@ if (!group.equals(GROUP_NAME))
 
 			case ConfigGroup.Core.MINIMAP:
 				//keep minimap hidden when the core minimap plugin is toggled (somewhat edge case)
-				clientThread.invokeLater(() -> manager.hideMinimapOnTabClose(config.hideMinimapWithSidePanel()));
+				later(() -> manager.hideMinimapOnTabClose(config.hideMinimapWithSidePanel()));
 				break;
 		}
 	}
@@ -647,7 +655,7 @@ if (!group.equals(GROUP_NAME))
 	{        if (config.showMenuToggle().matches(e))
         {
             e.consume();
-            clientThread.invokeLater(gameframe::toggleShown);
+            later(gameframe::toggleShown);
             return;
         }
 
@@ -659,7 +667,7 @@ if (!group.equals(GROUP_NAME))
 				{
 					e.consume();
 				}
-				clientThread.invokeLater(() -> editManager.toggleEditMode(false));
+				later(() -> editManager.toggleEditMode(false));
 			}
 			return;
 		}
@@ -686,7 +694,7 @@ if (!group.equals(GROUP_NAME))
 		switch (config.toggleOption())
 		{
 			case MINIMAP:
-				clientThread.invokeLater(manager::onMinimapToggle);
+				later(manager::onMinimapToggle);
 				break;
 
 			case DETACHED_MINIMAP:
@@ -694,7 +702,7 @@ if (!group.equals(GROUP_NAME))
 				break;
 
 			case EDIT_MODE:
-				clientThread.invokeLater(() -> editManager.toggleEditMode(true));
+				later(() -> editManager.toggleEditMode(true));
 				break;
 		}
 	}

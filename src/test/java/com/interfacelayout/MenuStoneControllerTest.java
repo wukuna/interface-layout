@@ -44,6 +44,21 @@ public class MenuStoneControllerTest
                 if (display == 2 && i >= 7) x = new int[]{99,132,165,0,66,33,0}[i - 7];
                 stones[i] = WidgetGeometryTest.widget(x, 0, 33, 36);
                 icons[i] = WidgetGeometryTest.widget(x + 4, 2, 25, 32);
+                final int nativeX = x;
+                final Widget nativeStone = stones[i], nativeIcon = icons[i];
+                // The game restores native relative coordinates when forced position is cleared.
+                doAnswer(call -> {
+                    int px = call.getArgument(0), py = call.getArgument(1);
+                    when(nativeStone.getRelativeX()).thenReturn(px == -1 ? nativeX : px);
+                    when(nativeStone.getRelativeY()).thenReturn(py == -1 ? 0 : py);
+                    return null;
+                }).when(nativeStone).setForcedPosition(anyInt(), anyInt());
+                doAnswer(call -> {
+                    int px = call.getArgument(0), py = call.getArgument(1);
+                    when(nativeIcon.getRelativeX()).thenReturn(px == -1 ? nativeX + 4 : px);
+                    when(nativeIcon.getRelativeY()).thenReturn(py == -1 ? 2 : py);
+                    return null;
+                }).when(nativeIcon).setForcedPosition(anyInt(), anyInt());
                 when(stones[i].getParent()).thenReturn(parents[i / 7]);
                 when(icons[i].getParent()).thenReturn(parents[i / 7]);
                 when(client.getWidget(registries[display][i][0])).thenReturn(stones[i]);
@@ -70,7 +85,9 @@ public class MenuStoneControllerTest
             else assertTrue(menu.stones().containsKey(10)); // Fixed/Classic Logout remains in the row.
             states.restore();
             when(config.hideCombatStone()).thenReturn(false); when(config.hideClanStone()).thenReturn(false);
-            menu.apply(); assertTrue(menu.groups().isEmpty());
+            menu.apply();
+            assertEquals(new Point(800, 500), menu.groups().get(0).getLocation());
+            assertEquals(new Point(800, 550), menu.groups().get(1).getLocation());
         }
     }
 
