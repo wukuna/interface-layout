@@ -134,6 +134,7 @@ public class OrbEventHandler implements KeyListener
 
     private void later(Runnable task)
     {
+        if (!manager.active) return;
         final int generation = lifecycleGeneration;
         clientThread.invokeLater(() -> {
             if (manager.active && generation == lifecycleGeneration) task.run();

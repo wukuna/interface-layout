@@ -21,6 +21,13 @@ import static org.mockito.Mockito.*;
 
 public class LifecycleTest
 {
+    @Test public void inactiveConfigChangeCannotQueueWorkBeforeInitialization()
+    {
+        Fixture f = new Fixture();
+        net.runelite.client.events.ConfigChanged event = new net.runelite.client.events.ConfigChanged();
+        event.setGroup("interfacelayout"); event.setKey("editInterface");
+        f.handler.onConfigChanged(event); assertTrue(f.queue.isEmpty());
+    }
     @Test public void queuedEditingChangeCannotRunAfterPluginReenabled() throws Exception
     {
         Fixture f = new Fixture(); f.handler.startUp();
