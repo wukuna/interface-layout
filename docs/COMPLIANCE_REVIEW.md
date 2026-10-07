@@ -47,7 +47,7 @@ startup tasks are canceled by a generation guard, including rapid re-enabling.
 The manifest uses `build=standard`. Production sources target Java 11 against
 RuneLite 1.13.1, the current Plugin Hub version at review time. No extra production
 runtime dependencies are required. Compact Orbs, Menu Stones Hider and RuneLite
-overlay BSD notices are retained in source and production resources.
+overlay author notices are retained in source and consolidated into one BSD-2-Clause LICENSE, also packaged as META-INF/LICENSE.
 Publication includes source, tests, build/wrapper files, icon, licenses and public
 documentation. Local launchers, credentials, client homes, logs, caches and built
 artifacts are excluded.

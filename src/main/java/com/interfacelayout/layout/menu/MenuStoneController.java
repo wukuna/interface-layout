@@ -26,7 +26,7 @@
  * 
  */
 /* Adapted hiding mappings from Menu Stones Hider.
- * Copyright (c) 2025, Richardant. BSD-2-Clause: see licenses/Menu-Stones-Hider.txt.
+ * Copyright (c) 2025, Richardant. BSD-2-Clause: see LICENSE.
  */
 package com.interfacelayout.layout.menu;
 
