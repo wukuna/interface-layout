@@ -271,6 +271,14 @@ public class MenuStoneController
         Integer value = configs.getConfiguration("interfacelayout", "menuGroup_" + mode() + "_" + index, Integer.class);
         return value == null || value < 0 || value > 14 ? 0 : value;
     }
+    public int groupForStone(int index) { return group(index); }
+    public int groupGeneration(int id)
+    { return groupGeneration(mode(), id); }
+    public int groupGeneration(String mode, int id)
+    {
+        Integer value = configs.getConfiguration("interfacelayout", "menuGeneration_" + mode + "_" + id, Integer.class);
+        return value == null ? 0 : value;
+    }
     private int order(int index)
     {
         Integer value = configs.getConfiguration("interfacelayout", "menuOrder_" + mode() + "_" + index, Integer.class);
@@ -294,6 +302,8 @@ public class MenuStoneController
         java.util.Set<Integer> usedGroups = new java.util.HashSet<>();
         for (int member = 0; member < 14; member++) usedGroups.add(group(member));
         while (id < 14 && usedGroups.contains(id)) id++;
+        // A reused numeric slot is a new bar, not the old bar's external anchor assignment.
+        configs.setConfiguration("interfacelayout", "menuGeneration_" + mode() + "_" + id, groupGeneration(id) + 1);
         configs.setConfiguration("interfacelayout", "menuGroup_" + mode() + "_" + index, id);
         configs.setConfiguration("interfacelayout", "menuHorizontal_" + mode() + "_" + id, false);
         saveGroup(id, point);

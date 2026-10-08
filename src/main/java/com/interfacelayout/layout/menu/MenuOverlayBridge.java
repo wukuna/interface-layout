@@ -33,12 +33,20 @@ public class MenuOverlayBridge
     public void stop()
     {
         running = false;
-        groups.values().forEach(overlays::remove); groups.clear();
+        groups.values().forEach(overlay -> { overlay.getBounds().setSize(0, 0); overlays.remove(overlay); }); groups.clear();
         nativeOverlays.forEach(overlays::add); nativeOverlays.clear();
     }
     public void sync()
     {
         if (!running) return;
+        // Retire old incarnations of numeric group slots. Keeping them registered
+        // would accumulate invisible overlays after repeated detach/join gestures.
+        String prefix = "INTERFACE_LAYOUT_MENU_" + menu.mode() + "_"
+            + (menu.individualDragging() ? "group_" : "row_");
+        groups.values().removeIf(overlay -> {
+            if (!overlay.name.startsWith(prefix) || overlay.name.equals(name(overlay.id))) return false;
+            overlay.getBounds().setSize(0, 0); overlays.remove(overlay); return true;
+        });
         // Modern's two native row wrappers would otherwise force expanded parents
         // back to their old overlay origins. Retain and restore the exact objects.
         nativeOverlays.removeIf(overlay -> {
@@ -60,6 +68,14 @@ public class MenuOverlayBridge
                 overlay.getBounds().setBounds(bounds);
                 groups.put(key, overlay); overlays.add(overlay);
             }
+            GroupOverlay overlay = groups.get(key);
+            overlay.getBounds().setSize(bounds.getSize());
+            if (overlay.getPreferredLocation() == null && overlay.getPreferredPosition() == null)
+                overlay.getBounds().setLocation(bounds.getLocation());
+        });
+        groups.values().forEach(overlay -> {
+            if (!overlay.name.equals(name(overlay.id)) || !menu.groups().containsKey(overlay.id))
+                overlay.getBounds().setSize(0, 0);
         });
     }
     private boolean replacesNativeOverlay(String name)
@@ -68,7 +84,7 @@ public class MenuOverlayBridge
         // elements need canvas-wide clipping, that is no longer a draggable map
         // rectangle: rendering it also expands the green snap corner to canvas size.
         // Keep the exact wrapper and its preferences for restoration once native
-        // clipping returns. Individual free elements remain controlled by our editor.
+        // clipping returns. Individual free elements have their own movement overlays.
         if (name.equals("RESIZABLE_MINIMAP_STONES_WIDGET"))
             return expander.isExpanded(InterfaceID.ToplevelOsrsStretch.MAP_CONTAINER);
         if (name.equals("RESIZABLE_MINIMAP_WIDGET"))
@@ -83,7 +99,21 @@ public class MenuOverlayBridge
     private String name(int id)
     {
         return "INTERFACE_LAYOUT_MENU_" + menu.mode() + "_"
-            + (menu.individualDragging() ? "group_" : "row_") + id;
+            + (menu.individualDragging() ? "group_" : "row_") + id
+            + (menu.individualDragging() && menu.groupGeneration(id) > 0 ? "_" + menu.groupGeneration(id) : "");
+    }
+    public void moveGroupingStone(int id, Point canvas, boolean beginning)
+    {
+        GroupOverlay overlay = groups.get(name(id));
+        if (overlay == null) return;
+        if (beginning) clearPreference(id); // Normalize the origin once for this grouping gesture.
+        overlay.setPreferredPosition(null);
+        overlay.setPreferredLocation(new Point(canvas));
+    }
+    public void finishGroupingStone(int id)
+    {
+        GroupOverlay overlay = groups.get(name(id));
+        if (overlay != null) overlays.saveOverlay(overlay);
     }
     public void clearPreference(int id)
     {
@@ -96,7 +126,12 @@ public class MenuOverlayBridge
         for (String mode : new String[]{"fixed", "classic", "modern"})
             for (String kind : new String[]{"group_", "row_"})
                 for (int id = 0; id <= 14; id++)
+                {
                     overlays.resetOverlay(new GroupOverlay("INTERFACE_LAYOUT_MENU_" + mode + "_" + kind + id, id));
+                    int version = menu.groupGeneration(mode, id);
+                    if (kind.equals("group_") && version > 0)
+                        overlays.resetOverlay(new GroupOverlay("INTERFACE_LAYOUT_MENU_" + mode + "_" + kind + id + "_" + version, id));
+                }
         groups.values().forEach(overlay -> { overlays.resetOverlay(overlay); overlay.lastApplied = null; });
     }
     public final class GroupOverlay extends Overlay

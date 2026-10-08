@@ -14,6 +14,7 @@ import net.runelite.api.GameState;
 import net.runelite.api.Client;
 import com.interfacelayout.util.NativeOrbStateStore;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.FocusChanged;
 import net.runelite.api.events.ScriptPostFired;
 import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.events.WidgetLoaded;
@@ -31,6 +32,7 @@ public class GameframeCoordinator
     @Inject private MenuStoneController menu;
     @Inject private com.interfacelayout.layout.menu.MenuOverlayBridge menuOverlays;
     @Inject private FreePositionController free;
+    @Inject private com.interfacelayout.layout.orbs.FreeOrbOverlayBridge freeOverlays;
     @Inject private InterfaceEditor editor;
     @Inject private EditManager compactEditor;
     @Inject private OrbController manager;
@@ -42,8 +44,8 @@ public class GameframeCoordinator
     private int visibilityDepth;
     private volatile boolean refreshPending;
 
-    public void start() { running = true; editor.setRefresh(this::refresh); refresh(); menuOverlays.start(this::refresh); }
-    public void stop() { running = false; layoutDepth = 0; visibilityDepth = 0; editor.cancel(); menuOverlays.stop(); restore(); menu.resetSession(); }
+    public void start() { running = true; editor.setRefresh(this::refresh); refresh(); menuOverlays.start(this::refresh); freeOverlays.start(this::refresh); }
+    public void stop() { running = false; layoutDepth = 0; visibilityDepth = 0; editor.cancel(); freeOverlays.stop(); menuOverlays.stop(); restore(); menu.resetSession(); }
     private void restore() { menu.restoreBackgrounds(); states.restore(); expander.clear(); }
     public void prepareNativeLayout() { restore(); }
     public boolean isHiddenByGame(net.runelite.api.widgets.Widget widget)
@@ -53,7 +55,7 @@ public class GameframeCoordinator
     public void refresh()
     {
         if (!running || layoutDepth > 0) return;
-        restore(); menu.apply(); free.apply(); menuOverlays.sync();
+        restore(); menu.apply(); free.apply(); menuOverlays.sync(); freeOverlays.sync();
     }
     public void toggleShown() { if (running) { menu.toggleShown(); refresh(); } }
     private synchronized void scheduleRefresh()
@@ -64,7 +66,7 @@ public class GameframeCoordinator
     }
     public void resetPositions()
     {
-        editor.cancel(); free.resetAll(); menu.resetAll(); menuOverlays.resetAll(); manager.resetSavedPositionConfigs();
+        editor.cancel(); free.resetAll(); freeOverlays.resetAll(); menu.resetAll(); menuOverlays.resetAll(); manager.resetSavedPositionConfigs();
         refresh();
     }
     private boolean layoutScript(int id)
@@ -126,7 +128,16 @@ public class GameframeCoordinator
     @Subscribe(priority = -2) public void onConfigChanged(ConfigChanged event)
     {
         if (!event.getGroup().equals("interfacelayout")) return;
+        if (event.getKey().equals("editInterface") || event.getKey().equals("menuLayout")
+            || event.getKey().equals(com.interfacelayout.layout.orbs.OrbConstants.ConfigKeys.ORB_LAYOUT))
+            editor.cancel();
         scheduleRefresh();
+    }
+    @Subscribe public void onFocusChanged(FocusChanged event)
+    {
+        // The mouse release may occur outside the client. Invalidate queued moves
+        // rather than allowing a stale drag to resume when focus returns.
+        if (running && !event.isFocused()) editor.cancel();
     }
     @Subscribe(priority = -2) public void onProfileChanged(ProfileChanged event)
     {

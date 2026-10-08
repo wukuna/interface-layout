@@ -64,7 +64,7 @@ public class InterfaceEditor extends Overlay implements MouseListener
         {
             if (handle.stone >= 0) continue;
             graphics.draw(handle.bounds);
-            graphics.drawString(handle.target == null ? (menu.individualDragging() ? "Menu bar (Shift-drag to detach)" : "Menu row (drag to move)") : handle.target.toString(),
+            graphics.drawString(handle.target == null ? "Alt-drag bar; Shift-drag stone" : "Alt-drag " + handle.target,
                 handle.bounds.x, Math.max(12, handle.bounds.y));
         }
         handles = List.copyOf(current);
@@ -72,27 +72,22 @@ public class InterfaceEditor extends Overlay implements MouseListener
     }
     @Override public MouseEvent mousePressed(MouseEvent event)
     {
-        boolean nativeStoneDrag = event.isAltDown() && event.isShiftDown();
-        if ((!manager.isEditingLayout && !nativeStoneDrag)
+        // Whole bars and free orbs always use RuneLite's configured drag hotkey.
+        // This listener owns only the Shift gesture for changing stone membership.
+        if (!event.isShiftDown() || !menu.individualDragging()
             || (event.getButton() != MouseEvent.BUTTON1 && event.getButton() != MouseEvent.BUTTON3)) return event;
-        // Plain Alt movement belongs to RuneLite's overlay renderer.
-        if (event.isAltDown() && !event.isShiftDown()) return event;
         List<Handle> current = handles;
         for (int i = current.size() - 1; i >= 0; i--)
         {
             Handle handle = current.get(i);
-            if (!manager.isEditingLayout && handle.stone < 0) continue;
-            if (handle.stone >= 0 && !event.isShiftDown()) continue;
-            if (event.isShiftDown() && handle.target == null && handle.stone < 0) continue;
+            if (handle.stone < 0) continue;
             if (!handle.bounds.contains(event.getPoint())) continue;
             if (event.getButton() == MouseEvent.BUTTON3)
             {
                 int epoch = generation;
                 clientThread.invokeLater(() -> {
-                    if (generation != epoch || (handle.target != null && !manager.isEditingLayout)) return;
-                    if (handle.stone >= 0) menu.reattach(handle.stone);
-                    else if (handle.target == null) { menuOverlays.clearPreference(handle.group); menu.resetGroup(handle.group); }
-                    else orbs.reset(handle.target);
+                    if (generation != epoch) return;
+                    menu.reattach(handle.stone);
                     refresh.run();
                 });
                 event.consume(); return event;
@@ -113,15 +108,11 @@ public class InterfaceEditor extends Overlay implements MouseListener
         boolean detachNow = handle.stone >= 0 && !detached;
         if (detachNow) detached = true;
         clientThread.invokeLater(() -> {
-            if (generation != epoch || (handle.target != null && !manager.isEditingLayout)) return;
-            if (handle.stone >= 0)
-            {
-                if (detachNow) menu.detach(handle.stone, point);
-                else menu.moveStone(handle.stone, point);
-                refresh.run();
-            }
-            else if (handle.target == null) { menuOverlays.clearPreference(handle.group); menu.saveGroup(handle.group, point); refresh.run(); }
-            else { orbs.move(handle.target, point); orbs.save(handle.target, point); }
+            if (generation != epoch) return;
+            if (detachNow) menu.detach(handle.stone, point);
+            else menu.moveStone(handle.stone, point);
+            refresh.run();
+            menuOverlays.moveGroupingStone(menu.groupForStone(handle.stone), point, detachNow);
         });
         event.consume(); return event;
     }
@@ -136,6 +127,7 @@ public class InterfaceEditor extends Overlay implements MouseListener
                 Point cursor = event.getPoint();
                 clientThread.invokeLater(() -> {
                     if (generation != epoch) return;
+                    menuOverlays.finishGroupingStone(menu.groupForStone(handle.stone));
                     menu.dropStone(handle.stone, cursor); refresh.run();
                 });
             }

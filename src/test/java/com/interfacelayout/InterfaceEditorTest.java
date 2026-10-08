@@ -20,21 +20,34 @@ import static org.mockito.Mockito.*;
 
 public class InterfaceEditorTest
 {
-    @Test public void ordinaryDragMovesEntireGroup() throws Exception { drag(false); }
+    @Test public void ordinaryDragPassesThroughToRuneLite() throws Exception { drag(false); }
+    @Test public void altDragPassesThroughToRuneLiteWithEditorDisabled() throws Exception { drag(false, true); }
     @Test public void shiftDragDetachesAndDropsIndividualStone() throws Exception { drag(true); }
+    @Test public void shiftDragDetachesWithoutEnablingEditor() throws Exception { drag(true, false, false, false); }
     @Test public void altShiftDragDetachesStoneWithoutEnablingEditor() throws Exception { drag(true, true); }
+    @Test public void cancellingDragDiscardsQueuedStoneMoves() throws Exception
+    { drag(true, false, true); }
     private void drag(boolean shift) throws Exception
     { drag(shift, false); }
     private void drag(boolean shift, boolean alt) throws Exception
+    { drag(shift, alt, false); }
+    private void drag(boolean shift, boolean alt, boolean cancelPending) throws Exception
+    { drag(shift, alt, cancelPending, !alt); }
+    private void drag(boolean shift, boolean alt, boolean cancelPending, boolean editorEnabled) throws Exception
     {
         MenuStoneController menu = mock(MenuStoneController.class);
         when(menu.individualDragging()).thenReturn(true);
         when(menu.groups()).thenReturn(Map.of(0, new Rectangle(0, 0, 33, 76)));
         when(menu.stones()).thenReturn(Map.of(0, new Rectangle(0, 0, 33, 36)));
-        OrbController manager = mock(OrbController.class); manager.isEditingLayout = !alt;
+        OrbController manager = mock(OrbController.class); manager.isEditingLayout = editorEnabled;
         InterfaceLayoutConfig config = mock(InterfaceLayoutConfig.class, CALLS_REAL_METHODS);
         ClientThread thread = mock(ClientThread.class);
-        doAnswer(invocation -> { ((Runnable) invocation.getArgument(0)).run(); return null; }).when(thread).invokeLater(any(Runnable.class));
+        java.util.List<Runnable> queued = new java.util.ArrayList<>();
+        doAnswer(invocation -> {
+            Runnable task = invocation.getArgument(0);
+            if (cancelPending) queued.add(task); else task.run();
+            return null;
+        }).when(thread).invokeLater(any(Runnable.class));
         FreePositionController orbs = mock(FreePositionController.class); when(orbs.bounds()).thenReturn(Map.of());
         InterfaceEditor editor = Guice.createInjector(new AbstractModule() {
             @Override protected void configure() {
@@ -57,17 +70,26 @@ public class InterfaceEditorTest
         inputs.registerMouseListener(competingListener);
         inputs.registerMouseListener(0, editor);
         MouseEvent press = new MouseEvent(canvas, MouseEvent.MOUSE_PRESSED, 0, modifiers, 10, 10, 1, false, MouseEvent.BUTTON1);
+        if (!shift)
+        {
+            editor.mousePressed(press); assertFalse(press.isConsumed());
+            verify(menu, never()).saveGroup(anyInt(), any(Point.class));
+            return;
+        }
         inputs.processMousePressed(press); assertTrue(press.isConsumed());
         inputs.processMouseDragged(new MouseEvent(canvas, MouseEvent.MOUSE_DRAGGED, 1, modifiers, 100, 110, 0, false, MouseEvent.NOBUTTON));
         inputs.processMouseReleased(new MouseEvent(canvas, MouseEvent.MOUSE_RELEASED, 2, modifiers, 100, 110, 1, false, MouseEvent.BUTTON1));
         verifyNoInteractions(competingListener);
-        if (shift) {
-            verify(menu).detach(0, new Point(90, 100));
-            verify(menu).dropStone(0, new Point(100, 110));
+        if (cancelPending)
+        {
+            editor.cancel(); queued.forEach(Runnable::run);
             verify(menu, never()).saveGroup(anyInt(), any(Point.class));
-        } else {
-            verify(menu).saveGroup(0, new Point(90, 100));
             verify(menu, never()).detach(anyInt(), any(Point.class));
+            verify(menu, never()).dropStone(anyInt(), any(Point.class));
+            return;
         }
+        verify(menu).detach(0, new Point(90, 100));
+        verify(menu).dropStone(0, new Point(100, 110));
+        verify(menu, never()).saveGroup(anyInt(), any(Point.class));
     }
 }

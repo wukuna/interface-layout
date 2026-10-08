@@ -16,7 +16,7 @@ Most features are independent, so you can use only the parts you want. Menu icon
 
 ## Moving menu stones and orbs
 
-Enable **Edit interface** to show drag handles. Choose **Free Position** under **Map and orb visibility → Orb arrangement** to move orbs individually, and choose a vertical or free-position menu arrangement to detach and regroup stones.
+Enable **Edit interface** to show editing outlines and guidance. RuneLite **Alt-drag** moves whole bars, detached stones, free orbs and the compass; **Shift-drag** changes stone groups. These movement controls also work with Edit interface off. Choose **Free Position** under **Map and orb visibility → Orb arrangement** to move orbs individually, and choose a vertical or free-position menu arrangement to detach and regroup stones.
 
 > Moving menu bars as groups, splitting stones into separate groups, and positioning individual orbs and the compass. The recording uses an earlier settings panel; the option names below match the current release.
 
@@ -32,7 +32,7 @@ Open **Menu bars** and choose a **Menu arrangement**:
 
 ### Moving a whole bar
 
-Hold **Alt** and drag a menu bar, using RuneLite's normal overlay positioning controls. With **Edit interface** enabled, drag its handle without holding Alt.
+Hold **Alt** and drag a menu bar, using RuneLite's normal overlay positioning controls. The same control works with **Edit interface** on or off. If you changed RuneLite's overlay movement hotkey, use that key instead of Alt.
 
 **Stone spacing** sets the gap between visible stones. Hiding a stone closes its gap while keeping the group's saved position.
 
@@ -40,13 +40,13 @@ Hold **Alt** and drag a menu bar, using RuneLite's normal overlay positioning co
 
 Choose **Free position**, **Vertical left** or **Vertical right** first. Individual stone groups are not available in **Native rows**.
 
-1. Hold **Alt + Shift** and drag a stone away from its bar. With **Edit interface** enabled, use **Shift-drag** instead.
+1. Hold **Shift** and drag a stone away from its bar. You do not need to enable **Edit interface**.
 2. Release it away from other stones to leave it on its own.
 3. Drop it near another stone or group to join them.
 
 Joining an existing bar preserves that bar's direction. Joining two separate stones side by side creates a row; joining them above or below each other creates a column. You can drag the resulting group as a whole or detach a stone again.
 
-While editing, **Shift-right-click** a stone to return it to its main group.
+**Shift-right-click** a stone to return it to its main group.
 
 ## Menu tab visibility
 
@@ -76,9 +76,9 @@ Showing a free-position orb or the compass again restores its saved location. A 
 
 ### Free-position orbs and compass
 
-Choose **Orb arrangement → Free Position**, then enable **Edit interface**. Drag an outlined orb or the compass to its own position. The compass can move separately from the minimap.
+Choose **Orb arrangement → Free Position**, then **Alt-drag** an orb or the compass to its own position. Enable **Edit interface** if you want additional outlines and guidance. The compass can move separately from the minimap.
 
-Disable **Edit interface** or press **Escape** when you are finished. While editing, right-click an element's outline to reset its position.
+Use RuneLite's **Alt-right-click** to reset an element's position. Disable **Edit interface** or press **Escape** to hide editing guidance when you are finished.
 
 Free Position moves the orbs and compass; it does not move the minimap itself. To put a separate map elsewhere, use **Show separate minimap**, described below.
 
@@ -113,7 +113,7 @@ The **Minimap toggle button** section controls the optional eye button, its loca
 
 **Editing controls** includes:
 
-- **Snap grid** aligns dragged elements to a grid measured in pixels. Set it to **1** to disable snapping.
+- **Stone grouping grid** aligns Shift-dragged stones to a grid measured in pixels. Set it to **1** to disable snapping. RuneLite handles snapping for Alt-drag movement.
 - **Reset positions and groups** clears saved positions and menu groups in every display mode. Your visibility choices are kept.
 
 Menu positions and groups are saved separately for **Fixed**, **Resizable Classic** and **Resizable Modern**. Independent orb and compass positioning, hiding the native minimap, and the separate minimap are features for resizable modes; Fixed keeps its native gameframe constraints.
@@ -125,6 +125,10 @@ Legacy Compact Orbs and Menu Stones Hider settings are imported once per RuneLit
 ### Other orb, minimap and menu layout plugins
 
 Disable other plugins that move or hide the same controls before using Interface Layout. Declared conflicts include **Compact Orbs**, **Menu Stones Hider**, **Fixed Resizable Hybrid**, **Orb Hider**, **Minimap Hider** and **Movable Orbs**.
+
+### Custom UI Anchors
+
+Whole bars, detached stones, free orbs and the compass expose separate RuneLite movement overlays. Custom UI Anchors can capture those overlays using the normal overlay movement control. Use Shift-drag to change stone groups. Hidden controls retain their saved positions, while a newly created group gets a new identity.
 
 ### Minimap overlays
 

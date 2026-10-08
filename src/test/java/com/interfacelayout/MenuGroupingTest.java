@@ -23,6 +23,21 @@ import static org.mockito.Mockito.*;
 public class MenuGroupingTest
 {
     private final Map<String, Object> settings = new HashMap<>();
+    @Test public void reusedGroupSlotGetsNewIdentityWhileMainBarIdentityStaysStable()
+    {
+        MenuStoneController menu = controller(); menu.apply();
+        menu.detach(0, new Point(400, 200)); menu.apply();
+        assertEquals(1, menu.groupForStone(0)); assertEquals(1, menu.groupGeneration(1));
+        menu.reattach(0); menu.apply();
+        menu.detach(0, new Point(500, 300)); menu.apply();
+        assertEquals(1, menu.groupForStone(0)); assertEquals(2, menu.groupGeneration(1));
+        assertEquals(0, menu.groupGeneration(0));
+        MenuStoneController reloaded = controller(); reloaded.apply();
+        assertEquals(2, reloaded.groupGeneration(1));
+        menu.resetAll(); menu.apply();
+        menu.detach(0, new Point(600, 400));
+        assertEquals(3, menu.groupGeneration(1));
+    }
     @Test public void detachDoesNotReuseGroupOwnedByHiddenOrUnavailableStone()
     {
         settings.put("menuGroup_modern_8", 1);

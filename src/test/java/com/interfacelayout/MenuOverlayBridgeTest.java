@@ -20,6 +20,35 @@ import static org.mockito.Mockito.*;
 
 public class MenuOverlayBridgeTest
 {
+    @Test public void newGroupIdentityRetiresOldOverlayAndGroupingSetsNativePreference()
+    {
+        MenuStoneController menu = mock(MenuStoneController.class);
+        when(menu.mode()).thenReturn("modern"); when(menu.individualDragging()).thenReturn(true);
+        when(menu.groups()).thenReturn(Map.of(1, new Rectangle(100, 200, 33, 36)));
+        when(menu.groupGeneration(1)).thenReturn(1);
+        OverlayManager overlays = mock(OverlayManager.class);
+        List<Overlay> added = new ArrayList<>();
+        when(overlays.add(any())).thenAnswer(i -> added.add(i.getArgument(0)));
+        when(overlays.remove(any())).thenAnswer(i -> added.remove(i.getArgument(0)));
+        doAnswer(i -> { Overlay overlay = i.getArgument(0); overlay.setPreferredLocation(null); overlay.revalidate(); return null; })
+            .when(overlays).resetOverlay(any());
+        MenuOverlayBridge bridge = Guice.createInjector(new AbstractModule() {
+            @Override protected void configure() {
+                bind(MenuStoneController.class).toProvider(() -> menu);
+                bind(OverlayManager.class).toProvider(() -> overlays);
+                bind(WidgetBoundsExpander.class).toProvider(() -> mock(WidgetBoundsExpander.class));
+            }
+        }).getInstance(MenuOverlayBridge.class);
+        bridge.start(() -> {});
+        Overlay retired = added.get(0);
+        bridge.moveGroupingStone(1, new Point(700, 400), true);
+        assertEquals(new Point(700, 400), retired.getPreferredLocation());
+        bridge.finishGroupingStone(1); verify(overlays).saveOverlay(retired);
+        when(menu.groupGeneration(1)).thenReturn(2); bridge.sync();
+        assertEquals(1, added.size()); assertNotEquals(retired.getName(), added.get(0).getName());
+        assertTrue(retired.getBounds().isEmpty()); assertNull(added.get(0).getPreferredLocation());
+        bridge.stop(); assertTrue(added.isEmpty()); assertTrue(retired.getBounds().isEmpty());
+    }
     @Test public void nativeRendererPositionMovesGroupAndNativeRowsReturnOnShutdown()
     { lifecycle(true); }
     @Test public void compactingOneNativeRowKeepsOtherRowsBuiltInAltMovement()

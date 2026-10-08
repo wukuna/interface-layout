@@ -99,7 +99,7 @@ public interface InterfaceLayoutConfig extends Config
 	@ConfigItem(
 		keyName = ConfigKeys.ORB_LAYOUT,
 		name = "Orb arrangement",
-		description = "Free Position lets you drag individual orbs and the compass separately from the minimap using Edit interface. Preset arrangements apply when Hide minimap is enabled.",
+		description = "Free Position lets you Alt-drag individual orbs and the compass separately from the minimap. Preset arrangements apply when Hide minimap is enabled.",
 		section = hideAndSwapUpdate,
 		position = 0
 	)
@@ -192,7 +192,7 @@ public interface InterfaceLayoutConfig extends Config
 	@ConfigItem(
 		keyName = ConfigKeys.ENABLE_ORB_SWAPPING,
 		name = "Swap preset orb slots",
-		description = "In preset arrangements, enable Edit interface and drag HP, Prayer, Run or Special onto another orb to swap slots. Free Position uses individual dragging instead.",
+		description = "In preset arrangements, enable Edit interface and drag HP, Prayer, Run or Special onto another orb to swap slots. Free Position uses RuneLite Alt-drag instead.",
 		section = layout,
 		position = 6
 	)
@@ -578,7 +578,7 @@ public interface InterfaceLayoutConfig extends Config
 
     @ConfigSection(name = "Menu bars", description = "Arrange and move the menu tabs independently of the orbs", position = 4)
     String menu = "menu";
-    @ConfigItem(keyName = "menuLayout", name = "Menu arrangement", description = "Alt-drag bars in any arrangement. Vertical left/right are initial positions, not locks. Use Alt+Shift-drag for individual stones in vertical or Free position groups.", section = menu, position = 0)
+    @ConfigItem(keyName = "menuLayout", name = "Menu arrangement", description = "Alt-drag bars in any arrangement. Vertical left/right are initial positions, not locks. Use Shift-drag to detach or join stones in vertical or Free position groups.", section = menu, position = 0)
     default com.interfacelayout.layout.menu.MenuStoneController.Layout menuLayout() { return com.interfacelayout.layout.menu.MenuStoneController.Layout.VANILLA_HORIZONTAL; }
     @ConfigItem(keyName = "menuDirection", name = "Initial bar direction", description = "Initial direction in Free position. Existing bars keep their direction. Joining two separate stones side-by-side makes a row; above or below makes a column.", section = menu, position = 1)
     default com.interfacelayout.layout.menu.MenuStoneController.Direction menuDirection() { return com.interfacelayout.layout.menu.MenuStoneController.Direction.VERTICAL; }
@@ -598,12 +598,12 @@ public interface InterfaceLayoutConfig extends Config
     default int hiddenStones() { return 0; }
     @ConfigItem(keyName = "showMenuToggle", name = "Restore native menu shortcut", description = "Toggle a temporary view of the original menu tabs. Press again to return to your saved layout.", section = menu, position = 8)
     default Keybind showMenuToggle() { return Keybind.NOT_SET; }
-    @ConfigSection(name = "Editing controls", description = "Alt-drag moves a menu bar. Alt+Shift-drag detaches a stone; drop near another stone to join. Edit interface allows dragging without Alt. Use Free position or vertical menu arrangements for individual stone groups.", position = 3)
+    @ConfigSection(name = "Editing controls", description = "RuneLite Alt-drag moves bars, detached stones and free orbs. Shift-drag detaches or joins stones. Edit interface shows guidance and enables preset orb swapping.", position = 3)
     String editor = "interfaceEditor";
-    @ConfigItem(keyName = "editInterface", name = "Edit interface", description = "Show handles and drag without Alt. Shift-drag a stone to detach. With this off, Alt-drag still moves menu bars and Alt+Shift-drag detaches stones.", position = 0)
+    @ConfigItem(keyName = "editInterface", name = "Edit interface", description = "Show editing outlines and guidance; enable preset orb slot swapping. RuneLite Alt-drag and Shift-drag stone grouping also work with this off.", position = 0)
     default boolean editInterface() { return false; }
     @Range(min = 1, max = 32)
-    @ConfigItem(keyName = "editGrid", name = "Snap grid", description = "Grid in pixels; 1 disables snapping", section = editor, position = 1)
+    @ConfigItem(keyName = "editGrid", name = "Stone grouping grid", description = "Snap Shift-dragged stones to this pixel grid; 1 disables snapping. RuneLite controls Alt-drag positioning.", section = editor, position = 1)
     default int editGrid() { return 1; }
     @ConfigItem(keyName = "resetLayoutPositions", name = "Reset positions and groups", description = "Check once to clear saved positions and menu groups in every display mode. Visibility choices are kept.", section = editor, position = 2)
     default boolean resetLayoutPositions() { return false; }

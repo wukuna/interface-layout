@@ -34,6 +34,7 @@ public class InterfaceLayoutModule implements Module
             MenuStoneController.class, com.interfacelayout.layout.menu.MenuStoneBackgrounds.class,
             com.interfacelayout.layout.menu.MenuOverlayBridge.class, FreePositionController.class, OrbController.class,
             OrbPositionStore.class, OrbConfigMigration.class, WidgetManager.class,
+            com.interfacelayout.layout.orbs.FreeOrbOverlayBridge.class,
             HideOrbRegistry.class, BindingManager.class, DragListener.class, DragState.class,
             EditManager.class, SlotManager.class, SlotRegistry.class, MinimapOverlay.class,
             LegacyConfigImporter.class, NativeOrbStateStore.class, WidgetStateStore.class,
