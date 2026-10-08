@@ -1,5 +1,6 @@
 package com.interfacelayout.layout.menu;
 
+import com.interfacelayout.util.WidgetBoundsExpander;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -21,8 +23,9 @@ public class MenuOverlayBridge
 {
     @Inject private OverlayManager overlays;
     @Inject private MenuStoneController menu;
+    @Inject private WidgetBoundsExpander expander;
     private final Map<String, GroupOverlay> groups = new HashMap<>();
-    private final List<Overlay> nativeRows = new ArrayList<>();
+    private final List<Overlay> nativeOverlays = new ArrayList<>();
     private Runnable refresh = () -> {};
     private boolean running;
 
@@ -31,20 +34,23 @@ public class MenuOverlayBridge
     {
         running = false;
         groups.values().forEach(overlays::remove); groups.clear();
-        nativeRows.forEach(overlays::add); nativeRows.clear();
+        nativeOverlays.forEach(overlays::add); nativeOverlays.clear();
     }
     public void sync()
     {
         if (!running) return;
         // Modern's two native row wrappers would otherwise force expanded parents
         // back to their old overlay origins. Retain and restore the exact objects.
-        nativeRows.removeIf(overlay -> {
-            if (replacesNativeRow(overlay.getName())) return false;
+        nativeOverlays.removeIf(overlay -> {
+            if (replacesNativeOverlay(overlay.getName())) return false;
             overlays.add(overlay); return true;
         });
         overlays.removeIf(overlay -> {
-            if (!replacesNativeRow(overlay.getName())) return false;
-            nativeRows.add(overlay); return true;
+            if (!replacesNativeOverlay(overlay.getName())) return false;
+            // External anchor managers must not retain a phantom full-canvas slot
+            // for a wrapper that no longer participates in the render pass.
+            overlay.getBounds().setSize(0, 0);
+            nativeOverlays.add(overlay); return true;
         });
         menu.groups().forEach((id, bounds) -> {
             String key = name(id);
@@ -56,8 +62,17 @@ public class MenuOverlayBridge
             }
         });
     }
-    private boolean replacesNativeRow(String name)
+    private boolean replacesNativeOverlay(String name)
     {
+        // The native minimap wrappers measure the clipping container. When free
+        // elements need canvas-wide clipping, that is no longer a draggable map
+        // rectangle: rendering it also expands the green snap corner to canvas size.
+        // Keep the exact wrapper and its preferences for restoration once native
+        // clipping returns. Individual free elements remain controlled by our editor.
+        if (name.equals("RESIZABLE_MINIMAP_STONES_WIDGET"))
+            return expander.isExpanded(InterfaceID.ToplevelOsrsStretch.MAP_CONTAINER);
+        if (name.equals("RESIZABLE_MINIMAP_WIDGET"))
+            return expander.isExpanded(InterfaceID.ToplevelPreEoc.MAP_CONTAINER);
         if (!menu.mode().equals("modern") || menu.groups().isEmpty()) return false;
         int row;
         if (name.equals("RESIZABLE_VIEWPORT_BOTTOM_LINE_TABS1")) row = 1;
@@ -109,17 +124,19 @@ public class MenuOverlayBridge
         {
             Rectangle actual = menu.groups().get(id);
             if (!running || !name.equals(MenuOverlayBridge.this.name(id)) || actual == null) return null;
-            if (reset)
+            if (reset && getPreferredLocation() == null && getPreferredPosition() == null)
             {
                 reset = false; lastApplied = null; menu.resetGroup(id); refresh.run();
                 actual = menu.groups().get(id);
                 if (actual == null) return null;
             }
+            reset = false;
             if (getPreferredLocation() != null || getPreferredPosition() != null)
             {
                 // OverlayRenderer has already resolved origins, snapping and clamping.
-                Point position = getPreferredLocation() != null
-                    ? new Point(getPreferredLocation()) : getBounds().getLocation();
+                // Preferred locations are origin-relative, including negative offsets
+                // from the right/bottom edge. Bounds are the resolved canvas position.
+                Point position = getBounds().getLocation();
                 if (!position.equals(lastApplied))
                 {
                     lastApplied = new Point(position);

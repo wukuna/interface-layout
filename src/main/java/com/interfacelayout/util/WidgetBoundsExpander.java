@@ -23,6 +23,12 @@ public class WidgetBoundsExpander
 
     public void clear() { expanded.clear(); }
 
+    /** Only layers whose clipping bounds were actually enlarged in this layout. */
+    public boolean isExpanded(int componentId)
+    {
+        return expanded.keySet().stream().anyMatch(widget -> widget.getId() == componentId);
+    }
+
     public void allowCanvasPosition(Widget widget)
     {
         List<Widget> ancestors = new ArrayList<>();
@@ -45,10 +51,11 @@ public class WidgetBoundsExpander
 
     private void expand(Widget parent)
     {
-        if (expanded.put(parent, true) != null) return;
+        if (expanded.containsKey(parent)) return;
         Rectangle bounds = WidgetGeometry.bounds(parent);
         if (bounds.x == 0 && bounds.y == 0 && bounds.width >= client.getCanvasWidth()
             && bounds.height >= client.getCanvasHeight()) return;
+        expanded.put(parent, true);
         Map<Widget, Point> positions = new IdentityHashMap<>();
         collect(parent.getStaticChildren(), positions);
         collect(parent.getDynamicChildren(), positions);
