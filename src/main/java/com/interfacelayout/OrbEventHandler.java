@@ -55,6 +55,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.events.ClientTick;
+import net.runelite.api.events.PostClientTick;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.ScriptPostFired;
@@ -219,6 +220,12 @@ public class OrbEventHandler implements KeyListener
 		{
 			dragListener.finalizeDrag();
 		}
+	}
+
+	@Subscribe(priority = -2)
+	public void onPostClientTick(PostClientTick event)
+	{
+		if (manager.active) manager.flushSidePanelVisibility();
 	}
 
 	@Subscribe
@@ -398,8 +405,8 @@ public class OrbEventHandler implements KeyListener
 			{
 				editManager.toggleEditMode(false);
 			}
-			// Apply after the native script finishes, including varc-only toggles.
-			later(() -> manager.hideMinimapOnTabClose(config.hideMinimapWithSidePanel()));
+			// Coalesce varc-only toggles with script updates at the end of the tick.
+			if (manager.active) manager.hideMinimapOnTabClose(config.hideMinimapWithSidePanel());
 		}
 	}
 
