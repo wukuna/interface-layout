@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 
 public class LifecycleTest
 {
-    @Test public void sidePanelVarcRefreshRunsAfterNativeWorkAndCancelsOnDisable() throws Exception
+    @Test public void sidePanelVarcRequestsRefreshAndOnlyActivePluginFlushesAtTickEnd() throws Exception
     {
         Fixture f = new Fixture();
         f.handler.startUp(); f.queue.forEach(Runnable::run); f.queue.clear();
@@ -29,15 +29,17 @@ public class LifecycleTest
         net.runelite.api.events.VarClientIntChanged event = new net.runelite.api.events.VarClientIntChanged(
             com.interfacelayout.layout.orbs.OrbConstants.VarClient.SIDE_PANEL_ID);
         f.handler.onVarClientIntChanged(event);
-        verify(f.manager, never()).hideMinimapOnTabClose(anyBoolean());
-        assertEquals(1, f.queue.size());
-        f.queue.forEach(Runnable::run); f.queue.clear();
         verify(f.manager).hideMinimapOnTabClose(false);
+        assertTrue(f.queue.isEmpty());
+        verify(f.manager, never()).flushSidePanelVisibility();
+        f.handler.onPostClientTick(new net.runelite.api.events.PostClientTick());
+        verify(f.manager).flushSidePanelVisibility();
         clearInvocations(f.manager);
         f.handler.onVarClientIntChanged(event);
         f.handler.shutDown();
         f.queue.forEach(Runnable::run);
-        verify(f.manager, never()).hideMinimapOnTabClose(anyBoolean());
+        f.handler.onPostClientTick(new net.runelite.api.events.PostClientTick());
+        verify(f.manager, never()).flushSidePanelVisibility();
     }
 
     @Test public void leavingLoggedInReleasesSidePanelVisibility()

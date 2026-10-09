@@ -145,6 +145,7 @@ public class OrbController
 	private Widget overlayLogoutXStone;
 	private Widget overlayLogoutXIcon;
 	public volatile boolean active;
+	private boolean sidePanelVisibilityPending;
     private final java.util.List<Widget> overlayNoClickChildren = new java.util.ArrayList<>();
     private final Map<TargetWidget, Widget> noClickThroughChildren = new HashMap<>();
 
@@ -332,6 +333,21 @@ public class OrbController
 	}
 
 	public void hideMinimapOnTabClose(boolean hide)
+	{
+		// Native tab keys and a hotkey plugin can both change the tab in one tick.
+		// Read the final state only after both have finished processing input.
+		sidePanelVisibilityPending = hide;
+		if (!hide) applySidePanelVisibility(false);
+	}
+
+	public void flushSidePanelVisibility()
+	{
+		if (!sidePanelVisibilityPending) return;
+		sidePanelVisibilityPending = false;
+		applySidePanelVisibility(config.hideMinimapWithSidePanel());
+	}
+
+	private void applySidePanelVisibility(boolean hide)
 	{
 		// Release our previous parent flags even when a guard below prevents hiding.
 		// The ownership journal preserves flags set by the game and hidden children.
