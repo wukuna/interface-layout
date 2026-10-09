@@ -204,7 +204,7 @@ public interface InterfaceLayoutConfig extends Config
 	@ConfigItem(
 		keyName = ConfigKeys.HIDE_MINIMAP_WITH_SIDE_PANEL,
 		name = "Hide preset with side panel",
-		description = "Hide the compact layout when the side panel tab is hidden (only works in resizable-modern).",
+		description = "Hide the minimap, compass and orbs with the side panel, with or without Hide minimap enabled (resizable-modern only).",
 		section = layout,
 		position = 7
 	)
