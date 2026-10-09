@@ -92,7 +92,7 @@ Open **Orb layout options** to adjust the preset:
 - **Keep hidden orb slots** preserves the remaining orbs' slots when another orb is hidden.
 - **Keep preset container size** preserves the preset's empty space after hiding orbs.
 - **Swap preset orb slots** lets you enable Edit interface and drag HP, Prayer, Run or Special onto another orb to swap their slots.
-- **Hide preset with side panel** hides the compact arrangement when the side panel is hidden in Resizable Modern.
+- **Hide preset with side panel** hides the minimap, compass and orbs when the side panel is hidden in Resizable Modern, including the normal minimap with **Hide minimap** disabled. Reopening the side panel restores their previous visibility. Fixed and Resizable Classic are unchanged.
 
 Preset anchoring, gap handling and slot swapping apply to compact arrangements. Free Position uses each element's saved location.
 

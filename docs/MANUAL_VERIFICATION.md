@@ -24,3 +24,16 @@ is required; do not automate gameplay.
 
 Overlapping widget movers are unsupported. Mock tests do not replace live
 rendering and hit-testing verification.
+
+## Issue #1 hotfix checks (pending live verification)
+
+- In Resizable Modern, enable **Hide preset with side panel** with **Hide minimap**
+  disabled. Use Hotkey Toggle Sidepanel to close the panel, then reopen it both
+  with its toggle and an inventory/tab hotkey. Check minimap, compass and orbs.
+- Repeat with Hide minimap enabled for each compact preset and with Free Position.
+  Individually hidden or game-hidden elements must remain hidden after reopening.
+- While the panel is closed, disable the setting, change profiles, change display
+  modes, and disable/re-enable the plugin. Check restoration and saved positions.
+- Check Fixed and Resizable Classic remain unaffected, including transitions back
+  to Resizable Modern. Check a world hop, wiki banner initialization, minimap
+  minimization and the core Minimap plugin's Hide minimap setting.

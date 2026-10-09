@@ -21,6 +21,39 @@ import static org.mockito.Mockito.*;
 
 public class LifecycleTest
 {
+    @Test public void sidePanelVarcRefreshRunsAfterNativeWorkAndCancelsOnDisable() throws Exception
+    {
+        Fixture f = new Fixture();
+        f.handler.startUp(); f.queue.forEach(Runnable::run); f.queue.clear();
+        clearInvocations(f.manager);
+        net.runelite.api.events.VarClientIntChanged event = new net.runelite.api.events.VarClientIntChanged(
+            com.interfacelayout.layout.orbs.OrbConstants.VarClient.SIDE_PANEL_ID);
+        f.handler.onVarClientIntChanged(event);
+        verify(f.manager, never()).hideMinimapOnTabClose(anyBoolean());
+        assertEquals(1, f.queue.size());
+        f.queue.forEach(Runnable::run); f.queue.clear();
+        verify(f.manager).hideMinimapOnTabClose(false);
+        clearInvocations(f.manager);
+        f.handler.onVarClientIntChanged(event);
+        f.handler.shutDown();
+        f.queue.forEach(Runnable::run);
+        verify(f.manager, never()).hideMinimapOnTabClose(anyBoolean());
+    }
+
+    @Test public void leavingLoggedInReleasesSidePanelVisibility()
+    {
+        Fixture f = new Fixture();
+        net.runelite.api.events.GameStateChanged event = mock(net.runelite.api.events.GameStateChanged.class);
+        for (net.runelite.api.GameState state : new net.runelite.api.GameState[]{
+            net.runelite.api.GameState.HOPPING, net.runelite.api.GameState.LOGIN_SCREEN,
+            net.runelite.api.GameState.LOGGING_IN, net.runelite.api.GameState.LOADING})
+        {
+            when(event.getGameState()).thenReturn(state);
+            f.handler.onGameStateChanged(event);
+        }
+        verify(f.manager, times(4)).hideMinimapOnTabClose(false);
+    }
+
     @Test public void inactiveConfigChangeCannotQueueWorkBeforeInitialization()
     {
         Fixture f = new Fixture();

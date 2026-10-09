@@ -224,6 +224,10 @@ public class OrbEventHandler implements KeyListener
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
+		if (event.getGameState() != GameState.LOGGED_IN)
+		{
+			manager.hideMinimapOnTabClose(false);
+		}
 		if (event.getGameState() == GameState.HOPPING ||
 			event.getGameState() == GameState.LOGIN_SCREEN ||
 			event.getGameState() == GameState.LOGGING_IN)
@@ -394,6 +398,8 @@ public class OrbEventHandler implements KeyListener
 			{
 				editManager.toggleEditMode(false);
 			}
+			// Apply after the native script finishes, including varc-only toggles.
+			later(() -> manager.hideMinimapOnTabClose(config.hideMinimapWithSidePanel()));
 		}
 	}
 

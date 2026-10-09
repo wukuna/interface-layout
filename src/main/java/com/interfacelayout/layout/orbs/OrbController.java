@@ -180,6 +180,7 @@ public class OrbController
 			createCustomChildren();
 			updateCustomChildren();
 			updateNoClickThrough();
+			hideMinimapOnTabClose(config.hideMinimapWithSidePanel());
 			gameframe.refresh();
 			return;
 		}
@@ -190,6 +191,7 @@ public class OrbController
 			widgetManager.setHidden(MinimapOverlay.UNIVERSE, true);
 			widgetManager.remapTargets(Orbs.values());
 			updateNoClickThrough();
+			hideMinimapOnTabClose(false);
 			gameframe.refresh();
 			return;
 		}
@@ -204,6 +206,7 @@ public class OrbController
 		{
 			hideLogout();
 		}
+		hideMinimapOnTabClose(config.hideMinimapWithSidePanel());
 		gameframe.refresh();
 	}
 
@@ -330,8 +333,18 @@ public class OrbController
 
 	public void hideMinimapOnTabClose(boolean hide)
 	{
+		// Release our previous parent flags even when a guard below prevents hiding.
+		// The ownership journal preserves flags set by the game and hidden children.
+		widgetManager.setHidden(Minimap.MODERN_MAP_MINIMAP.getComponentId(), false);
+		widgetManager.setHidden(Minimap.MODERN_ORBS_CONTAINER.getComponentId(), false);
 		if (!isFixedMode() && !isClassicResizable())
 		{
+			updateLogoutXPosition();
+			if (!hide || !isSidePanelHidden())
+			{
+				return;
+			}
+
 			//wait for the wiki plugin to create its banner
 			// - side panel appears to be flagged as 'closed' on world-hop(other?), which will hide the minimap container
 			//   and cause the wiki plugin to return early when it tries to create its widget
@@ -351,18 +364,14 @@ public class OrbController
 				wikiPluginBannerExists = true;
 			}
 
-			updateLogoutXPosition();
-
 			if (isCutsceneActive || isMinimapMinimized() || isMinimapPluginConfigEnabled())
 			{
 				return;
 			}
 
-			boolean hidden = hide && isCompactLayout() && isSidePanelHidden();
-
 			//only hide the parent not the children (do not use setTargetsHidden/setHidden(target...))
-			widgetManager.setHidden(Minimap.MODERN_MAP_MINIMAP.getComponentId(), hidden);
-			widgetManager.setHidden(Minimap.MODERN_ORBS_CONTAINER.getComponentId(), hidden);
+			widgetManager.setHidden(Minimap.MODERN_MAP_MINIMAP.getComponentId(), true);
+			widgetManager.setHidden(Minimap.MODERN_ORBS_CONTAINER.getComponentId(), true);
 		}
 	}
 
