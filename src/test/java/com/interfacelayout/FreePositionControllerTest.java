@@ -38,8 +38,10 @@ public class FreePositionControllerTest
             Widget map = restorableWidget(30, 30, 150, 150);
             Widget compass = restorableWidget(5, 5, 33, 33);
             Widget options = restorableWidget(4, 4, 35, 35);
+            Widget world = restorableWidget(150, 150, 30, 30);
+            Widget wiki = restorableWidget(120, 180, 70, 20);
             when(parent.getParent()).thenReturn(root);
-            for (Widget widget : new Widget[]{map, compass, options})
+            for (Widget widget : new Widget[]{map, compass, options, world, wiki})
             {
                 when(widget.getParent()).thenReturn(parent);
                 boolean[] hidden = {false};
@@ -53,6 +55,10 @@ public class FreePositionControllerTest
             WidgetManager widgets = mock(WidgetManager.class);
             when(widgets.getTargetWidget(target)).thenReturn(compass);
             when(widgets.getTargetWidget(click)).thenReturn(options);
+            // Attached minimap controls need not appear in the clipping ancestor's
+            // static child array. They must retain their own canvas origins too.
+            when(widgets.getTargetWidget(Orbs.WORLD_MAP_CONTAINER)).thenReturn(world);
+            when(widgets.getTargetWidget(Orbs.WIKI_ICON_CONTAINER)).thenReturn(wiki);
             when(widgets.getTargetWidget(classic ? Minimap.CLASSIC_MINIMAP : Minimap.MODERN_MINIMAP)).thenReturn(map);
             OrbController manager = mock(OrbController.class);
             when(manager.isLoggedIn()).thenReturn(true); when(manager.isClassicResizable()).thenReturn(classic);
@@ -74,13 +80,20 @@ public class FreePositionControllerTest
                 }
             }).getInstance(FreePositionController.class);
             assertTrue(free.bounds().containsKey(target));
+            free.apply();
+            verify(parent,never()).setForcedPosition(anyInt(),anyInt());
             free.save(target, new Point(100, 200)); free.apply();
             assertEquals(new Point(100, 200), WidgetGeometry.location(compass));
             assertEquals(new Point(99, 199), WidgetGeometry.location(options));
             assertEquals(new Point(820, 30), WidgetGeometry.location(map));
+            assertEquals(new Point(940, 150), WidgetGeometry.location(world));
+            assertEquals(new Point(910, 180), WidgetGeometry.location(wiki));
+            assertEquals("Untouched controls must not create saved positions",1,saved.size());
             states.restore(); free.apply();
             assertEquals(new Point(100, 200), WidgetGeometry.location(compass));
             assertEquals(new Point(99, 199), WidgetGeometry.location(options));
+            assertEquals(new Point(940, 150), WidgetGeometry.location(world));
+            assertEquals(new Point(910, 180), WidgetGeometry.location(wiki));
             when(config.hideMinimap()).thenReturn(true); states.restore(); free.apply();
             assertTrue(map.isHidden()); assertFalse(compass.isHidden()); assertTrue(free.bounds().containsKey(target));
             when(config.hideCompass()).thenReturn(true); states.restore(); free.apply();
@@ -88,6 +101,9 @@ public class FreePositionControllerTest
             when(config.hideCompass()).thenReturn(false); states.restore(); free.apply();
             assertEquals(new Point(100, 200), WidgetGeometry.location(compass));
             free.resetAll(); assertTrue(saved.isEmpty());
+            states.restore();
+            assertEquals(new Point(940, 150), WidgetGeometry.location(world));
+            assertEquals(new Point(910, 180), WidgetGeometry.location(wiki));
         }
     }
     private static Widget restorableWidget(int x, int y, int width, int height)
