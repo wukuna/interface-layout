@@ -585,6 +585,8 @@ public interface InterfaceLayoutConfig extends Config
     @Range(min = 0, max = 20)
     @ConfigItem(keyName = "menuSpacing", name = "Stone spacing", description = "Pixels between visible stones. Hidden stones close the gap without changing the group's saved position.", section = menu, position = 2)
     default int menuSpacing() { return 0; }
+    @ConfigItem(keyName = "allowClicksThroughGaps", name = "Allow clicks through gaps", description = "Allow game clicks between stones in a moved menu bar. Disable to block clicks inside these gaps without selecting a tab. Stone buttons are unchanged.", section = menu, position = 7)
+    default boolean allowClicksThroughGaps() { return true; }
     @ConfigItem(keyName = "hideTopMenu", name = "Hide combat–spellbook tabs", description = "Hide Combat, Skills, Quests, Inventory, Equipment, Prayer and Spellbook wherever they are placed.", section = menu, position = 3)
     default boolean hideTopMenu() { return false; }
     @ConfigItem(keyName = "hideBottomMenu", name = "Hide clan–music tabs", description = "Hide Clan, Account Management, Friends, Logout, Settings, Emotes and Music wherever they are placed.", section = menu, position = 4)
@@ -600,7 +602,7 @@ public interface InterfaceLayoutConfig extends Config
     default Keybind showMenuToggle() { return Keybind.NOT_SET; }
     @ConfigSection(name = "Editing controls", description = "RuneLite Alt-drag moves bars, detached stones and free orbs. Shift-drag detaches or joins stones. Edit interface shows guidance and enables preset orb swapping.", position = 3)
     String editor = "interfaceEditor";
-    @ConfigItem(keyName = "editInterface", name = "Edit interface", description = "Show editing outlines and guidance; enable preset orb slot swapping. RuneLite Alt-drag and Shift-drag stone grouping also work with this off.", position = 0)
+    @ConfigItem(keyName = "editInterface", name = "Edit interface", description = "Show editing outlines and guidance; enable Shift-drag stone grouping and preset orb slot swapping. Alt-drag bar positioning remains available with this off. Stone grouping is saved on release and cancelled by layout transitions.", position = 0)
     default boolean editInterface() { return false; }
     @Range(min = 1, max = 32)
     @ConfigItem(keyName = "editGrid", name = "Stone grouping grid", description = "Snap Shift-dragged stones to this pixel grid; 1 disables snapping. RuneLite controls Alt-drag positioning.", section = editor, position = 1)

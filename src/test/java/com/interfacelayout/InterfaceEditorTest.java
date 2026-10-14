@@ -24,7 +24,8 @@ public class InterfaceEditorTest
     @Test public void altDragPassesThroughToRuneLiteWithEditorDisabled() throws Exception { drag(false, true); }
     @Test public void shiftDragDetachesAndDropsIndividualStone() throws Exception { drag(true); }
     @Test public void shiftDragDetachesWithoutEnablingEditor() throws Exception { drag(true, false, false, false); }
-    @Test public void altShiftDragDetachesStoneWithoutEnablingEditor() throws Exception { drag(true, true); }
+    @Test public void altShiftKeepsRuneLiteWholeBarGesture() throws Exception { drag(true, true); }
+    @Test public void shiftDragCannotRegroupWithEditorDisabled() throws Exception { drag(true, false, false, false); }
     @Test public void cancellingDragDiscardsQueuedStoneMoves() throws Exception
     { drag(true, false, true); }
     private void drag(boolean shift) throws Exception
@@ -57,6 +58,7 @@ public class InterfaceEditorTest
                 bind(InterfaceLayoutConfig.class).toInstance(config);
                 bind(FreePositionController.class).toProvider(() -> orbs);
                 bind(ClientThread.class).toProvider(() -> thread);
+                bind(net.runelite.api.Client.class).toProvider(() -> mock(net.runelite.api.Client.class));
             }
         }).getInstance(InterfaceEditor.class);
         java.awt.Graphics2D graphics = new BufferedImage(200, 200, BufferedImage.TYPE_INT_ARGB).createGraphics();
@@ -70,7 +72,7 @@ public class InterfaceEditorTest
         inputs.registerMouseListener(competingListener);
         inputs.registerMouseListener(0, editor);
         MouseEvent press = new MouseEvent(canvas, MouseEvent.MOUSE_PRESSED, 0, modifiers, 10, 10, 1, false, MouseEvent.BUTTON1);
-        if (!shift)
+        if (!shift || alt || !editorEnabled)
         {
             editor.mousePressed(press); assertFalse(press.isConsumed());
             verify(menu, never()).saveGroup(anyInt(), any(Point.class));

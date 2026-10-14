@@ -16,7 +16,7 @@ Most features are independent, so you can use only the parts you want. Menu icon
 
 ## Moving menu stones and orbs
 
-Enable **Edit interface** to show editing outlines and guidance. RuneLite **Alt-drag** moves whole bars, detached stones, free orbs and the compass; **Shift-drag** changes stone groups. These movement controls also work with Edit interface off. Choose **Free Position** under **Map and orb visibility → Orb arrangement** to move orbs individually, and choose a vertical or free-position menu arrangement to detach and regroup stones.
+Enable **Edit interface** to show editing outlines and allow **Shift-drag** stone grouping. RuneLite **Alt-drag** moves whole bars, detached stones, free orbs and the compass with Edit interface on or off. Choose **Free Position** under **Map and orb visibility → Orb arrangement** to move orbs individually, and choose a vertical or free-position menu arrangement to detach and regroup stones.
 
 > Moving menu bars as groups, splitting stones into separate groups, and positioning individual orbs and the compass. The recording uses an earlier settings panel; the option names below match the current release.
 
@@ -36,17 +36,21 @@ Hold **Alt** and drag a menu bar, using RuneLite's normal overlay positioning co
 
 **Stone spacing** sets the gap between visible stones. Hiding a stone closes its gap while keeping the group's saved position.
 
+**Allow clicks through gaps** is enabled by default. Disable it to block left/right clicks between stones inside a bar without selecting a neighboring tab. Clicks on the stones, outside the bar, and selections in an already-open right-click menu remain unchanged.
+
 ### Moving a single stone
 
 Choose **Free position**, **Vertical left** or **Vertical right** first. Individual stone groups are not available in **Native rows**.
 
-1. Hold **Shift** and drag a stone away from its bar. You do not need to enable **Edit interface**.
+1. Enable **Edit interface**, then hold **Shift** and drag a stone away from its bar. Use Shift alone; Alt uses RuneLite's whole-bar movement.
 2. Release it away from other stones to leave it on its own.
 3. Drop it near another stone or group to join them.
 
 Joining an existing bar preserves that bar's direction. Joining two separate stones side by side creates a row; joining them above or below each other creates a column. You can drag the resulting group as a whole or detach a stone again.
 
 **Shift-right-click** a stone to return it to its main group.
+
+Stone grouping has a five-pixel movement threshold and shows a proposed-position outline while dragging. Membership and position are saved only when you release. Focus loss, native interface rebuilds, or display-mode changes cancel the pending edit without changing the saved group. Stretched Mode uses RuneLite's translated native canvas coordinates, so grouping does not depend on which plugin was enabled first. Existing layouts are preserved; there is no separate stretched layout or migration.
 
 ## Menu tab visibility
 

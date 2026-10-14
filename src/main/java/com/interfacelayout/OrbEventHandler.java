@@ -150,7 +150,9 @@ public class OrbEventHandler implements KeyListener
 		overlayManager.add(minimapOverlay);
         overlayManager.add(interfaceEditor);
         eventBus.register(gameframe);
-        mouseManager.registerMouseListener(0, interfaceEditor);
+        // Native Stretched Mode translation stays ahead of custom hit testing,
+        // regardless of which plugin is enabled first.
+        mouseManager.registerMouseListener(interfaceEditor);
 		keyManager.registerKeyListener(this);
 		mouseManager.registerMouseListener(dragListener);
 		orbRegistry.registerAll();
