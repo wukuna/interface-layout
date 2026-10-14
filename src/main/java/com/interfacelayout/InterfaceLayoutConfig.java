@@ -346,7 +346,7 @@ public interface InterfaceLayoutConfig extends Config
 	@ConfigItem(
 		keyName = ConfigKeys.COMPASS,
 		name = "Hide compass",
-		description = "Hide this control. Show it again here; Free Position keeps the saved location.",
+		description = "Hide this control. Show it again here; Free Position keeps the saved location. Ctrl+M while hidden (Beta): not yet verified; show the World Map button if the shortcut stops working.",
 		section = hideAndSwapUpdate,
 		position = 2
 	)
