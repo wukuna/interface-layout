@@ -27,6 +27,13 @@ rendering and hit-testing verification.
 
 ## Issue #1 hotfix checks (pending live verification)
 
+- Bind the side-panel toggle to the same F-key as a native tab. Starting on a
+  different tab, press the key once: if the final panel state is visible, the
+  minimap must remain visible without flashing. Repeat with the assigned tab
+  active and with the panel hidden; only the final panel state should control
+  minimap visibility. Test both isolated presses and key repeat. Interface Layout
+  must not consume the key or change native tab selection.
+
 - In Resizable Modern, enable **Hide preset with side panel** with **Hide minimap**
   disabled. Use Hotkey Toggle Sidepanel to close the panel, then reopen it both
   with its toggle and an inventory/tab hotkey. Check minimap, compass and orbs.
