@@ -161,8 +161,7 @@ public class InterfaceEditor extends Overlay implements MouseListener
     }
     private boolean inBlockedGap(Point point) {
         return !config.allowClicksThroughGaps() && manager.isLoggedIn() && !client.isMenuOpen()
-            && menu.groups().values().stream().anyMatch(bounds -> bounds.contains(point))
-            && menu.stones().values().stream().noneMatch(bounds -> bounds.contains(point));
+            && menu.isBlockedGap(point);
     }
     private boolean geometryChanged() {
         return !dragCanvas.equals(new Dimension(client.getCanvasWidth(), client.getCanvasHeight()))

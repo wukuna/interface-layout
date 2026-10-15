@@ -166,10 +166,164 @@ public class MenuFeedbackDiagnosticsTest {
         f.editor.mouseDragged(f.event(MouseEvent.MOUSE_DRAGGED, stone.x + 9, stone.y + 10, MouseEvent.NOBUTTON));
     }
 
+    @Test public void hiddenBankIconsKeepNativeVisibleBackgroundsWithoutClickableStones() {
+        Fixture f = new Fixture(2);
+        Rectangle before = f.menu.groups().get(0);
+        f.allowGaps = false;
+        for (Widget icon : f.icons) when(icon.isHidden()).thenReturn(true);
+        when(f.backgrounds.isNativeRowVisible(true)).thenReturn(true);
+        clearInvocations(f.backgrounds);
+        f.refresh();
+        assertEquals(before, f.menu.groups().get(0));
+        assertTrue(f.menu.stones().isEmpty());
+        verify(f.backgrounds, times(6)).place(anyInt(), any(Point.class), anyInt(), anyInt(), anyBoolean());
+        assertFalse(f.menu.isBlockedGap(new Point(before.x + 10, before.y + 10)));
+        for (Widget icon : f.icons) verify(icon, never()).setHidden(false);
+    }
+
+    @Test public void bankAndPinCoverMovedStonesAndClosingRestoresAllModes() {
+        for (int display = 0; display < 3; display++)
+            for (int modal : new int[]{net.runelite.api.gameval.InterfaceID.Bankmain.UNIVERSE,
+                    net.runelite.api.gameval.InterfaceID.BankpinKeypad.UNIVERSE}) {
+                Fixture f = new Fixture(display); f.allowGaps = false;
+                Map<Integer, Rectangle> before = f.menu.stones();
+                Widget window = WidgetGeometryTest.widget(90, 90, 600, 150);
+                when(f.client.getWidget(modal)).thenReturn(window);
+                f.refresh();
+                assertTrue(f.menu.stones().isEmpty());
+                assertFalse(f.menu.isBlockedGap(new Point(134, 115)));
+                assertFalse(f.editor.mousePressed(f.event(MouseEvent.MOUSE_PRESSED,134,115,MouseEvent.BUTTON1)).isConsumed());
+                for (Widget icon : f.icons) verify(icon).setHidden(true);
+                when(window.isHidden()).thenReturn(true);
+                f.refresh();
+                assertEquals(before, f.menu.stones());
+                for (Widget icon : f.icons) verify(icon).setHidden(false);
+            }
+    }
+
+    @Test public void pinOutsideTheMovedBarDoesNotHideIt() {
+        Fixture f = new Fixture();
+        Map<Integer, Rectangle> before = f.menu.stones();
+        Widget window = WidgetGeometryTest.widget(500, 350, 300, 250);
+        when(f.client.getWidget(net.runelite.api.gameval.InterfaceID.BankpinKeypad.UNIVERSE)).thenReturn(window);
+        f.refresh();
+        assertEquals(before, f.menu.stones());
+        for (Widget icon : f.icons) verify(icon, never()).setHidden(true);
+    }
+
+    @Test public void movableWindowsTrackDragResizeHideAndCloseInEveryDisplayMode() {
+        for (int display = 0; display < 3; display++)
+            for (int id : new int[]{net.runelite.api.gameval.InterfaceID.Collection.FRAME,
+                net.runelite.api.gameval.InterfaceID.CollectionOverview.UNIVERSE,
+                net.runelite.api.gameval.InterfaceID.SkillGuide.WINDOW,
+                net.runelite.api.gameval.InterfaceID.SkillGuideV2.UNIVERSE,
+                net.runelite.api.gameval.InterfaceID.Settings.UNIVERSE}) {
+                Fixture f = new Fixture(display);
+                Map<Integer, Rectangle> original = f.menu.stones();
+                Map<String, Object> saved = new HashMap<>(f.values);
+                Widget window = WidgetGeometryTest.widget(600, 350, 33, 36);
+                when(f.client.getWidget(id)).thenReturn(window);
+                assertTrue(f.menu.windowBoundsChanged()); f.refresh();
+                assertEquals(original, f.menu.stones());
+                assertFalse(f.menu.windowBoundsChanged());
+                window.setForcedPosition(100, 100);
+                assertTrue(f.menu.windowBoundsChanged()); f.refresh();
+                assertFalse(f.menu.stones().containsKey(0));
+                assertEquals(original.get(5), f.menu.stones().get(5));
+                window.setOriginalWidth(120);
+                assertTrue(f.menu.windowBoundsChanged()); f.refresh();
+                assertFalse(f.menu.stones().containsKey(2));
+                assertEquals(original.get(5), f.menu.stones().get(5));
+                window.setOriginalWidth(20);
+                assertTrue(f.menu.windowBoundsChanged()); f.refresh();
+                assertTrue(f.menu.stones().containsKey(1));
+                assertFalse(f.menu.stones().containsKey(0));
+                when(window.isHidden()).thenReturn(true);
+                assertTrue(f.menu.windowBoundsChanged()); f.refresh();
+                assertEquals(original, f.menu.stones());
+                when(f.client.getWidget(id)).thenReturn(null);
+                assertFalse(f.menu.windowBoundsChanged());
+                assertEquals(saved, f.values);
+                verify(window, never()).setHidden(anyBoolean());
+                verify(window, never()).revalidate();
+            }
+    }
+
+    @Test public void overlappingWindowsRemainIndependentAndNeverUseResizePreview() {
+        Fixture f = new Fixture();
+        Widget log = WidgetGeometryTest.widget(100,100,33,36);
+        Widget settings = WidgetGeometryTest.widget(305,100,33,36);
+        Widget preview = WidgetGeometryTest.widget(0,0,1000,700);
+        when(f.client.getWidget(net.runelite.api.gameval.InterfaceID.Collection.FRAME)).thenReturn(log);
+        when(f.client.getWidget(net.runelite.api.gameval.InterfaceID.Settings.UNIVERSE)).thenReturn(settings);
+        when(f.client.getWidget(net.runelite.api.gameval.InterfaceID.Settings.INFINITE)).thenReturn(preview);
+        when(f.client.getWidget(net.runelite.api.gameval.InterfaceID.CollectionOverview.RESIZE_PREVIEW)).thenReturn(preview);
+        f.refresh();
+        assertFalse(f.menu.stones().containsKey(0)); assertFalse(f.menu.stones().containsKey(5));
+        assertTrue(f.menu.stones().containsKey(2));
+        when(log.isHidden()).thenReturn(true); f.refresh();
+        assertTrue(f.menu.stones().containsKey(0)); assertFalse(f.menu.stones().containsKey(5));
+        when(settings.isHidden()).thenReturn(true); f.refresh();
+        assertEquals(6, f.menu.stones().size());
+    }
+
+    @Test public void combatAchievementAndQuestDiaryWindowsCoverOnlyTheirOwnAreaAndRestore() {
+        for (int display = 0; display < 3; display++)
+            for (int id : new int[]{
+                net.runelite.api.gameval.InterfaceID.CaOverview.UNIVERSE,
+                net.runelite.api.gameval.InterfaceID.CaTasks.UNIVERSE,
+                net.runelite.api.gameval.InterfaceID.CaBosses.UNIVERSE,
+                net.runelite.api.gameval.InterfaceID.CaBoss.UNIVERSE,
+                net.runelite.api.gameval.InterfaceID.CaRewards.UNIVERSE,
+                net.runelite.api.gameval.InterfaceID.Questjournal.UNIVERSE,
+                net.runelite.api.gameval.InterfaceID.QuestjournalOverview.UNIVERSE,
+                net.runelite.api.gameval.InterfaceID.AreaTask.UNIVERSE,
+                net.runelite.api.gameval.InterfaceID.Journalscroll.UNIVERSE,
+                net.runelite.api.gameval.InterfaceID.Questdisplay.UNIVERSE,
+                net.runelite.api.gameval.InterfaceID.Questscroll.UNIVERSE,
+                net.runelite.api.gameval.InterfaceID.QuestscrollSpeedrun.UNIVERSE}) {
+                Fixture f = new Fixture(display); f.allowGaps = false;
+                Map<Integer, Rectangle> original = f.menu.stones();
+                Map<String, Object> saved = new HashMap<>(f.values);
+                Widget window = WidgetGeometryTest.widget(95,95,135,80);
+                when(f.client.getWidget(id)).thenReturn(window);
+                assertTrue(f.menu.windowBoundsChanged()); f.refresh();
+                assertFalse(f.menu.stones().containsKey(0));
+                assertFalse(f.menu.stones().containsKey(2));
+                assertFalse(f.menu.isBlockedGap(new Point(134,115)));
+                assertEquals(original.get(5),f.menu.stones().get(5));
+                assertFalse(f.menu.windowBoundsChanged());
+                when(f.client.getWidget(id)).thenReturn(null);
+                assertTrue(f.menu.windowBoundsChanged()); f.refresh();
+                assertEquals(original,f.menu.stones());
+                assertEquals(saved,f.values);
+                verify(window,never()).setForcedPosition(anyInt(),anyInt());
+                verify(window,never()).setOriginalWidth(anyInt());
+                verify(window,never()).setOriginalHeight(anyInt());
+                verify(window,never()).setHidden(anyBoolean());
+            }
+    }
+
+    @Test public void hiddenEmptyWindowRootsAndQuestSidebarDoNotOccludeStones() {
+        Fixture f = new Fixture();
+        Map<Integer, Rectangle> original = f.menu.stones();
+        Widget hidden = WidgetGeometryTest.widget(0,0,1000,700);
+        when(hidden.isHidden()).thenReturn(true);
+        Widget empty = WidgetGeometryTest.widget(100,100,0,0);
+        Widget sidebar = WidgetGeometryTest.widget(0,0,1000,700);
+        when(f.client.getWidget(net.runelite.api.gameval.InterfaceID.CaOverview.UNIVERSE)).thenReturn(hidden);
+        when(f.client.getWidget(net.runelite.api.gameval.InterfaceID.AreaTask.UNIVERSE)).thenReturn(empty);
+        when(f.client.getWidget(net.runelite.api.gameval.InterfaceID.Questlist.UNIVERSE)).thenReturn(sidebar);
+        assertFalse(f.menu.windowBoundsChanged()); f.refresh();
+        assertEquals(original,f.menu.stones());
+    }
+
     private static final class Fixture {
         final Client client = mock(Client.class);
         final OrbController manager = mock(OrbController.class);
         final Widget[] stones = new Widget[6];
+        final Widget[] icons = new Widget[6];
+        final MenuStoneBackgrounds backgrounds = mock(MenuStoneBackgrounds.class);
         final Map<String, Object> values = new HashMap<>();
         final MenuStoneController menu;
         final InterfaceEditor editor;
@@ -196,6 +350,8 @@ public class MenuFeedbackDiagnosticsTest {
                 stones[i] = WidgetGeometryTest.widget(i * 33, 600, 33, 36);
                 int[][] registry = display == 0 ? MenuStoneRegistry.FIXED : display == 1 ? MenuStoneRegistry.CLASSIC : MenuStoneRegistry.MODERN;
                 when(client.getWidget(registry[i][0])).thenReturn(stones[i]);
+                icons[i] = WidgetGeometryTest.widget(i * 33 + 5, 605, 23, 26);
+                when(client.getWidget(registry[i][1])).thenReturn(icons[i]);
             }
             InterfaceLayoutConfig config = mock(InterfaceLayoutConfig.class, CALLS_REAL_METHODS);
             when(config.menuLayout()).thenReturn(MenuStoneController.Layout.FREE_POSITION);
@@ -211,7 +367,7 @@ public class MenuFeedbackDiagnosticsTest {
                     bind(ConfigManager.class).toInstance(configs); bind(OrbController.class).toProvider(() -> manager);
                     bind(WidgetStateStore.class).toInstance(states);
                     bind(WidgetBoundsExpander.class).toProvider(() -> mock(WidgetBoundsExpander.class));
-                    bind(MenuStoneBackgrounds.class).toProvider(() -> mock(MenuStoneBackgrounds.class));
+                    bind(MenuStoneBackgrounds.class).toInstance(backgrounds);
                 }
             }).getInstance(MenuStoneController.class);
             editor = Guice.createInjector(new AbstractModule() {

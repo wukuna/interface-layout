@@ -82,6 +82,7 @@ public class OrbEventHandler implements KeyListener
     @Inject private com.interfacelayout.layout.edit.InterfaceEditor interfaceEditor;
     @Inject private net.runelite.client.eventbus.EventBus eventBus;
     @Inject private com.interfacelayout.util.LegacyConfigImporter legacyConfigs;
+    @Inject private com.interfacelayout.layout.menu.MenuStoneClickPriority stoneClickPriority;
 
 	@Inject
 	private Client client;
@@ -150,6 +151,9 @@ public class OrbEventHandler implements KeyListener
 		overlayManager.add(minimapOverlay);
         overlayManager.add(interfaceEditor);
         eventBus.register(gameframe);
+        stoneClickPriority.clear();
+        eventBus.register(stoneClickPriority.nativeListener());
+        eventBus.register(stoneClickPriority);
         // Native Stretched Mode translation stays ahead of custom hit testing,
         // regardless of which plugin is enabled first.
         mouseManager.registerMouseListener(interfaceEditor);
@@ -195,6 +199,9 @@ public class OrbEventHandler implements KeyListener
 		overlayManager.remove(minimapOverlay);
         overlayManager.remove(interfaceEditor);
         eventBus.unregister(gameframe);
+        eventBus.unregister(stoneClickPriority);
+        eventBus.unregister(stoneClickPriority.nativeListener());
+        stoneClickPriority.clear();
         mouseManager.unregisterMouseListener(interfaceEditor);
 		keyManager.unregisterKeyListener(this);
 		mouseManager.unregisterMouseListener(dragListener);

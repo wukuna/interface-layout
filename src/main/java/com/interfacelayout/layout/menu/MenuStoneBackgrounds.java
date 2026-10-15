@@ -24,6 +24,12 @@ public class MenuStoneBackgrounds
     @Inject private WidgetStateStore states;
     @Inject private WidgetBoundsExpander expander;
     private final Map<Widget, List<Widget>> owned = new IdentityHashMap<>();
+    public boolean isNativeRowVisible(boolean top)
+    {
+        Widget row = client.getWidget(top ? InterfaceID.ToplevelPreEoc.SIDE_MOVABLE_BACKGROUND
+            : InterfaceID.ToplevelPreEoc.SIDE_STATIC_BACKGROUND);
+        return row != null && !row.isHidden();
+    }
 
     public void place(int index, Point destination, int width, int height)
     {

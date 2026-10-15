@@ -47,6 +47,7 @@ import java.awt.Rectangle;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.Client;
+import net.runelite.api.MenuEntry;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
@@ -54,6 +55,16 @@ import net.runelite.client.config.ConfigManager;
 @Singleton
 public class MenuStoneController
 {
+    private static final int[] WINDOW_ROOTS = {
+        InterfaceID.Bankmain.UNIVERSE, InterfaceID.BankpinKeypad.UNIVERSE,
+        InterfaceID.Collection.FRAME, InterfaceID.CollectionOverview.UNIVERSE,
+        InterfaceID.SkillGuide.WINDOW, InterfaceID.SkillGuideV2.UNIVERSE, InterfaceID.Settings.UNIVERSE,
+        InterfaceID.CaOverview.UNIVERSE, InterfaceID.CaTasks.UNIVERSE, InterfaceID.CaBosses.UNIVERSE,
+        InterfaceID.CaBoss.UNIVERSE, InterfaceID.CaRewards.UNIVERSE,
+        InterfaceID.Questjournal.UNIVERSE, InterfaceID.QuestjournalOverview.UNIVERSE,
+        InterfaceID.AreaTask.UNIVERSE, InterfaceID.Journalscroll.UNIVERSE,
+        InterfaceID.Questdisplay.UNIVERSE, InterfaceID.Questscroll.UNIVERSE, InterfaceID.QuestscrollSpeedrun.UNIVERSE
+    };
     public enum Layout
     {
         VANILLA_HORIZONTAL("Native rows"), FREE_POSITION("Free position"),
@@ -82,12 +93,44 @@ public class MenuStoneController
     private boolean dragSourceHorizontal;
     private Rectangle stack = new Rectangle();
     private volatile Map<Integer, Rectangle> groupBounds = Map.of(), stoneBounds = Map.of();
+    private volatile List<Rectangle> gapBounds = List.of(), windowBounds = List.of();
 
     public Rectangle bounds() { return new Rectangle(stack); }
     public void toggleShown() { temporarilyShown = !temporarilyShown; }
-    public void resetSession() { dragStone = -1; temporarilyShown = false; stack = new Rectangle(); groupBounds = Map.of(); stoneBounds = Map.of(); }
+    public void resetSession() { dragStone = -1; temporarilyShown = false; stack = new Rectangle(); groupBounds = Map.of(); stoneBounds = Map.of(); gapBounds = List.of(); windowBounds = List.of(); }
+    public boolean isBlockedGap(Point point)
+    {
+        return !config.allowClicksThroughGaps() && gapBounds.stream().anyMatch(bounds -> bounds.contains(point))
+            && windowBounds.stream().noneMatch(bounds -> bounds.contains(point));
+    }
     public Map<Integer, Rectangle> groups() { return copyBounds(groupBounds); }
     public Map<Integer, Rectangle> stones() { return copyBounds(stoneBounds); }
+    /** Identify an existing native action, never infer an action from a saved rectangle alone. */
+    public boolean isHoveredStoneAction(MenuEntry entry)
+    {
+        if (entry == null || temporarilyShown || !orbs.isLoggedIn()) return false;
+        switch (entry.getType())
+        {
+            case WIDGET_TYPE_1: case WIDGET_TYPE_4: case WIDGET_TYPE_5: case CC_OP: break;
+            default: return false;
+        }
+        net.runelite.api.Point mouse = client.getMouseCanvasPosition();
+        if (mouse == null) return false;
+        int[][] registry = orbs.isFixedMode() ? MenuStoneRegistry.FIXED
+            : orbs.isClassicResizable() ? MenuStoneRegistry.CLASSIC : MenuStoneRegistry.MODERN;
+        int component = entry.getWidget() == null ? entry.getParam1() : entry.getWidget().getId();
+        for (Map.Entry<Integer, Rectangle> bounds : stoneBounds.entrySet())
+        {
+            int index = bounds.getKey();
+            if (!bounds.getValue().contains(mouse.getX(), mouse.getY()) || hidden(index)
+                || (component != registry[index][0] && component != registry[index][1])) continue;
+            Widget stone = client.getWidget(registry[index][0]), icon = client.getWidget(registry[index][1]);
+            // Modern's stone graphic is a selection highlight, so use its icon
+            // for native visibility, just as apply() does.
+            return stone != null && !(icon != null ? icon.isHidden() : stone.isHidden());
+        }
+        return false;
+    }
     public boolean individualDragging() { return config.menuLayout() != Layout.VANILLA_HORIZONTAL; }
     private static Map<Integer, Rectangle> copyBounds(Map<Integer, Rectangle> bounds)
     {
@@ -102,7 +145,10 @@ public class MenuStoneController
     {
         stack = new Rectangle();
         groupBounds = Map.of(); stoneBounds = Map.of();
+        gapBounds = List.of();
+        windowBounds = List.of();
         if (!orbs.isLoggedIn() || temporarilyShown) return;
+        windowBounds = modalBounds();
         hideDecoration(InterfaceID.ToplevelOsrsStretch.SIDE_MENU_GRAPHIC1, config.hideLeftBar());
         hideDecoration(InterfaceID.ToplevelOsrsStretch.SIDE_MENU_GRAPHIC2, config.hideRightBar());
         hideDecoration(InterfaceID.ToplevelOsrsStretch.SIDE_MENU_GRAPHIC5, config.hideTopMenu());
@@ -142,10 +188,13 @@ public class MenuStoneController
             if (!vertical && modern && i == 10) continue;
             // Modern's stone graphic is a selection highlight: its own hidden flag
             // must not remove an otherwise visible tab from the layout.
-            if ((!vertical && !compactRow[row]) || (icon != null ? icon.isHidden() : stone.isHidden())) continue;
+            boolean interactive = !(icon != null ? icon.isHidden() : stone.isHidden());
+            boolean decoration = modern && i != 10 ? backgrounds.isNativeRowVisible(i < 7) : !stone.isHidden();
+            if ((!vertical && !compactRow[row]) || (!interactive && !decoration)) continue;
             groups.computeIfAbsent(vertical ? group(i) : row, ignored -> new ArrayList<>()).add(new Entry(i, stone, icon));
         }
         Map<Integer, Rectangle> nextGroups = new LinkedHashMap<>(), nextStones = new LinkedHashMap<>();
+        List<Rectangle> nextGaps = new ArrayList<>();
         // Keep the entire native arrangement when any requested group cannot fit.
         for (Map.Entry<Integer, List<Entry>> group : groups.entrySet())
         {
@@ -186,6 +235,8 @@ public class MenuStoneController
             if (width > client.getCanvasWidth() || height > client.getCanvasHeight()) continue;
             Point origin = loadOrigin(id, width, height, vertical ? null : nativeOrigins.getOrDefault(id, new Point()));
             int offset = 0;
+            Rectangle previous = null;
+            boolean previousInteractive = false;
             for (Entry entry : entries)
             {
                 Point destination = new Point(origin.x + (horizontal ? offset : (width - entry.width) / 2),
@@ -197,17 +248,49 @@ public class MenuStoneController
                     expander.allowCanvasPosition(entry.stone);
                     if (entry.icon != null) expander.allowCanvasPosition(entry.icon);
                 }
-                if (modern)
+                Rectangle placed = new Rectangle(destination.x, destination.y, entry.width, entry.height);
+                boolean covered = windowBounds.stream().anyMatch(bounds -> bounds.intersects(placed));
+                if (modern && !covered)
                     backgrounds.place(entry.index, destination, entry.width, entry.height, movable);
                 move(entry.stone, destination);
                 if (entry.icon != null) move(entry.icon, new Point(destination.x + entry.iconOffset.x, destination.y + entry.iconOffset.y));
-                nextStones.put(entry.index, new Rectangle(destination.x, destination.y, entry.width, entry.height));
+                if (covered) { states.hide(entry.stone, true); states.hide(entry.icon, true); }
+                boolean interactive = !covered && entry.interactive;
+                if (interactive) nextStones.put(entry.index, placed);
+                if (interactive && previousInteractive && config.menuSpacing() > 0)
+                {
+                    Rectangle gap = horizontal
+                        ? new Rectangle(previous.x + previous.width, origin.y, config.menuSpacing(), height)
+                        : new Rectangle(origin.x, previous.y + previous.height, width, config.menuSpacing());
+                    nextGaps.add(gap);
+                }
+                previous = placed; previousInteractive = interactive;
                 offset += (horizontal ? entry.width : entry.height) + config.menuSpacing();
             }
             nextGroups.put(id, new Rectangle(origin.x, origin.y, width, height));
         }
         groupBounds = Map.copyOf(nextGroups); stoneBounds = Map.copyOf(nextStones);
+        gapBounds = List.copyOf(nextGaps);
         stack = nextGroups.getOrDefault(0, new Rectangle());
+    }
+
+    private List<Rectangle> modalBounds()
+    {
+        List<Rectangle> result = new ArrayList<>();
+        // Use each window's actual frame, never a full-canvas INFINITY parent
+        // or its resize preview. Bank/PIN retain their existing bounds sources.
+        for (int id : WINDOW_ROOTS)
+        {
+            Widget window = client.getWidget(id);
+            if (window == null || window.isHidden()) continue;
+            Rectangle bounds = WidgetGeometry.bounds(window);
+            if (!bounds.isEmpty()) result.add(bounds);
+        }
+        return List.copyOf(result);
+    }
+    public boolean windowBoundsChanged()
+    {
+        return orbs.isLoggedIn() && !temporarilyShown && !windowBounds.equals(modalBounds());
     }
 
     private boolean hasSavedOrigin(int group)
@@ -382,9 +465,11 @@ public class MenuStoneController
         final int index, width, height;
         final Widget stone, icon;
         final Point iconOffset;
+        final boolean interactive;
         Entry(int index, Widget stone, Widget icon)
         {
             this.index = index; this.stone = stone; this.icon = icon;
+            interactive = !(icon != null ? icon.isHidden() : stone.isHidden());
             width = stone.getWidth(); height = stone.getHeight();
             Point position = WidgetGeometry.location(stone), graphic = icon == null ? position : WidgetGeometry.location(icon);
             iconOffset = new Point(graphic.x - position.x, graphic.y - position.y);
