@@ -36,7 +36,7 @@ Hold **Alt** and drag a menu bar, using RuneLite's normal overlay positioning co
 
 **Stone spacing** sets the gap between visible stones. Hiding a stone closes its gap while keeping the group's saved position.
 
-**Allow clicks through gaps** is enabled by default. Disable it to block left/right clicks between stones inside a bar without selecting a neighboring tab. Clicks on the stones, outside the bar, and selections in an already-open right-click menu remain unchanged.
+**Allow clicks through gaps** is enabled by default. Disable it to block clicks through the spacing between visible, clickable stones in a moved bar without selecting a neighboring tab. Overlapping supported game windows take priority. Native menu protection covers supported world actions; unfamiliar menu entries are left available rather than removed. Clicks on the stones, outside the bar, and selections in an already-open right-click menu remain unchanged.
 
 ### Moving a single stone
 
@@ -57,6 +57,8 @@ Stone grouping has a five-pixel movement threshold and shows a proposed-position
 Moved stones temporarily give way to overlapping Bank/PIN, Collection Log, skill-guide and Settings windows. Stones outside those windows stay available. Moving, resizing or closing a supported window restores uncovered stones in their saved positions; the plugin does not move or resize the windows themselves.
 
 This also covers Combat Achievements overview, tasks, boss lists/details and rewards, plus quest journals, achievement-diary task windows, journal scrolls and quest-completion screens. Only visible window areas count; hidden windows and the ordinary quest sidebar do not hide stones.
+
+Banking can hide tab icons as part of the game's normal behavior. Interface Layout preserves stone backgrounds that the game still displays without forcing hidden icons back on or making them clickable. Bank and PIN windows keep their native positions and sizing. Window protection covers the interfaces listed above; it does not promise coverage for every game interface.
 
 Open **Menu tab visibility** to hide individual tabs, including Combat options, Skills, Quests, Inventory, Equipment, Prayer, Spellbook, Clan, Account Management, Friends, Logout, Settings, Emotes and Music.
 
