@@ -16,7 +16,7 @@ Most features are independent, so you can use only the parts you want. Menu icon
 
 ## Moving menu stones and orbs
 
-Enable **Edit interface** to show editing outlines and guidance. RuneLite **Alt-drag** moves whole bars, detached stones, free orbs and the compass; **Shift-drag** changes stone groups. These movement controls also work with Edit interface off. Choose **Free Position** under **Map and orb visibility → Orb arrangement** to move orbs individually, and choose a vertical or free-position menu arrangement to detach and regroup stones.
+Enable **Edit interface** to show editing outlines and allow **Shift-drag** stone grouping. RuneLite **Alt-drag** moves whole bars, detached stones, free orbs and the compass with Edit interface on or off. Choose **Free Position** under **Map and orb visibility → Orb arrangement** to move orbs individually, and choose a vertical or free-position menu arrangement to detach and regroup stones.
 
 > Moving menu bars as groups, splitting stones into separate groups, and positioning individual orbs and the compass. The recording uses an earlier settings panel; the option names below match the current release.
 
@@ -36,11 +36,13 @@ Hold **Alt** and drag a menu bar, using RuneLite's normal overlay positioning co
 
 **Stone spacing** sets the gap between visible stones. Hiding a stone closes its gap while keeping the group's saved position.
 
+**Allow clicks through gaps** is enabled by default. Disable it to block clicks through the spacing between visible, clickable stones in a moved bar without selecting a neighboring tab. Overlapping supported game windows take priority. Native menu protection covers supported world actions; unfamiliar menu entries are left available rather than removed. Clicks on the stones, outside the bar, and selections in an already-open right-click menu remain unchanged.
+
 ### Moving a single stone
 
 Choose **Free position**, **Vertical left** or **Vertical right** first. Individual stone groups are not available in **Native rows**.
 
-1. Hold **Shift** and drag a stone away from its bar. You do not need to enable **Edit interface**.
+1. Enable **Edit interface**, then hold **Shift** and drag a stone away from its bar. Use Shift alone; Alt uses RuneLite's whole-bar movement.
 2. Release it away from other stones to leave it on its own.
 3. Drop it near another stone or group to join them.
 
@@ -48,7 +50,15 @@ Joining an existing bar preserves that bar's direction. Joining two separate sto
 
 **Shift-right-click** a stone to return it to its main group.
 
+Stone grouping has a five-pixel movement threshold and shows a proposed-position outline while dragging. Membership and position are saved only when you release. Focus loss, native interface rebuilds, or display-mode changes cancel the pending edit without changing the saved group. Stretched Mode uses RuneLite's translated native canvas coordinates, so grouping does not depend on which plugin was enabled first. Existing layouts are preserved; there is no separate stretched layout or migration.
+
 ## Menu tab visibility
+
+Moved stones temporarily give way to overlapping Bank/PIN, Collection Log, skill-guide and Settings windows. Stones outside those windows stay available. Moving, resizing or closing a supported window restores uncovered stones in their saved positions; the plugin does not move or resize the windows themselves.
+
+This also covers Combat Achievements overview, tasks, boss lists/details and rewards, plus quest journals, achievement-diary task windows, journal scrolls and quest-completion screens. Only visible window areas count; hidden windows and the ordinary quest sidebar do not hide stones.
+
+Banking can hide tab icons as part of the game's normal behavior. Interface Layout preserves stone backgrounds that the game still displays without forcing hidden icons back on or making them clickable. Bank and PIN windows keep their native positions and sizing. Window protection covers the interfaces listed above; it does not promise coverage for every game interface.
 
 Open **Menu tab visibility** to hide individual tabs, including Combat options, Skills, Quests, Inventory, Equipment, Prayer, Spellbook, Clan, Account Management, Friends, Logout, Settings, Emotes and Music.
 
@@ -81,6 +91,8 @@ Choose **Orb arrangement → Free Position**, then **Alt-drag** an orb or the co
 Use RuneLite's **Alt-right-click** to reset an element's position. Disable **Edit interface** or press **Escape** to hide editing guidance when you are finished.
 
 Free Position moves the orbs and compass; it does not move the minimap itself. To put a separate map elsewhere, use **Show separate minimap**, described below.
+
+Moving another orb preserves the native Wiki and world-map button positions, even if you have not moved those buttons. Their positions are only saved when you move them yourself. Game-hidden controls remain hidden.
 
 ### Compact orb arrangements
 
@@ -152,3 +164,5 @@ If a layout does not behave as expected, check for another enabled plugin that m
 ## License and attribution
 
 Interface Layout is distributed under the [BSD-2-Clause license](LICENSE). The license attributes all contributing authors. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the original projects and adapted code.
+
+Ctrl+M while the World Map button is hidden is marked **Beta** in the Hide World Map setting tooltip. This shortcut combination has not been verified in-game; show the button again if the shortcut stops working.
