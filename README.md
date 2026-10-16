@@ -30,6 +30,8 @@ Open **Menu bars** and choose a **Menu arrangement**:
 - **Vertical left** and **Vertical right** start the bars along the selected edge. These are starting positions; you can move the bars afterward.
 - **Free position** lets you build your own arrangement. **Initial bar direction** chooses the starting direction of new bars; existing groups keep their direction.
 
+In Fixed and both resizable modes, **Free position** starts with separate top and bottom groups. Older combined defaults are split too, including moved bars; explicitly saved custom memberships, detached groups and ordering are retained. Choosing Column starts the default groups beside each other. In Resizable Classic, an untouched **Native rows** layout keeps the game's original stone artwork, spacing and icon alignment. Moving a native row with zero spacing translates it as a whole.
+
 ### Moving a whole bar
 
 Hold **Alt** and drag a menu bar, using RuneLite's normal overlay positioning controls. The same control works with **Edit interface** on or off. If you changed RuneLite's overlay movement hotkey, use that key instead of Alt.
@@ -126,7 +128,7 @@ The **Minimap toggle button** section controls the optional eye button, its loca
 **Editing controls** includes:
 
 - **Stone grouping grid** aligns Shift-dragged stones to a grid measured in pixels. Set it to **1** to disable snapping. RuneLite handles snapping for Alt-drag movement.
-- **Reset positions and groups** clears saved positions and menu groups in every display mode. Your visibility choices are kept.
+- **Reset positions and groups** asks for confirmation before clearing saved positions and menu groups in every display mode. Choose No or close the dialog to cancel. Your visibility choices are kept.
 
 Menu positions and groups are saved separately for **Fixed**, **Resizable Classic** and **Resizable Modern**. Independent orb and compass positioning, hiding the native minimap, and the separate minimap are features for resizable modes; Fixed keeps its native gameframe constraints.
 

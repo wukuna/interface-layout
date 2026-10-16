@@ -133,6 +133,8 @@ public class OrbEventHandler implements KeyListener
 	private MouseManager mouseManager;
 
     private volatile int lifecycleGeneration;
+    private volatile int resetRequestGeneration;
+    @Inject private LayoutResetConfirmation resetConfirmation;
 
     private void later(Runnable task)
     {
@@ -478,11 +480,17 @@ public class OrbEventHandler implements KeyListener
 
 		                if (group.equals(GROUP_NAME) && key.equals("resetLayoutPositions"))
         {
-            if (config.resetLayoutPositions()) later(() -> {
-                editManager.toggleEditMode(false);
-                gameframe.resetPositions();
+            if (config.resetLayoutPositions()) {
                 configManager.setConfiguration(GROUP_NAME, "resetLayoutPositions", false);
-            });
+                if (manager.active) {
+                    final int generation = lifecycleGeneration, requestGeneration = resetRequestGeneration;
+                    resetConfirmation.request(() -> clientThread.invokeLater(() -> {
+                        if (!manager.active || generation != lifecycleGeneration || requestGeneration != resetRequestGeneration) return;
+                        editManager.toggleEditMode(false);
+                        gameframe.resetPositions();
+                    }));
+                }
+            }
             return;
         }
 if (group.equals(GROUP_NAME) && (key.startsWith("free_") || key.startsWith("menu") || key.startsWith("hideStone")
@@ -627,6 +635,7 @@ if (!group.equals(GROUP_NAME))
 	@Subscribe
 	public void onProfileChanged(ProfileChanged event)
 	{
+        resetRequestGeneration++;
 		legacyConfigs.importOnce();
         manager.migrateConfigs();
 

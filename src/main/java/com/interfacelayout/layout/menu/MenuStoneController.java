@@ -164,6 +164,7 @@ public class MenuStoneController
         boolean vertical = config.menuLayout() == Layout.VERTICAL_LEFT || config.menuLayout() == Layout.VERTICAL_RIGHT
             || config.menuLayout() == Layout.FREE_POSITION;
         boolean modern = !orbs.isFixedMode() && !orbs.isClassicResizable();
+        initializeFreeRows(registry);
         // Own both native rows consistently, so visibility does not switch between
         // built-in and plugin overlay preferences (and lose the dragged origin).
         boolean[] compactRow = {!vertical, !vertical};
@@ -189,7 +190,8 @@ public class MenuStoneController
             // Modern's stone graphic is a selection highlight: its own hidden flag
             // must not remove an otherwise visible tab from the layout.
             boolean interactive = !(icon != null ? icon.isHidden() : stone.isHidden());
-            boolean decoration = modern && i != 10 ? backgrounds.isNativeRowVisible(i < 7) : !stone.isHidden();
+            boolean decoration = modern ? (i == 10 ? !stone.isHidden() : backgrounds.isNativeRowVisible(i < 7))
+                : backgrounds.isNativeRowVisible(rowBackground(i / 7)) || !stone.isHidden();
             if ((!vertical && !compactRow[row]) || (!interactive && !decoration)) continue;
             groups.computeIfAbsent(vertical ? group(i) : row, ignored -> new ArrayList<>()).add(new Entry(i, stone, icon));
         }
@@ -211,17 +213,52 @@ public class MenuStoneController
         for (int row = 0; row < 2; row++)
         {
             if (!vertical && !compactRow[row]) continue;
+            boolean intact = false;
+            for (Map.Entry<Integer, List<Entry>> group : groups.entrySet())
+                intact |= intactNativeRow(group.getKey(), group.getValue()) == row;
+            if (!modern && intact) continue;
             if (modern) backgrounds.prepareRow(row == 0, vertical || hasSavedOrigin(row));
-            else if (orbs.isClassicResizable()) hideDecoration(row == 0
-                ? InterfaceID.ToplevelOsrsStretch.SIDE_MENU_GRAPHIC5
-                : InterfaceID.ToplevelOsrsStretch.SIDE_MENU_GRAPHIC3, true);
-            else hideDecoration(row == 0 ? InterfaceID.Toplevel.SIDE_TOP_CONTAINER_GRAPHIC0
-                : InterfaceID.Toplevel.SIDE_BOTTOM_CONTAINER_GRAPHIC0, true);
+            else backgrounds.prepareRow(rowBackground(row), vertical || hasSavedOrigin(row));
         }
         for (Map.Entry<Integer, List<Entry>> group : groups.entrySet())
         {
             int id = group.getKey();
             List<Entry> entries = group.getValue();
+            int sourceRow = intactNativeRow(id, entries);
+            if (!modern && sourceRow >= 0)
+            {
+                // Native click targets have unequal widths/offsets and overlap the
+                // shared row artwork. Packing them edge-to-edge shifts the icons.
+                // Translate native artwork and targets together; split only for occlusion.
+                Rectangle nativeRow = new Rectangle(entries.get(0).nativeBounds);
+                for (Entry entry : entries) nativeRow.add(entry.nativeBounds);
+                Point origin = hasSavedOrigin(id) ? loadOrigin(id, nativeRow.width, nativeRow.height, nativeRow.getLocation())
+                    : nativeRow.getLocation();
+                int dx = origin.x - nativeRow.x, dy = origin.y - nativeRow.y;
+                boolean moved = dx != 0 || dy != 0;
+                boolean split = entries.stream().anyMatch(entry -> covered(translated(entry.nativeBounds, dx, dy)));
+                if (split) backgrounds.prepareRow(rowBackground(sourceRow), moved);
+                else if (moved) backgrounds.translateRow(rowBackground(sourceRow), dx, dy);
+                for (Entry entry : entries)
+                {
+                    Rectangle placed = translated(entry.nativeBounds, dx, dy);
+                    if (moved)
+                    {
+                        expander.allowCanvasPosition(entry.stone);
+                        if (entry.icon != null) expander.allowCanvasPosition(entry.icon);
+                        move(entry.stone, placed.getLocation());
+                        if (entry.icon != null) move(entry.icon, new Point(placed.x + entry.iconOffset.x, placed.y + entry.iconOffset.y));
+                    }
+                    if (covered(placed)) { states.hide(entry.stone, true); states.hide(entry.icon, true); }
+                    else
+                    {
+                        if (split) backgrounds.placeFromRow(rowBackground(sourceRow), placed.getLocation(), entry.nativeBounds, moved);
+                        if (entry.interactive) nextStones.put(entry.index, placed);
+                    }
+                }
+                nextGroups.put(id, translated(nativeRow, dx, dy));
+                continue;
+            }
             entries.sort(Comparator.comparingInt(entry -> vertical ? order(entry.index)
                 : WidgetGeometry.location(entry.stone).x));
             boolean horizontal = !vertical || horizontal(id);
@@ -252,6 +289,8 @@ public class MenuStoneController
                 boolean covered = windowBounds.stream().anyMatch(bounds -> bounds.intersects(placed));
                 if (modern && !covered)
                     backgrounds.place(entry.index, destination, entry.width, entry.height, movable);
+                else if (!covered)
+                    backgrounds.placeFromRow(rowBackground(entry.index / 7), destination, entry.nativeBounds, movable);
                 move(entry.stone, destination);
                 if (entry.icon != null) move(entry.icon, new Point(destination.x + entry.iconOffset.x, destination.y + entry.iconOffset.y));
                 if (covered) { states.hide(entry.stone, true); states.hide(entry.icon, true); }
@@ -272,6 +311,116 @@ public class MenuStoneController
         groupBounds = Map.copyOf(nextGroups); stoneBounds = Map.copyOf(nextStones);
         gapBounds = List.copyOf(nextGaps);
         stack = nextGroups.getOrDefault(0, new Rectangle());
+    }
+
+    private int rowBackground(int row)
+    {
+        if (orbs.isFixedMode()) return row == 0 ? InterfaceID.Toplevel.SIDE_TOP_CONTAINER_GRAPHIC0
+            : InterfaceID.Toplevel.SIDE_BOTTOM_CONTAINER_GRAPHIC0;
+        if (orbs.isClassicResizable()) return row == 0 ? InterfaceID.ToplevelOsrsStretch.SIDE_MENU_GRAPHIC5
+            : InterfaceID.ToplevelOsrsStretch.SIDE_MENU_GRAPHIC3;
+        return row == 0 ? InterfaceID.ToplevelPreEoc.SIDE_MOVABLE_BACKGROUND
+            : InterfaceID.ToplevelPreEoc.SIDE_STATIC_BACKGROUND;
+    }
+
+    /** Complete horizontal rows retain their native artwork and click-target offsets. */
+    private int intactNativeRow(int id, List<Entry> entries)
+    {
+        if (entries.size() != 7) return -1;
+        int row = entries.get(0).index / 7;
+        if (!untouchedNativeRow(row)) return -1;
+        if (config.menuLayout() != Layout.VANILLA_HORIZONTAL
+            && (config.menuLayout() != Layout.FREE_POSITION || !horizontal(id))) return -1;
+        if (config.menuLayout() == Layout.VANILLA_HORIZONTAL) return row;
+        List<Entry> ordered = new ArrayList<>(entries);
+        ordered.sort(Comparator.comparingInt(entry -> order(entry.index)));
+        for (int i = 0; i < 7; i++) if (ordered.get(i).index != row * 7 + i) return -1;
+        return row;
+    }
+
+    private boolean untouchedNativeRow(int row)
+    {
+        if (config.menuSpacing() != 0) return false;
+        for (int i = row * 7; i < row * 7 + 7; i++) if (hidden(i)) return false;
+        return true;
+    }
+
+    private boolean covered(Rectangle bounds)
+    {
+        return windowBounds.stream().anyMatch(window -> window.intersects(bounds));
+    }
+
+    private static Rectangle translated(Rectangle bounds, int dx, int dy)
+    {
+        Rectangle result = new Rectangle(bounds); result.translate(dx, dy); return result;
+    }
+
+    private void initializeFreeRows(int[][] registry)
+    {
+        if (config.menuLayout() != Layout.FREE_POSITION) return;
+        String mode = mode();
+        if (Boolean.TRUE.equals(configs.getConfiguration("interfacelayout", "menuSeparateRows_" + mode, Boolean.class))) return;
+        // Split legacy implicit defaults too, even when their bar was moved.
+        // Explicit memberships/orders are deliberate edits and must survive.
+        java.util.Set<Integer> used = new java.util.HashSet<>(); used.add(0);
+        boolean implicitBottom = false;
+        for (int i = 0; i < 14; i++)
+        {
+            Integer saved = configs.getConfiguration("interfacelayout", "menuGroup_" + mode + "_" + i, Integer.class);
+            if (saved != null && saved >= 0 && saved <= 14) used.add(saved);
+            if (i >= 7 && saved == null
+                && configs.getConfiguration("interfacelayout", "menuOrder_" + mode + "_" + i, Integer.class) == null) implicitBottom = true;
+        }
+        if (!implicitBottom) return;
+        int bottomGroup = 1;
+        while (used.contains(bottomGroup) && bottomGroup < 14) bottomGroup++;
+        if (used.contains(bottomGroup)) return;
+        Rectangle[] rows = new Rectangle[2];
+        int[] widths = new int[2], heights = new int[2];
+        for (int i = 0; i < registry.length; i++)
+        {
+            // Modern's Logout-X lives beside the minimap, not in the bottom row.
+            if (!orbs.isFixedMode() && !orbs.isClassicResizable() && i == 10) continue;
+            Widget stone = client.getWidget(registry[i][0]);
+            if (stone == null) continue;
+            Rectangle bounds = WidgetGeometry.bounds(stone);
+            if (rows[i / 7] == null) rows[i / 7] = bounds; else rows[i / 7].add(bounds);
+            widths[i / 7] = Math.max(widths[i / 7], bounds.width);
+            heights[i / 7] += bounds.height + config.menuSpacing();
+        }
+        if (rows[0] == null || rows[1] == null) return;
+        Point previousOrigin = configs.getConfiguration("interfacelayout", "menuPosition_" + mode, Point.class);
+        if (previousOrigin != null)
+        {
+            int dx = previousOrigin.x - rows[0].x, dy = previousOrigin.y - rows[0].y;
+            rows[0].translate(dx, dy); rows[1].translate(dx, dy);
+        }
+        if (config.menuDirection() == Direction.VERTICAL)
+        {
+            Point first = LayoutGeometry.clamp(rows[0].getLocation(), widths[0], heights[0] - config.menuSpacing(),
+                client.getCanvasWidth(), client.getCanvasHeight());
+            int secondX = first.x >= widths[1] + 8 ? first.x - widths[1] - 8 : first.x + widths[0] + 8;
+            Point second = LayoutGeometry.clamp(new Point(secondX, first.y), widths[1], heights[1] - config.menuSpacing(),
+                client.getCanvasWidth(), client.getCanvasHeight());
+            rows[0].setLocation(first); rows[1].setLocation(second);
+        }
+        for (int i = 0; i < 14; i++)
+            if (configs.getConfiguration("interfacelayout", "menuGroup_" + mode + "_" + i, Integer.class) == null
+                && configs.getConfiguration("interfacelayout", "menuOrder_" + mode + "_" + i, Integer.class) == null)
+                configs.setConfiguration("interfacelayout", "menuGroup_" + mode + "_" + i, i < 7 ? 0 : bottomGroup);
+        configs.setConfiguration("interfacelayout", "menuSeparateRows_" + mode, true);
+        configs.setConfiguration("interfacelayout", "menuBottomGroup_" + mode, bottomGroup);
+        // A reused numeric slot must not inherit an old detached bar's anchor preferences.
+        configs.setConfiguration("interfacelayout", "menuGeneration_" + mode + "_" + bottomGroup,
+            groupGeneration(mode, bottomGroup) + 1);
+        for (int row = 0; row < 2; row++)
+        {
+            int group = row == 0 ? 0 : bottomGroup;
+            if (configs.getConfiguration("interfacelayout", "menuHorizontal_" + mode + "_" + group, Boolean.class) == null)
+                configs.setConfiguration("interfacelayout", "menuHorizontal_" + mode + "_" + group,
+                    config.menuDirection() == Direction.HORIZONTAL);
+            if (row != 0 || previousOrigin == null) saveGroup(group, rows[row].getLocation());
+        }
     }
 
     private List<Rectangle> modalBounds()
@@ -395,7 +544,13 @@ public class MenuStoneController
     public void reattach(int index)
     {
         dragStone = -1;
-        configs.unsetConfiguration("interfacelayout", "menuGroup_" + mode() + "_" + index);
+        if (config.menuLayout() == Layout.FREE_POSITION
+            && Boolean.TRUE.equals(configs.getConfiguration("interfacelayout", "menuSeparateRows_" + mode(), Boolean.class)))
+        {
+            Integer bottom = configs.getConfiguration("interfacelayout", "menuBottomGroup_" + mode(), Integer.class);
+            configs.setConfiguration("interfacelayout", "menuGroup_" + mode() + "_" + index, index < 7 ? 0 : bottom == null ? 1 : bottom);
+        }
+        else configs.unsetConfiguration("interfacelayout", "menuGroup_" + mode() + "_" + index);
         configs.unsetConfiguration("interfacelayout", "menuOrder_" + mode() + "_" + index);
     }
     public void dropStone(int index, Point cursor)
@@ -443,6 +598,8 @@ public class MenuStoneController
     private void resetMode(String mode)
     {
         dragStone = -1;
+        configs.unsetConfiguration("interfacelayout", "menuSeparateRows_" + mode);
+        configs.unsetConfiguration("interfacelayout", "menuBottomGroup_" + mode);
         configs.unsetConfiguration("interfacelayout", "menuPosition_" + mode);
         for (int row = 0; row < 2; row++) configs.unsetConfiguration("interfacelayout", "menuNativePosition_" + mode + "_" + row);
         for (int i = 0; i < 14; i++)
@@ -465,6 +622,7 @@ public class MenuStoneController
         final int index, width, height;
         final Widget stone, icon;
         final Point iconOffset;
+        final Rectangle nativeBounds;
         final boolean interactive;
         Entry(int index, Widget stone, Widget icon)
         {
@@ -472,6 +630,7 @@ public class MenuStoneController
             interactive = !(icon != null ? icon.isHidden() : stone.isHidden());
             width = stone.getWidth(); height = stone.getHeight();
             Point position = WidgetGeometry.location(stone), graphic = icon == null ? position : WidgetGeometry.location(icon);
+            nativeBounds = new Rectangle(position.x, position.y, width, height);
             iconOffset = new Point(graphic.x - position.x, graphic.y - position.y);
         }
     }

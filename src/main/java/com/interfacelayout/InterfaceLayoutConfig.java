@@ -607,7 +607,7 @@ public interface InterfaceLayoutConfig extends Config
     @Range(min = 1, max = 32)
     @ConfigItem(keyName = "editGrid", name = "Stone grouping grid", description = "Snap Shift-dragged stones to this pixel grid; 1 disables snapping. RuneLite controls Alt-drag positioning.", section = editor, position = 1)
     default int editGrid() { return 1; }
-    @ConfigItem(keyName = "resetLayoutPositions", name = "Reset positions and groups", description = "Check once to clear saved positions and menu groups in every display mode. Visibility choices are kept.", section = editor, position = 2)
+    @ConfigItem(keyName = "resetLayoutPositions", name = "Reset positions and groups", description = "Ask for confirmation before clearing saved positions and menu groups in every display mode. Cancel keeps the layout. Visibility choices are kept.", section = editor, position = 2)
     default boolean resetLayoutPositions() { return false; }
     @ConfigSection(name = "Menu tab visibility", description = "Hide a tab, its icon and background; remaining tabs close the gap", closedByDefault = true, position = 5)
     String individualStones = "individualStones";
