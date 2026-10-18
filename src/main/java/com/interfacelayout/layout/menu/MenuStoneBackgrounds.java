@@ -51,6 +51,12 @@ public class MenuStoneBackgrounds
     /** Classic/Fixed use a complete row sprite, not Modern's repeating stone tile. */
     public void placeFromRow(int component, Point destination, Rectangle source, boolean movable)
     {
+        placeFromRow(component, new Rectangle(destination.x, destination.y, source.width, source.height), source, movable);
+    }
+
+    public void placeFromRow(int component, Rectangle destination, Rectangle source, boolean movable)
+    {
+        if (source.width <= 0 || source.height <= 0) return;
         Widget background = prepareRow(component, movable);
         if (background == null || background.isHidden()) return;
         Rectangle row = nativeBounds.get(background);
@@ -58,7 +64,7 @@ public class MenuStoneBackgrounds
         owned.get(background).add(clip);
         Point parent = WidgetGeometry.location(background);
         clip.setOriginalX(destination.x - parent.x); clip.setOriginalY(destination.y - parent.y);
-        clip.setOriginalWidth(source.width); clip.setOriginalHeight(source.height);
+        clip.setOriginalWidth(destination.width); clip.setOriginalHeight(destination.height);
         clip.setNoClickThrough(false);
         clip.revalidate();
         Widget art = clip.createChild(-1, WidgetType.GRAPHIC);
@@ -70,8 +76,11 @@ public class MenuStoneBackgrounds
         art.setOpacity(background.getOpacity());
         art.setBorderType(background.getBorderType());
         art.setNoClickThrough(false);
-        art.setOriginalX(row.x - source.x); art.setOriginalY(row.y - source.y);
-        art.setOriginalWidth(row.width); art.setOriginalHeight(row.height);
+        double sx = destination.width / (double) source.width, sy = destination.height / (double) source.height;
+        art.setOriginalX((int) Math.round((row.x - source.x) * sx));
+        art.setOriginalY((int) Math.round((row.y - source.y) * sy));
+        art.setOriginalWidth((int) Math.round(row.width * sx)); art.setOriginalHeight((int) Math.round(row.height * sy));
+        if (destination.width != source.width || destination.height != source.height) art.setSpriteTiling(false);
         art.revalidate();
     }
 
@@ -97,6 +106,20 @@ public class MenuStoneBackgrounds
         tile.setOriginalX(destination.x - parent.x); tile.setOriginalY(destination.y - parent.y);
         tile.revalidate();
     }
+    public void placeScaled(int index, Point destination, int width, int height, boolean movable)
+    {
+        Widget background = prepareRow(index < 7, movable);
+        if (background == null || background.isHidden()) return;
+        Widget tile = background.createChild(-1, WidgetType.GRAPHIC);
+        owned.get(background).add(tile);
+        tile.setSpriteId(background.getSpriteId()); tile.setSpriteTiling(false);
+        tile.setOpacity(background.getOpacity()); tile.setBorderType(background.getBorderType());
+        tile.setNoClickThrough(false); tile.setOriginalWidth(width); tile.setOriginalHeight(height);
+        Point parent = WidgetGeometry.location(background);
+        tile.setOriginalX(destination.x - parent.x); tile.setOriginalY(destination.y - parent.y);
+        tile.revalidate();
+    }
+
     /** Remove the shared row art even when every stone in that row is hidden. */
     public Widget prepareRow(boolean top)
     {

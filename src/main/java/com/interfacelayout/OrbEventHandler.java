@@ -79,6 +79,9 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 @javax.inject.Singleton
 public class OrbEventHandler implements KeyListener
 {    @Inject private com.interfacelayout.layout.GameframeCoordinator gameframe;
+    @Inject private com.interfacelayout.layout.sizing.OrbTextOverlay orbText;
+    @Inject private com.interfacelayout.layout.sizing.OrbRingOverlay orbRings;
+    @Inject private com.interfacelayout.layout.sizing.OrbRingTimers orbTimers;
     @Inject private com.interfacelayout.layout.edit.InterfaceEditor interfaceEditor;
     @Inject private net.runelite.client.eventbus.EventBus eventBus;
     @Inject private com.interfacelayout.util.LegacyConfigImporter legacyConfigs;
@@ -152,6 +155,9 @@ public class OrbEventHandler implements KeyListener
         manager.migrateConfigs();
 		overlayManager.add(minimapOverlay);
         overlayManager.add(interfaceEditor);
+        overlayManager.add(orbText);
+        overlayManager.add(orbRings);
+        eventBus.register(orbTimers);
         eventBus.register(gameframe);
         stoneClickPriority.clear();
         eventBus.register(stoneClickPriority.nativeListener());
@@ -190,6 +196,7 @@ public class OrbEventHandler implements KeyListener
 				manager.hideMinimapOnTabClose(config.hideMinimapWithSidePanel());
 			}
 		gameframe.start();
+            orbTimers.reset();
             if (config.editInterface()) editManager.toggleEditMode(true);
         });
 	}
@@ -200,6 +207,9 @@ public class OrbEventHandler implements KeyListener
         manager.active = false;
 		overlayManager.remove(minimapOverlay);
         overlayManager.remove(interfaceEditor);
+        overlayManager.remove(orbText);
+        overlayManager.remove(orbRings);
+        eventBus.unregister(orbTimers);
         eventBus.unregister(gameframe);
         eventBus.unregister(stoneClickPriority);
         eventBus.unregister(stoneClickPriority.nativeListener());
@@ -207,7 +217,7 @@ public class OrbEventHandler implements KeyListener
         mouseManager.unregisterMouseListener(interfaceEditor);
 		keyManager.unregisterKeyListener(this);
 		mouseManager.unregisterMouseListener(dragListener);
-		clientThread.invoke(() -> { gameframe.stop(); manager.reset(); });
+		clientThread.invoke(() -> { orbTimers.reset(); gameframe.stop(); manager.reset(); });
 	}
 
 	@Subscribe
@@ -443,6 +453,8 @@ public class OrbEventHandler implements KeyListener
 	{
 		String group = event.getGroup();
 		String key = event.getKey();
+        if (GROUP_NAME.equals(group) && "orbTimerWarning".equals(key)) return;
+        if (GROUP_NAME.equals(group) && "orbTimerCompatibility".equals(key)) later(orbTimers::reset);
 
 		if (group.equals(ConfigGroup.Core.RUNELITE))
 		{
@@ -640,7 +652,7 @@ if (!group.equals(GROUP_NAME))
         manager.migrateConfigs();
 
 		manager.isUpdatingProfile = true;
-		clientThread.invoke(() -> manager.rebuild(false));
+		clientThread.invoke(() -> { orbTimers.reset(); manager.rebuild(false); });
 	}
 
 	@Subscribe

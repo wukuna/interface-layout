@@ -82,6 +82,8 @@ public class MenuStoneController
     }
     @Inject private Client client;
     @Inject private InterfaceLayoutConfig config;
+    @Inject private com.interfacelayout.layout.sizing.SizingSettings sizing;
+    @Inject private com.interfacelayout.layout.sizing.WidgetSizing resize;
     @Inject private OrbController orbs;
     @Inject private ConfigManager configs;
     @Inject private WidgetStateStore states;
@@ -105,6 +107,12 @@ public class MenuStoneController
     }
     public Map<Integer, Rectangle> groups() { return copyBounds(groupBounds); }
     public Map<Integer, Rectangle> stones() { return copyBounds(stoneBounds); }
+    public List<Rectangle> windows()
+    {
+        List<Rectangle> result = new ArrayList<>();
+        windowBounds.forEach(bounds -> result.add(new Rectangle(bounds)));
+        return result;
+    }
     /** Identify an existing native action, never infer an action from a saved rectangle alone. */
     public boolean isHoveredStoneAction(MenuEntry entry)
     {
@@ -147,8 +155,9 @@ public class MenuStoneController
         groupBounds = Map.of(); stoneBounds = Map.of();
         gapBounds = List.of();
         windowBounds = List.of();
-        if (!orbs.isLoggedIn() || temporarilyShown) return;
+        if (!orbs.isLoggedIn()) return;
         windowBounds = modalBounds();
+        if (temporarilyShown) return;
         hideDecoration(InterfaceID.ToplevelOsrsStretch.SIDE_MENU_GRAPHIC1, config.hideLeftBar());
         hideDecoration(InterfaceID.ToplevelOsrsStretch.SIDE_MENU_GRAPHIC2, config.hideRightBar());
         hideDecoration(InterfaceID.ToplevelOsrsStretch.SIDE_MENU_GRAPHIC5, config.hideTopMenu());
@@ -186,14 +195,26 @@ public class MenuStoneController
                     (a, b) -> new Point(Math.min(a.x, b.x), Math.min(a.y, b.y)));
             if (hidden(i)) { states.hide(stone, true); states.hide(icon, true); continue; }
             // Modern Logout-X belongs to the minimap, not either native tab row.
-            if (!vertical && modern && i == 10) continue;
+            if (!vertical && modern && i == 10)
+            {
+                int percent = sizing.stone(i);
+                if (percent != 100 && !(icon != null ? icon.isHidden() : stone.isHidden()))
+                {
+                    Entry logout = new Entry(i, stone, icon, percent);
+                    resizeStone(logout);
+                    move(stone, logout.nativeBounds.getLocation());
+                    if (icon != null) move(icon, new Point(logout.nativeBounds.x + logout.iconOffset.x,
+                        logout.nativeBounds.y + logout.iconOffset.y));
+                }
+                continue;
+            }
             // Modern's stone graphic is a selection highlight: its own hidden flag
             // must not remove an otherwise visible tab from the layout.
             boolean interactive = !(icon != null ? icon.isHidden() : stone.isHidden());
             boolean decoration = modern ? (i == 10 ? !stone.isHidden() : backgrounds.isNativeRowVisible(i < 7))
                 : backgrounds.isNativeRowVisible(rowBackground(i / 7)) || !stone.isHidden();
             if ((!vertical && !compactRow[row]) || (!interactive && !decoration)) continue;
-            groups.computeIfAbsent(vertical ? group(i) : row, ignored -> new ArrayList<>()).add(new Entry(i, stone, icon));
+            groups.computeIfAbsent(vertical ? group(i) : row, ignored -> new ArrayList<>()).add(new Entry(i, stone, icon, sizing.stone(i)));
         }
         Map<Integer, Rectangle> nextGroups = new LinkedHashMap<>(), nextStones = new LinkedHashMap<>();
         List<Rectangle> nextGaps = new ArrayList<>();
@@ -288,9 +309,16 @@ public class MenuStoneController
                 Rectangle placed = new Rectangle(destination.x, destination.y, entry.width, entry.height);
                 boolean covered = windowBounds.stream().anyMatch(bounds -> bounds.intersects(placed));
                 if (modern && !covered)
-                    backgrounds.place(entry.index, destination, entry.width, entry.height, movable);
+                {
+                    if (entry.percent == 100) backgrounds.place(entry.index, destination, entry.width, entry.height, movable);
+                    else backgrounds.placeScaled(entry.index, destination, entry.width, entry.height, movable);
+                }
                 else if (!covered)
-                    backgrounds.placeFromRow(rowBackground(entry.index / 7), destination, entry.nativeBounds, movable);
+                {
+                    if (entry.percent == 100) backgrounds.placeFromRow(rowBackground(entry.index / 7), destination, entry.nativeBounds, movable);
+                    else backgrounds.placeFromRow(rowBackground(entry.index / 7), placed, entry.nativeBounds, movable);
+                }
+                resizeStone(entry);
                 move(entry.stone, destination);
                 if (entry.icon != null) move(entry.icon, new Point(destination.x + entry.iconOffset.x, destination.y + entry.iconOffset.y));
                 if (covered) { states.hide(entry.stone, true); states.hide(entry.icon, true); }
@@ -313,6 +341,13 @@ public class MenuStoneController
         stack = nextGroups.getOrDefault(0, new Rectangle());
     }
 
+    private void resizeStone(Entry entry)
+    {
+        if (entry.percent == 100) return;
+        resize.size(entry.stone, entry.width, entry.height);
+        if (entry.icon != null) resize.size(entry.icon, entry.iconWidth, entry.iconHeight);
+    }
+
     private int rowBackground(int row)
     {
         if (orbs.isFixedMode()) return row == 0 ? InterfaceID.Toplevel.SIDE_TOP_CONTAINER_GRAPHIC0
@@ -328,7 +363,7 @@ public class MenuStoneController
     {
         if (entries.size() != 7) return -1;
         int row = entries.get(0).index / 7;
-        if (!untouchedNativeRow(row)) return -1;
+        if (!untouchedNativeRow(row) || entries.stream().anyMatch(entry -> entry.percent != 100)) return -1;
         if (config.menuLayout() != Layout.VANILLA_HORIZONTAL
             && (config.menuLayout() != Layout.FREE_POSITION || !horizontal(id))) return -1;
         if (config.menuLayout() == Layout.VANILLA_HORIZONTAL) return row;
@@ -439,7 +474,7 @@ public class MenuStoneController
     }
     public boolean windowBoundsChanged()
     {
-        return orbs.isLoggedIn() && !temporarilyShown && !windowBounds.equals(modalBounds());
+        return orbs.isLoggedIn() && !windowBounds.equals(modalBounds());
     }
 
     private boolean hasSavedOrigin(int group)
@@ -619,19 +654,25 @@ public class MenuStoneController
     }
     private static final class Entry
     {
-        final int index, width, height;
+        final int index, width, height, percent, iconWidth, iconHeight;
         final Widget stone, icon;
         final Point iconOffset;
         final Rectangle nativeBounds;
         final boolean interactive;
-        Entry(int index, Widget stone, Widget icon)
+        Entry(int index, Widget stone, Widget icon, int percent)
         {
-            this.index = index; this.stone = stone; this.icon = icon;
+            if (stone.getType() == net.runelite.api.widgets.WidgetType.MODEL
+                || icon != null && icon.getType() == net.runelite.api.widgets.WidgetType.MODEL) percent = 100;
+            this.index = index; this.stone = stone; this.icon = icon; this.percent = percent;
             interactive = !(icon != null ? icon.isHidden() : stone.isHidden());
-            width = stone.getWidth(); height = stone.getHeight();
+            width = com.interfacelayout.layout.sizing.SizingSettings.pixels(stone.getWidth(), percent);
+            height = com.interfacelayout.layout.sizing.SizingSettings.pixels(stone.getHeight(), percent);
+            iconWidth = icon == null ? 0 : com.interfacelayout.layout.sizing.SizingSettings.pixels(icon.getWidth(), percent);
+            iconHeight = icon == null ? 0 : com.interfacelayout.layout.sizing.SizingSettings.pixels(icon.getHeight(), percent);
             Point position = WidgetGeometry.location(stone), graphic = icon == null ? position : WidgetGeometry.location(icon);
-            nativeBounds = new Rectangle(position.x, position.y, width, height);
-            iconOffset = new Point(graphic.x - position.x, graphic.y - position.y);
+            nativeBounds = new Rectangle(position.x, position.y, stone.getWidth(), stone.getHeight());
+            iconOffset = new Point(com.interfacelayout.layout.sizing.SizingSettings.offset(graphic.x - position.x, percent),
+                com.interfacelayout.layout.sizing.SizingSettings.offset(graphic.y - position.y, percent));
         }
     }
 }

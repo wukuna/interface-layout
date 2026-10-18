@@ -14,6 +14,34 @@ Most features are independent, so you can use only the parts you want. Menu icon
 - **Saved layouts** — keep separate menu arrangements for Fixed, Resizable Classic and Resizable Modern.
 - **Editing controls** — use drag handles, optional grid snapping and resets to adjust your layout.
 
+## Sizing (Beta)
+
+Open **Sizing (Beta)** to shrink the outer menu stones and HUD orbs/buttons to **50-100%** of their normal size. **Resize menu tabs** and **Resize orb group** set the size for each family. Individual controls are relative to that group: for example, an 80% group with a 75% individual control gives 60% of normal. The final size cannot fall below 50% or exceed 100%. All defaults are 100%.
+
+Only the outer controls change. The inventory, equipment, combat-options, prayer and spellbook panel contents, the special attack bar, the minimap and 3D components keep their native size. The Prayer orb and Prayer/Spellbook **tab buttons** are separate from the icons inside those panels. Orb numbers keep their normal size unless optional text sizing is enabled.
+
+The controls retain their native actions and shrink their visual and clickable bounds together. Menu rows repack around the new sizes; stone spacing remains measured in game pixels. Orb positions stay where they were saved, so shrink and reposition them as needed. Existing game-hidden controls stay hidden, and window/bank/PIN protection still applies to stones. Stretched Mode magnifies this result afterward.
+
+Set the sizing controls back to 100% to restore normal sizes. Disabling the plugin restores owned native geometry; saved size preferences remain available when re-enabling it. Sizing is a Beta feature; restore a control to 100% if it does not display or behave as expected.
+
+### Orb text sizing (Beta)
+
+In **Sizing (Beta)**, enable **Scale orb text/numbers (Beta)** to shrink HP, Prayer, Run and Special attack numbers with their orbs. This is off by default. It uses RuneLite fonts for smaller numeric labels and preserves the current values and colors. At 100%, text stays native. Unknown fonts or interactive labels stay native too.
+
+### Resizing Orb Timers (Beta)
+
+The warning is inside **Sizing (Beta)**, above the orb resizing controls. Its checkbox is informational only and does not change any behavior.
+
+**WARNING: If you use orb timers, turn OFF their original circular overlays before using resized orbs. Otherwise those rings will stay at their original size. Keep the timer plugins enabled.**
+
+- **Regeneration Meter:** turn off **Show hitpoints regen** and/or **Show spec. attack regen** for the rings you replace.
+- **Special Attack Timers:** turn off **Show Circular Overlay**.
+- In Interface Layout, enable **Resizing Orb Timers (Beta)** and the HP and/or special attack ring you want.
+
+These are Interface Layout's own replacement rings. They follow the orb's position and size, including at 100%, and hide with its native visibility and overlapping supported windows. No other plugin's settings or overlays are changed. Notifications, infoboxes and other timer features can stay enabled.
+
+The HP ring uses the enabled Regeneration Meter plugin's public timing. For special attack, enabled Special Attack Timers takes priority; otherwise the ring uses Regeneration Meter. The Special Attack Timers replacement tracks regeneration independently, including Lightbearer and supported wave pauses. If enabled mid-cycle, it waits for the next observed regeneration or known cycle start before drawing, rather than showing a guessed time. It does not replace Surge potion cooldowns or other timer features. Disabling both timer plugins removes the corresponding replacement rings. This compatibility is Beta; report any timing, visibility or alignment problems along with your timer settings.
+
 ## Moving menu stones and orbs
 
 Enable **Edit interface** to show editing outlines and allow **Shift-drag** stone grouping. RuneLite **Alt-drag** moves whole bars, detached stones, free orbs and the compass with Edit interface on or off. Choose **Free Position** under **Map and orb visibility → Orb arrangement** to move orbs individually, and choose a vertical or free-position menu arrangement to detach and regroup stones.
@@ -156,6 +184,8 @@ Interface Layout combines and extends features from the projects below. If you o
 | --- | --- | --- |
 | [Compact Orbs](https://github.com/its-cue/compact-orbs) | cue | Compact orb arrangements and a separate minimap. |
 | [Menu Stones Hider](https://github.com/Richardant/menustoneshider) | Richardant | Hiding native menu stones and decorations. |
+| [Special Attack Timers](https://github.com/AnuVen/special-attack-timers) | Anuraag Venkat | Full special attack timers, notifications, infoboxes and Surge potion cooldowns. Its regeneration clock informed the BETA replacement ring. |
+| [Regeneration Meter](https://github.com/runelite/runelite/tree/master/runelite-client/src/main/java/net/runelite/client/plugins/regenmeter) | RuneLite contributors | HP and special attack regeneration tracking; supplies public timing to the BETA replacement rings. |
 
 ## Support
 

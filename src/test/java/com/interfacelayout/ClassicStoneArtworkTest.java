@@ -26,6 +26,54 @@ import static org.mockito.Mockito.*;
 /** Issue #7: selection-highlight widgets do not contain the shared stone artwork. */
 public class ClassicStoneArtworkTest
 {
+    @Test public void smallerStonesUseMatchingArtworkAndHitBoundsInAllModes()
+    {
+        for (int mode = 0; mode < 3; mode++)
+            for (boolean stretched : new boolean[]{false, true})
+            {
+                Fixture f = new Fixture(mode == 0, mode == 2);
+                when(f.client.isStretchedEnabled()).thenReturn(stretched);
+                when(f.config.menuGroupSize()).thenReturn(80);
+                when(f.config.sizeStoneInventory()).thenReturn(75);
+                when(f.config.menuSpacing()).thenReturn(3);
+                f.menu.apply();
+                Rectangle inv = f.menu.stones().get(3);
+                assertEquals(20, inv.width); assertEquals(22, inv.height);
+                assertEquals(20, f.stones[3].getWidth()); assertEquals(22, f.stones[3].getHeight());
+                assertEquals(14, f.icons[3].getWidth()); assertEquals(16, f.icons[3].getHeight());
+                net.runelite.api.Point center = new net.runelite.api.Point(inv.x + inv.width / 2, inv.y + inv.height / 2);
+                net.runelite.api.MenuEntry action = mock(net.runelite.api.MenuEntry.class);
+                when(action.getType()).thenReturn(net.runelite.api.MenuAction.CC_OP);
+                int[][] registry = mode == 0 ? MenuStoneRegistry.FIXED : mode == 1 ? MenuStoneRegistry.CLASSIC : MenuStoneRegistry.MODERN;
+                when(action.getParam1()).thenReturn(registry[3][0]);
+                when(f.client.getMouseCanvasPosition()).thenReturn(center);
+                assertTrue(f.menu.isHoveredStoneAction(action));
+                when(f.client.getMouseCanvasPosition()).thenReturn(new net.runelite.api.Point(inv.x + inv.width, inv.y));
+                assertFalse(f.menu.isHoveredStoneAction(action));
+                f.restore(); assertEquals(33, f.stones[3].getWidth()); assertEquals(36, f.stones[3].getHeight());
+                when(f.config.menuGroupSize()).thenReturn(100); when(f.config.sizeStoneInventory()).thenReturn(100);
+                f.menu.apply(); assertEquals(33, f.menu.stones().get(3).width);
+            }
+    }
+
+    @Test public void smallerStonesKeepBankAndWindowProtectionAndModernLogoutSize()
+    {
+        Fixture f = new Fixture(false);
+        when(f.config.menuGroupSize()).thenReturn(50);
+        for (Widget icon : f.icons) icon.setHidden(true);
+        f.menu.apply(); assertTrue(f.menu.stones().isEmpty()); assertEquals(14, f.artCount());
+        f.restore();
+        for (Widget icon : f.icons) icon.setHidden(false);
+        Widget window = visible(400, 300, 17, 18);
+        when(f.client.getWidget(InterfaceID.BankpinKeypad.UNIVERSE)).thenReturn(window);
+        f.menu.apply(); assertFalse(f.menu.stones().containsKey(0));
+        f.restore(); window.setHidden(true); f.menu.apply(); assertTrue(f.menu.stones().containsKey(0));
+        Fixture modern = new Fixture(false, true); when(modern.config.sizeStoneLogout()).thenReturn(50);
+        modern.menu.apply(); assertEquals(17, modern.stones[10].getWidth());
+        assertEquals(18, modern.stones[10].getHeight());
+        modern.restore(); assertEquals(33, modern.stones[10].getWidth());
+    }
+
     @Test public void freshClassicFreePositionKeepsRowsSeparateAndCustomGroupsSurvive()
     {
         for (MenuStoneController.Direction direction : MenuStoneController.Direction.values())

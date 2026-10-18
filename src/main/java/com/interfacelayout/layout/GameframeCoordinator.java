@@ -29,6 +29,7 @@ import net.runelite.client.events.ProfileChanged;
 public class GameframeCoordinator
 {
     @Inject private WidgetStateStore states;
+    @Inject private com.interfacelayout.layout.sizing.HudSizingController sizing;
     @Inject private WidgetBoundsExpander expander;
     @Inject private MenuStoneController menu;
     @Inject private com.interfacelayout.layout.menu.MenuOverlayBridge menuOverlays;
@@ -46,8 +47,8 @@ public class GameframeCoordinator
     private volatile boolean refreshPending;
 
     public void start() { running = true; editor.setRefresh(this::refresh); refresh(); menuOverlays.start(this::refresh); freeOverlays.start(this::refresh); }
-    public void stop() { running = false; layoutDepth = 0; visibilityDepth = 0; editor.cancel(); freeOverlays.stop(); menuOverlays.stop(); restore(); menu.resetSession(); }
-    private void restore() { menu.restoreBackgrounds(); states.restore(); expander.clear(); }
+    public void stop() { running = false; layoutDepth = 0; visibilityDepth = 0; editor.cancel(); freeOverlays.stop(); menuOverlays.stop(); restore(); menu.resetSession(); sizing.resetSession(); }
+    private void restore() { sizing.clearText(); menu.restoreBackgrounds(); states.restore(); expander.clear(); }
     public void prepareNativeLayout() { restore(); }
     public boolean isHiddenByGame(net.runelite.api.widgets.Widget widget)
     {
@@ -56,7 +57,7 @@ public class GameframeCoordinator
     public void refresh()
     {
         if (!running || layoutDepth > 0) return;
-        restore(); menu.apply(); free.apply(); menuOverlays.sync(); freeOverlays.sync();
+        restore(); menu.apply(); sizing.apply(); free.apply(); sizing.occlude(menu.windows()); menuOverlays.sync(); freeOverlays.sync();
     }
     public void toggleShown() { if (running) { menu.toggleShown(); refresh(); } }
     @Subscribe(priority = -2) public void onBeforeRender(BeforeRender event)
@@ -84,7 +85,9 @@ public class GameframeCoordinator
             || id == Script.PROC_TOPLEVEL_SUBCHANGE || id == Script.TOPLEVEL_SIDE_CUSTOMIZE
             || id == Script.TOPLEVEL_RESIZE_CUSTOMIZE || id == Script.ORBS_UPDATE_STORE
             || id == Script.ORBS_UPDATE_ACTIVITY || id == Script.WORLD_MAP_UPDATE
-            || id == Script.WIKI_ICON_INIT || id == Script.WIKI_ICON_UPDATE;
+            || id == Script.WIKI_ICON_INIT || id == Script.WIKI_ICON_UPDATE
+            || sizing.active() && (id == Script.ORBS_UPDATE_HEALTH || id == Script.ORBS_UPDATE_SPECENERGY
+                || id == net.runelite.api.ScriptID.ORBS_UPDATE_RUNENERGY || sizing.nativeScript(id));
     }
     @Subscribe(priority = 2) public void onScriptPreFired(ScriptPreFired event)
     {
@@ -137,6 +140,7 @@ public class GameframeCoordinator
     @Subscribe(priority = -2) public void onConfigChanged(ConfigChanged event)
     {
         if (!event.getGroup().equals("interfacelayout")) return;
+        if (event.getKey().equals("orbTimerWarning")) return;
         if (event.getKey().equals("editInterface") || event.getKey().equals("menuLayout")
             || event.getKey().equals(com.interfacelayout.layout.orbs.OrbConstants.ConfigKeys.ORB_LAYOUT))
             editor.cancel();

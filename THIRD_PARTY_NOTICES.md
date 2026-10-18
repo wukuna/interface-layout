@@ -15,6 +15,12 @@ Interface Layout adapts these BSD-2-Clause plugins:
 - **RuneLite WidgetOverlay**, Tomas Slusny.
   - Copyright (c) 2018, Tomas Slusny <slusnucky@gmail.com>.
   - The detached minimap overlay retains adapted WidgetOverlay code.
+- **Special Attack Timers**, Anuraag Venkat, https://github.com/AnuVen/special-attack-timers
+  - Reference commit: `b663dd46399e1a27eba4b67861cfecf55b3c2712`.
+  - Copyright (c) 2026, Anuraag Venkat.
+  - The BETA special attack ring's independent regeneration clock and wave/potion
+    handling are adapted from this BSD-2-Clause implementation. Other timer
+    features and overlays are not included or modified.
 
 All authors are attributed in the single BSD-2-Clause LICENSE at the repository
 root. The same license is included in the plugin JAR as META-INF/LICENSE, alongside

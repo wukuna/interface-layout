@@ -44,6 +44,7 @@ public class VisibilityComplianceTest
         OrbController manager = mock(OrbController.class);
         doAnswer(i -> { journal.visibility(special, false); return null; }).when(manager).refreshVisibility();
         GameframeCoordinator coordinator = new GameframeCoordinator();
+        set(coordinator, "sizing", mock(com.interfacelayout.layout.sizing.HudSizingController.class));
         set(coordinator, "running", true); set(coordinator, "nativeStates", journal); set(coordinator, "manager", manager);
         ScriptPreFired pre = new ScriptPreFired(Script.ORBS_UPDATE_SPECENERGY);
         coordinator.onScriptPreFired(pre); assertFalse(hidden[0]);

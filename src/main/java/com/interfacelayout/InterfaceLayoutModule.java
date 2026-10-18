@@ -31,6 +31,12 @@ public class InterfaceLayoutModule implements Module
     {
         for (Class<?> component : new Class<?>[]{
             OrbEventHandler.class, GameframeCoordinator.class, InterfaceEditor.class,
+            com.interfacelayout.layout.sizing.SizingSettings.class,
+            com.interfacelayout.layout.sizing.WidgetSizing.class,
+            com.interfacelayout.layout.sizing.HudSizingController.class,
+            com.interfacelayout.layout.sizing.OrbTextOverlay.class,
+            com.interfacelayout.layout.sizing.OrbRingOverlay.class,
+            com.interfacelayout.layout.sizing.OrbRingTimers.class,
             MenuStoneController.class, com.interfacelayout.layout.menu.MenuStoneBackgrounds.class,
             com.interfacelayout.layout.menu.MenuStoneClickPriority.class,
             com.interfacelayout.layout.menu.MenuOverlayBridge.class, FreePositionController.class, OrbController.class,

@@ -30,6 +30,16 @@ public class WidgetStateStore
         capture(widget);
         if (widget != null) states.get(widget).captureRendering(widget);
     }
+    /** Own only tiling when sizing: never snapshot a selection sprite we did not change. */
+    public void spriteTiling(Widget widget, boolean tiled)
+    {
+        if (widget == null) return;
+        capture(widget);
+        State state = states.get(widget);
+        if (state.spriteTiling == null) state.spriteTiling = widget.getSpriteTiling();
+        widget.setSpriteTiling(tiled);
+    }
+
     public void captureOpacity(Widget widget)
     {
         capture(widget);
@@ -118,7 +128,7 @@ public class WidgetStateStore
     {
         private final int x, y, xMode, yMode, width, height, widthMode, heightMode;
         private Integer opacity, type, contentType, sprite;
-        private Boolean hidden;
+        private Boolean hidden, spriteTiling;
         private final boolean noClickThrough;
         State(Widget widget)
         {
@@ -132,6 +142,7 @@ public class WidgetStateStore
         {
             if (type != null) return;
             type = widget.getType(); contentType = widget.getContentType(); sprite = widget.getSpriteId();
+            if (spriteTiling == null) spriteTiling = widget.getSpriteTiling();
         }
         void restore(Widget widget)
         {
@@ -151,9 +162,11 @@ public class WidgetStateStore
         }
         void restoreRendering(Widget widget)
         {
-            if (type == null) return;
-            widget.setType(type); widget.setContentType(contentType); widget.setSpriteId(sprite);
-            type = null; contentType = null; sprite = null;
+            if (type != null) {
+                widget.setType(type); widget.setContentType(contentType); widget.setSpriteId(sprite);
+            }
+            if (spriteTiling != null) widget.setSpriteTiling(spriteTiling);
+            type = null; contentType = null; sprite = null; spriteTiling = null;
         }
     }
 }

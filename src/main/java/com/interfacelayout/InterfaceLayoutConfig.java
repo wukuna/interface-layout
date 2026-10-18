@@ -214,7 +214,7 @@ public interface InterfaceLayoutConfig extends Config
 		name = "Minimap toggle button",
 		description = "Optional eye button for hiding the minimap and toggling editing.",
 		closedByDefault = true,
-		position = 8
+		position = 10
 	)
 	String button = "button";
 
@@ -258,7 +258,7 @@ public interface InterfaceLayoutConfig extends Config
 		name = "Keyboard shortcut",
 		description = "Choose a shortcut and the action it controls.",
 		closedByDefault = true,
-		position = 9
+		position = 11
 	)
 	String hotkey = "hotkey";
 
@@ -639,4 +639,99 @@ public interface InterfaceLayoutConfig extends Config
     default boolean hideEmotesStone() { return false; }
     @ConfigItem(keyName = "hideStone13", name = "Music", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 13)
     default boolean hideMusicStone() { return false; }
+    @ConfigSection(name = "Sizing (Beta)", description = "Shrink outer HUD controls only. Only outer orbs and stones shrink. Panel contents and the special attack bar keep their normal size.", closedByDefault = true, position = 8)
+    String sizing = "sizing";
+    @ConfigItem(
+        keyName = "orbTimerWarning",
+        name = "<html><font color='#ff981f'><b>WARNING: Using orb timers?<br>Turn OFF the original rings:<br><br>Regeneration Meter:<br>Show hitpoints regen<br>Show spec. attack regen<br><br>Special Attack Timers:<br>Show Circular Overlay<br><br>Keep the plugins enabled.<br>Enable Resizing Orb Timers<br>(Beta).</b></font></html>",
+        description = "When resizing orbs with timer rings, turn off the original circular overlays in the timer plugins and enable Interface Layout's BETA replacements. Otherwise the original rings keep their normal size. Other timer features can stay enabled. This checkbox is an informational reminder only; checking it changes nothing.",
+        section = sizing, position = -1
+    )
+    default boolean orbTimerWarning() { return false; }
+    @ConfigSection(name = "Resizing Orb Timers (Beta)", description = "Replacement HP and special attack rings that follow orb size and position. See the warning inside Sizing (Beta).", closedByDefault = true, position = 9)
+    String orbRings = "orbRings";
+    @ConfigItem(keyName = "orbTimerCompatibility", name = "Resizing Orb Timers (Beta)", description = "Replacement rings that follow orb size and position. Requires the corresponding timer plugin to stay enabled, with its original circular overlay turned OFF. No settings in other plugins are changed.", section = orbRings, position = 0)
+    default boolean orbTimerCompatibility() { return false; }
+    @ConfigItem(keyName = "orbHpRing", name = "HP ring (BETA)", description = "Use Regeneration Meter's timing for a ring around the HP orb. Turn off Show hitpoints regen in Regeneration Meter.", section = orbRings, position = 1)
+    default boolean orbHpRing() { return true; }
+    @ConfigItem(keyName = "orbSpecRing", name = "Special attack ring (BETA)", description = "Use a resized special attack ring. Special Attack Timers takes priority over Regeneration Meter when both are enabled. After starting mid-cycle, the Special Attack Timers replacement waits for the next observed regeneration to synchronize.", section = orbRings, position = 2)
+    default boolean orbSpecRing() { return true; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "orbGroupSize", name = "Resize orb group (%)", description = "Size of eligible HUD orbs and buttons. 100 is normal size; smaller values shrink. Saved positions are kept. WARNING: Timer users must turn off their original circular overlays and use Resizing Orb Timers (Beta); see the warning at the top of this section.", section = sizing, position = 0)
+    default int orbGroupSize() { return 100; }
+
+    @ConfigItem(keyName = "scaleOrbText", name = "Scale orb text/numbers (Beta)", description = "Shrink HP, Prayer, Run and Special attack numbers with their orbs. Off keeps normal-size numbers. Uses RuneLite's small fonts; saved positions and values are unchanged.", section = sizing, position = 26)
+    default boolean scaleOrbText() { return false; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "menuGroupSize", name = "Resize menu tabs (%)", description = "Size of outer tab buttons. Does not resize inventory slots, equipment, combat options, prayers or spells.", section = sizing, position = 1)
+    default int menuGroupSize() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeOrbHp", name = "Resize HP orb (%)", description = "Relative to the orb group size: 100 follows the group. Final size is limited to 50-100% of normal.", section = sizing, position = 2)
+    default int sizeOrbHp() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeOrbPrayer", name = "Resize Prayer orb (%)", description = "Shrink only the HUD prayer orb, never the prayer book. 100 follows the orb group; final size is 50-100% of normal.", section = sizing, position = 3)
+    default int sizeOrbPrayer() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeOrbRun", name = "Resize Run orb (%)", description = "Relative to the orb group size: 100 follows the group. Final size is limited to 50-100% of normal.", section = sizing, position = 4)
+    default int sizeOrbRun() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeOrbSpec", name = "Resize Special attack orb (%)", description = "Relative to the orb group size: 100 follows the group. Final size is limited to 50-100% of normal.", section = sizing, position = 5)
+    default int sizeOrbSpec() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeOrbXp", name = "Resize XP button (%)", description = "Relative to the orb group size: 100 follows the group. Final size is limited to 50-100% of normal.", section = sizing, position = 6)
+    default int sizeOrbXp() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeOrbStore", name = "Resize Store orb (%)", description = "Relative to the orb group size: 100 follows the group. Final size is limited to 50-100% of normal.", section = sizing, position = 7)
+    default int sizeOrbStore() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeOrbActivity", name = "Resize Activity orb (%)", description = "Relative to the orb group size: 100 follows the group. Final size is limited to 50-100% of normal.", section = sizing, position = 8)
+    default int sizeOrbActivity() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeOrbMap", name = "Resize World map button (%)", description = "Relative to the orb group size: 100 follows the group. Final size is limited to 50-100% of normal.", section = sizing, position = 9)
+    default int sizeOrbMap() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeOrbWiki", name = "Resize Wiki button (%)", description = "Relative to the orb group size: 100 follows the group. Final size is limited to 50-100% of normal.", section = sizing, position = 10)
+    default int sizeOrbWiki() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeStoneCombat", name = "Resize combat stone (%)", description = "Relative to the menu group size: 100 follows the group. Final size is limited to 50-100% of normal. Only the outer button and its icon change.", section = sizing, position = 11)
+    default int sizeStoneCombat() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeStoneSkills", name = "Resize skills stone (%)", description = "Relative to the menu group size: 100 follows the group. Final size is limited to 50-100% of normal. Only the outer button and its icon change.", section = sizing, position = 12)
+    default int sizeStoneSkills() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeStoneQuests", name = "Resize quests stone (%)", description = "Relative to the menu group size: 100 follows the group. Final size is limited to 50-100% of normal. Only the outer button and its icon change.", section = sizing, position = 13)
+    default int sizeStoneQuests() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeStoneInventory", name = "Resize inventory stone (%)", description = "Relative to the menu group size: 100 follows the group. Final size is limited to 50-100% of normal. Only the outer button and its icon change.", section = sizing, position = 14)
+    default int sizeStoneInventory() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeStoneEquipment", name = "Resize equipment stone (%)", description = "Relative to the menu group size: 100 follows the group. Final size is limited to 50-100% of normal. Only the outer button and its icon change.", section = sizing, position = 15)
+    default int sizeStoneEquipment() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeStoneClan", name = "Resize clan stone (%)", description = "Relative to the menu group size: 100 follows the group. Final size is limited to 50-100% of normal. Only the outer button and its icon change.", section = sizing, position = 16)
+    default int sizeStoneClan() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeStoneAccount", name = "Resize account stone (%)", description = "Relative to the menu group size: 100 follows the group. Final size is limited to 50-100% of normal. Only the outer button and its icon change.", section = sizing, position = 17)
+    default int sizeStoneAccount() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeStoneFriends", name = "Resize friends stone (%)", description = "Relative to the menu group size: 100 follows the group. Final size is limited to 50-100% of normal. Only the outer button and its icon change.", section = sizing, position = 18)
+    default int sizeStoneFriends() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeStoneLogout", name = "Resize logout stone (%)", description = "Relative to the menu group size: 100 follows the group. Final size is limited to 50-100% of normal. Only the outer button and its icon change.", section = sizing, position = 19)
+    default int sizeStoneLogout() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeStoneSettings", name = "Resize settings stone (%)", description = "Relative to the menu group size: 100 follows the group. Final size is limited to 50-100% of normal. Only the outer button and its icon change.", section = sizing, position = 20)
+    default int sizeStoneSettings() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeStoneEmotes", name = "Resize emotes stone (%)", description = "Relative to the menu group size: 100 follows the group. Final size is limited to 50-100% of normal. Only the outer button and its icon change.", section = sizing, position = 21)
+    default int sizeStoneEmotes() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeStoneMusic", name = "Resize music stone (%)", description = "Relative to the menu group size: 100 follows the group. Final size is limited to 50-100% of normal. Only the outer button and its icon change.", section = sizing, position = 22)
+    default int sizeStoneMusic() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeStonePrayer", name = "Resize prayer stone (%)", description = "Shrink only the outer Prayer tab button. Prayers inside the panel keep their normal size. 100 follows the menu group.", section = sizing, position = 23)
+    default int sizeStonePrayer() { return 100; }
+    @Range(min = 50, max = 100)
+    @ConfigItem(keyName = "sizeStoneSpellbook", name = "Resize spellbook stone (%)", description = "Shrink only the outer Spellbook tab button. Spells inside the panel keep their normal size. 100 follows the menu group.", section = sizing, position = 24)
+    default int sizeStoneSpellbook() { return 100; }
 }

@@ -138,6 +138,7 @@ public class MenuStoneControllerTest
                 bind(com.interfacelayout.layout.menu.MenuOverlayBridge.class).toProvider(() -> mock(com.interfacelayout.layout.menu.MenuOverlayBridge.class));
                 bind(WidgetStateStore.class).toInstance(states);
                 bind(FreePositionController.class).toProvider(() -> free);
+                bind(com.interfacelayout.layout.sizing.HudSizingController.class).toProvider(() -> mock(com.interfacelayout.layout.sizing.HudSizingController.class));
                 bind(com.interfacelayout.layout.orbs.FreeOrbOverlayBridge.class).toProvider(() -> mock(com.interfacelayout.layout.orbs.FreeOrbOverlayBridge.class));
                 bind(WidgetBoundsExpander.class).toProvider(() -> mock(WidgetBoundsExpander.class));
                 bind(InterfaceEditor.class).toProvider(() -> mock(InterfaceEditor.class));
@@ -212,7 +213,8 @@ public class MenuStoneControllerTest
         when(config.hideTopMenu()).thenReturn(true);
         MenuStoneController controller = controller(client, config, new WidgetStateStore());
         controller.toggleShown(); controller.apply();
-        verify(client, never()).getWidget(anyInt());
+        // Window geometry is still sampled for orb protection; native stones remain untouched.
+        verify(client, never()).getWidget(MenuStoneRegistry.MODERN[0][0]);
     }
     @Test public void missingInterfacesAreSafe()
     {

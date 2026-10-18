@@ -160,6 +160,7 @@ public class LifecycleTest
                     bind(KeyManager.class).toInstance(mock(KeyManager.class));
                     bind(MouseManager.class).toInstance(mock(MouseManager.class));
                     bind(OverlayManager.class).toInstance(mock(OverlayManager.class));
+                bind(net.runelite.client.plugins.PluginManager.class).toProvider(() -> mock(net.runelite.client.plugins.PluginManager.class));
                     bind(EventBus.class).toInstance(new EventBus());
                     bind(OrbController.class).toProvider(() -> manager);
                     bind(GameframeCoordinator.class).toProvider(() -> frame);
