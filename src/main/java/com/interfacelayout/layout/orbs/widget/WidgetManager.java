@@ -689,6 +689,7 @@ public class WidgetManager
 			.setOriginalHeight(Original.MINIMAP_DIMENSION)
 			.setXPositionMode(WidgetPositionMode.ABSOLUTE_RIGHT)
 			.setYPositionMode(WidgetPositionMode.ABSOLUTE_TOP);
+		widget.setNoClickThrough(config.enableNoClickthrough());
 		widget.revalidate();
 		return widget;
 	}

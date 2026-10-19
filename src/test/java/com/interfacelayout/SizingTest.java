@@ -241,6 +241,7 @@ public class SizingTest
                 bind(net.runelite.api.Client.class).toProvider(() -> mock(net.runelite.api.Client.class));
                 bind(net.runelite.client.callback.ClientThread.class).toProvider(() -> mock(net.runelite.client.callback.ClientThread.class));
                 bind(WidgetStateStore.class).toInstance(f.states);
+                bind(com.interfacelayout.layout.orbs.MinimapClickProtection.class).toProvider(() -> mock(com.interfacelayout.layout.orbs.MinimapClickProtection.class));
                 bind(OrbController.class).toProvider(() -> f.manager);
                 bind(HudSizingController.class).toProvider(() -> f.sizing);
                 bind(WidgetBoundsExpander.class).toProvider(() -> mock(WidgetBoundsExpander.class));

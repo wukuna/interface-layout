@@ -44,3 +44,17 @@ rendering and hit-testing verification.
 - Check Fixed and Resizable Classic remain unaffected, including transitions back
   to Resizable Modern. Check a world hop, wiki banner initialization, minimap
   minimization and the core Minimap plugin's Hide minimap setting.
+
+## Minimap clickthrough protection (#9)
+
+- Enable **Prevent orb and minimap clickthrough**. In Fixed, Resizable Classic,
+  and Resizable Modern, click destinations on the visible minimap. The flag must
+  stay at the minimap destination, with no second walk/action in the scene below.
+- Repeat after moving orbs with Free Position, moving menu tabs, and using the
+  detached minimap in compact layouts. Check clicks near the map edge and normal
+  scene clicks outside it. Check compass, orbs, and right-click menus still work.
+- Toggle the protection off/on, hide/show/minimize the map, change display modes,
+  hop worlds, log out/in, and disable/re-enable the plugin. Hidden maps must not
+  block input; disabling must restore the original native clickthrough flag.
+
+These are live-game checks; automated widget tests do not verify destination packets.
