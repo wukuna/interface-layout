@@ -1,8 +1,8 @@
 # Interface Layout
 
-Interface Layout is an all-in-one RuneLite plugin for customizing the minimap, orbs, compass and menu stones. Choose a compact orb arrangement, position individual controls, turn menu rows into movable bars, create your own stone groups, and hide the elements you do not need.
+Arrange your RuneLite interface around the way you play. Move menu bars, split tabs into custom groups, position orbs and the compass, and hide controls you do not need. Choose compact orb layouts or a separate movable minimap in resizable modes, with optional protection against clicks passing through orbs and the minimap.
 
-Most features are independent, so you can use only the parts you want. Menu icons and their stone backgrounds move together, keeping their normal clicks and tooltips.
+Start in Menu bars to choose an arrangement. Use Alt-drag to move supported controls, or enable Edit interface and Shift-drag to regroup menu tabs. Menu layouts are saved separately for Fixed, Resizable Classic and Resizable Modern.
 
 ## Highlights
 
@@ -54,7 +54,7 @@ Joining an existing bar preserves that bar's direction. Joining two separate sto
 
 Stone grouping has a five-pixel movement threshold and shows a proposed-position outline while dragging. Membership and position are saved only when you release. Focus loss, native interface rebuilds, or display-mode changes cancel the pending edit without changing the saved group. Stretched Mode uses RuneLite's translated native canvas coordinates, so grouping does not depend on which plugin was enabled first. Existing layouts are preserved; there is no separate stretched layout or migration.
 
-## Menu tab visibility
+## Hide menu tabs
 
 Moved stones temporarily give way to overlapping Bank/PIN, Collection Log, skill-guide and Settings windows. Stones outside those windows stay available. Moving, resizing or closing a supported window restores uncovered stones in their saved positions; the plugin does not move or resize the windows themselves.
 
@@ -62,7 +62,7 @@ This also covers Combat Achievements overview, tasks, boss lists/details and rew
 
 Banking can hide tab icons as part of the game's normal behavior. Interface Layout preserves stone backgrounds that the game still displays without forcing hidden icons back on or making them clickable. Bank and PIN windows keep their native positions and sizing. Window protection covers the interfaces listed above; it does not promise coverage for every game interface.
 
-Open **Menu tab visibility** to hide individual tabs, including Combat options, Skills, Quests, Inventory, Equipment, Prayer, Spellbook, Clan, Account Management, Friends, Logout, Settings, Emotes and Music.
+Open **Hide menu tabs** to hide individual tabs, including Combat options, Skills, Quests, Inventory, Equipment, Prayer, Spellbook, Clan, Account Management, Friends, Logout, Settings, Emotes and Music.
 
 Hiding a tab removes its icon and stone background. The remaining stones close the gap, and the bar stays movable. Show the tab again by clearing its visibility setting.
 

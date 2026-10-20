@@ -35,7 +35,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 @PluginDescriptor(
 	name = "Interface Layout",
-	description = "Manage native menu stones, minimap and orb layouts.",
+	description = "Reposition orbs, compass and menu tabs, build custom tab groups, and control minimap visibility and clickthrough.",
 	tags = {"compact", "orbs", "layout", "hide", "minimap", "resizable", "classic", "modern", "world", "map", "wiki", "swap", "overlay", "orb", "fixed"},
 	conflicts = {"Compact Orbs", "Menu Stones Hider", "Fixed Resizable Hybrid", "Orb Hider", "Minimap Hider", "Movable Orbs"}
 )

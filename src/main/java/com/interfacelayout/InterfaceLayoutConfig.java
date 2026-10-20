@@ -346,7 +346,7 @@ public interface InterfaceLayoutConfig extends Config
 	@ConfigItem(
 		keyName = ConfigKeys.COMPASS,
 		name = "Hide compass",
-		description = "Hide this control. Show it again here; Free Position keeps the saved location. Ctrl+M while hidden (Beta): not yet verified; show the World Map button if the shortcut stops working.",
+		description = "Hide the compass. Show it again here; Free Position keeps its saved location.",
 		section = hideAndSwapUpdate,
 		position = 2
 	)
@@ -508,7 +508,7 @@ public interface InterfaceLayoutConfig extends Config
 	@ConfigItem(
 		keyName = ConfigKeys.HIDE_WORLD,
 		name = "Hide World Map",
-		description = "Hide this control. Show it again here; Free Position keeps the saved location.",
+		description = "Hide the World Map button. Show it again here if you need to open the map with the button.",
 		section = hideAndSwapUpdate,
 		position = 8
 	)
@@ -609,7 +609,7 @@ public interface InterfaceLayoutConfig extends Config
     default int editGrid() { return 1; }
     @ConfigItem(keyName = "resetLayoutPositions", name = "Reset positions and groups", description = "Ask for confirmation before clearing saved positions and menu groups in every display mode. Cancel keeps the layout. Visibility choices are kept.", section = editor, position = 2)
     default boolean resetLayoutPositions() { return false; }
-    @ConfigSection(name = "Menu tab visibility", description = "Hide a tab, its icon and background; remaining tabs close the gap", closedByDefault = true, position = 5)
+    @ConfigSection(name = "Hide menu tabs", description = "Hide a tab, its icon and background; remaining tabs close the gap", closedByDefault = true, position = 5)
     String individualStones = "individualStones";
     @ConfigItem(keyName = "hideStone0", name = "Combat options", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 0)
     default boolean hideCombatStone() { return false; }
