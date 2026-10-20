@@ -118,8 +118,8 @@ public interface InterfaceLayoutConfig extends Config
 
 	@ConfigItem(
 		keyName = ConfigKeys.ENABLE_NO_CLICKTHROUGH,
-		name = "Prevent orb clickthrough",
-		description = "Stop clicks on orbs from reaching the game behind them. Applies to every orb arrangement.",
+		name = "Prevent orb and minimap clickthrough",
+		description = "Stop orb and minimap clicks from reaching the game behind them while keeping minimap navigation. Applies to every orb arrangement.",
 		section = layout,
 		position = 20
 	)

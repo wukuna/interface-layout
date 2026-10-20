@@ -110,7 +110,7 @@ Open **Orb layout options** to adjust the preset:
 
 Preset anchoring, gap handling and slot swapping apply to compact arrangements. Free Position uses each element's saved location.
 
-**Prevent orb clickthrough** stops clicks on an orb from reaching the game behind it and applies to every orb arrangement.
+**Prevent orb and minimap clickthrough** stops clicks on orbs and the minimap from reaching the game behind them. Minimap navigation still works, including the detached minimap in compact layouts. This applies to every orb arrangement and uses the existing clickthrough setting.
 
 ## Separate minimap and shortcuts
 

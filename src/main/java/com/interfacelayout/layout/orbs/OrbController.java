@@ -398,6 +398,7 @@ public class OrbController
 
 	public void updateNoClickThrough()
 	{
+		if (overlayMinimap != null) overlayMinimap.setNoClickThrough(config.enableNoClickthrough());
 		if (isFixedMode())
 		{
 			return;

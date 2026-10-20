@@ -33,6 +33,7 @@ public class GameframeCoordinator
     @Inject private MenuStoneController menu;
     @Inject private com.interfacelayout.layout.menu.MenuOverlayBridge menuOverlays;
     @Inject private FreePositionController free;
+    @Inject private com.interfacelayout.layout.orbs.MinimapClickProtection minimapClicks;
     @Inject private com.interfacelayout.layout.orbs.FreeOrbOverlayBridge freeOverlays;
     @Inject private InterfaceEditor editor;
     @Inject private EditManager compactEditor;
@@ -47,7 +48,7 @@ public class GameframeCoordinator
 
     public void start() { running = true; editor.setRefresh(this::refresh); refresh(); menuOverlays.start(this::refresh); freeOverlays.start(this::refresh); }
     public void stop() { running = false; layoutDepth = 0; visibilityDepth = 0; editor.cancel(); freeOverlays.stop(); menuOverlays.stop(); restore(); menu.resetSession(); }
-    private void restore() { menu.restoreBackgrounds(); states.restore(); expander.clear(); }
+    private void restore() { minimapClicks.restore(); menu.restoreBackgrounds(); states.restore(); expander.clear(); }
     public void prepareNativeLayout() { restore(); }
     public boolean isHiddenByGame(net.runelite.api.widgets.Widget widget)
     {
@@ -56,7 +57,7 @@ public class GameframeCoordinator
     public void refresh()
     {
         if (!running || layoutDepth > 0) return;
-        restore(); menu.apply(); free.apply(); menuOverlays.sync(); freeOverlays.sync();
+        restore(); menu.apply(); free.apply(); minimapClicks.apply(); menuOverlays.sync(); freeOverlays.sync();
     }
     public void toggleShown() { if (running) { menu.toggleShown(); refresh(); } }
     @Subscribe(priority = -2) public void onBeforeRender(BeforeRender event)
