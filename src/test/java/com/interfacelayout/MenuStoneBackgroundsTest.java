@@ -16,6 +16,41 @@ import static org.mockito.Mockito.*;
 
 public class MenuStoneBackgroundsTest
 {
+    @Test public void restoredLogoutPaintsXAfterTileAndRemovesBothOnRestore()
+    {
+        Client client = mock(Client.class);
+        Widget background = WidgetGeometryTest.widget(0, 0, 231, 36);
+        Widget icon = WidgetGeometryTest.widget(900, 10, 21, 21);
+        Widget foreign = mock(Widget.class), tile = mock(Widget.class), graphic = mock(Widget.class);
+        when(icon.getSpriteId()).thenReturn(1003);
+        when(client.getWidget(InterfaceID.ToplevelPreEoc.SIDE_STATIC_BACKGROUND)).thenReturn(background);
+        when(background.createChild(-1, WidgetType.GRAPHIC)).thenReturn(tile, graphic);
+        when(tile.getIndex()).thenReturn(1); when(graphic.getIndex()).thenReturn(2);
+        when(background.getChildren()).thenReturn(new Widget[]{foreign, tile, graphic});
+        MenuStoneBackgrounds backgrounds = Guice.createInjector(new AbstractModule() {
+            @Override protected void configure() {
+                bind(Client.class).toInstance(client);
+                bind(WidgetStateStore.class).toInstance(new WidgetStateStore());
+                bind(WidgetBoundsExpander.class).toProvider(() -> mock(WidgetBoundsExpander.class));
+            }
+        }).getInstance(MenuStoneBackgrounds.class);
+        backgrounds.place(10, new Point(400,200),33,36);
+        backgrounds.placeLogoutIcon(icon, new Point(406,207));
+        verify(graphic).setSpriteId(1003);
+        verify(graphic).setOriginalX(406); verify(graphic).setOriginalY(207);
+        verify(graphic).setOriginalWidth(21); verify(graphic).setOriginalHeight(21);
+        verify(graphic).setNoClickThrough(false);
+        verifyNoInteractions(foreign);
+        verify(icon, never()).setHidden(anyBoolean());
+        backgrounds.restore();
+        org.mockito.ArgumentCaptor<Widget[]> children = org.mockito.ArgumentCaptor.forClass(Widget[].class);
+        verify(background).setChildren(children.capture());
+        assertArrayEquals(new Widget[]{foreign}, children.getValue());
+        clearInvocations(background);
+        when(icon.isHidden()).thenReturn(true);
+        backgrounds.placeLogoutIcon(icon, new Point());
+        verify(background, never()).createChild(anyInt(), anyInt());
+    }
     @Test public void nativeCompactionSplitsArtWithoutResizingItsClippingLayer()
     {
         Client client = mock(Client.class);

@@ -97,6 +97,26 @@ public class MenuStoneBackgrounds
         tile.setOriginalX(destination.x - parent.x); tile.setOriginalY(destination.y - parent.y);
         tile.revalidate();
     }
+    /** The minimap X draws before the side-row artwork. Repeat only its graphic
+     * above our tile; the original widget retains all native input handling. */
+    public void placeLogoutIcon(Widget icon, Point destination)
+    {
+        Widget background = client.getWidget(InterfaceID.ToplevelPreEoc.SIDE_STATIC_BACKGROUND);
+        if (icon == null || icon.isHidden() || background == null || background.isHidden()
+            || !owned.containsKey(background)) return;
+        Widget graphic = background.createChild(-1, WidgetType.GRAPHIC);
+        owned.get(background).add(graphic);
+        graphic.setSpriteId(icon.getSpriteId());
+        graphic.setSpriteTiling(icon.getSpriteTiling());
+        graphic.setOpacity(icon.getOpacity());
+        graphic.setBorderType(icon.getBorderType());
+        graphic.setNoClickThrough(false);
+        graphic.setOriginalWidth(icon.getWidth()); graphic.setOriginalHeight(icon.getHeight());
+        Point parent = WidgetGeometry.location(background);
+        graphic.setOriginalX(destination.x - parent.x); graphic.setOriginalY(destination.y - parent.y);
+        graphic.revalidate();
+    }
+
     /** Remove the shared row art even when every stone in that row is hidden. */
     public Widget prepareRow(boolean top)
     {

@@ -57,6 +57,7 @@ public class ModernLogoutTabTest
             verify(f.stones[10],never()).setOriginalWidth(anyInt());
             verify(f.stones[10],never()).setOriginalHeight(anyInt());
             verify(f.backgrounds).place(eq(10),eq(slot.getLocation()),eq(33),eq(36),anyBoolean());
+            verify(f.backgrounds).placeLogoutIcon(f.icons[10], new java.awt.Point(slot.x+6,slot.y+7));
             f.menu.restoreBackgrounds(); f.states.restore();
             verify(f.stones[10]).setForcedPosition(-1,-1);
             clearInvocations(f.stones[10],f.icons[10],f.backgrounds);

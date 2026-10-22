@@ -71,6 +71,21 @@ public class EditingTransitionsTest
         f.editor.toggleEditMode(true); f.editor.toggleEditMode(false);
         assertFalse(f.manager.isEditingLayout);
     }
+    @Test public void rebuildingLogoutOwnershipKeepsEditingEnabled() throws Exception
+    {
+        for (OrbLayout layout : new OrbLayout[]{OrbLayout.VERTICAL, OrbLayout.FREE_POSITION})
+        {
+            Fixture f = new Fixture();
+            when(f.config.layout()).thenReturn(layout);
+            when(f.config.editInterface()).thenReturn(true);
+            f.editor.toggleEditMode(true);
+            f.editor.refreshEditMode();
+            assertTrue(f.manager.isEditingLayout);
+            verify(f.manager, never()).saveConfig("editInterface", false);
+            f.editor.toggleEditMode(false);
+            assertFalse(f.manager.isEditingLayout);
+        }
+    }
     @Test public void repeatedDisableSynchronizesCheckboxWithoutRebuilding() throws Exception
     {
         Fixture f = new Fixture();

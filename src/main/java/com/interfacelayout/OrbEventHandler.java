@@ -496,8 +496,8 @@ public class OrbEventHandler implements KeyListener
         if (group.equals(GROUP_NAME) && (key.equals("menuRestoreLogoutTab") || key.equals("menuLayout")))
         {
             later(() -> {
-                if (manager.isEditingLayout) editManager.toggleEditMode(false);
                 gameframe.prepareNativeLayout();
+                editManager.refreshEditMode();
                 manager.hideLogout(); manager.updateLogoutXPosition(); manager.updateLogoutXOverlay();
                 gameframe.refresh();
             });

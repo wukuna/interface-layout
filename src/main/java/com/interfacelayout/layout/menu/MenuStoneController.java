@@ -312,6 +312,9 @@ public class MenuStoneController
                     backgrounds.placeFromRow(rowBackground(entry.index / 7), destination, entry.nativeBounds, movable);
                 move(entry.stone, new Point(destination.x + entry.stoneOffset.x, destination.y + entry.stoneOffset.y));
                 if (entry.icon != null) move(entry.icon, new Point(destination.x + entry.iconOffset.x, destination.y + entry.iconOffset.y));
+                if (modern && entry.index == 10 && config.restoreLogoutTab() && !covered)
+                    backgrounds.placeLogoutIcon(entry.icon,
+                        new Point(destination.x + entry.iconOffset.x, destination.y + entry.iconOffset.y));
                 if (covered) { states.hide(entry.stone, true); states.hide(entry.icon, true); }
                 boolean interactive = !covered && entry.interactive;
                 if (interactive) nextStones.put(entry.index, placed);

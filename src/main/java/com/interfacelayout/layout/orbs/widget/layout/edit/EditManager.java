@@ -139,6 +139,14 @@ public class EditManager
         }
     }
 
+    /** Rebuild handlers after ownership changes without turning off interface editing. */
+    public void refreshEditMode()
+    {
+        if (!manager.isEditingLayout) return;
+        closeEditMode();
+        toggleEditMode(true);
+    }
+
 	public void toggleEditMode(boolean state)
 	{
         if (state == manager.isEditingLayout)
