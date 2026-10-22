@@ -585,6 +585,8 @@ public interface InterfaceLayoutConfig extends Config
     @Range(min = 0, max = 20)
     @ConfigItem(keyName = "menuSpacing", name = "Stone spacing", description = "Pixels between visible stones. Hidden stones close the gap without changing the group's saved position.", section = menu, position = 2)
     default int menuSpacing() { return 0; }
+    @ConfigItem(keyName = "menuRestoreLogoutTab", name = "Restore logout stone (Modern)", description = "Move Modern's existing logout X onto a menu-tab background. Off uses the bare X. Both can join custom menu groups; Native rows leaves the bare X at the minimap. The original click area and Hide Logout-X are retained. Fixed and Classic are unchanged.", section = menu, position = 8)
+    default boolean restoreLogoutTab() { return false; }
     @ConfigItem(keyName = "allowClicksThroughGaps", name = "Allow clicks through gaps", description = "Allow game clicks between stones in a moved menu bar. Disable to block clicks inside these gaps without selecting a tab. Stone buttons are unchanged.", section = menu, position = 7)
     default boolean allowClicksThroughGaps() { return true; }
     @ConfigItem(keyName = "hideTopMenu", name = "Hide combat–spellbook tabs", description = "Hide Combat, Skills, Quests, Inventory, Equipment, Prayer and Spellbook wherever they are placed.", section = menu, position = 3)

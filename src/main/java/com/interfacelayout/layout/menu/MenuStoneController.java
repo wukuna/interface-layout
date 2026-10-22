@@ -80,6 +80,12 @@ public class MenuStoneController
         Direction(String label) { this.label = label; }
         @Override public String toString() { return label; }
     }
+    public static boolean managesModernLogout(InterfaceLayoutConfig config)
+    {
+        Layout layout=config.menuLayout();
+        return config.restoreLogoutTab() || layout==Layout.FREE_POSITION
+            || layout==Layout.VERTICAL_LEFT || layout==Layout.VERTICAL_RIGHT;
+    }
     @Inject private Client client;
     @Inject private InterfaceLayoutConfig config;
     @Inject private OrbController orbs;
@@ -177,6 +183,9 @@ public class MenuStoneController
         Map<Integer, List<Entry>> groups = new TreeMap<>();
         for (int i = 0; i < registry.length; i++)
         {
+            // Native rows leave the bare X at the minimap; custom bars can group it
+            // with or without the optional full-size tab background.
+            if (modern && i == 10 && !managesModernLogout(config)) continue;
             Widget stone = client.getWidget(registry[i][0]);
             Widget icon = client.getWidget(registry[i][1]);
             if (stone == null) continue;
@@ -185,15 +194,25 @@ public class MenuStoneController
                 nativeOrigins.merge(row, WidgetGeometry.location(stone),
                     (a, b) -> new Point(Math.min(a.x, b.x), Math.min(a.y, b.y)));
             if (hidden(i)) { states.hide(stone, true); states.hide(icon, true); continue; }
-            // Modern Logout-X belongs to the minimap, not either native tab row.
-            if (!vertical && modern && i == 10) continue;
             // Modern's stone graphic is a selection highlight: its own hidden flag
             // must not remove an otherwise visible tab from the layout.
             boolean interactive = !(icon != null ? icon.isHidden() : stone.isHidden());
             boolean decoration = modern ? (i == 10 ? !stone.isHidden() : backgrounds.isNativeRowVisible(i < 7))
                 : backgrounds.isNativeRowVisible(rowBackground(i / 7)) || !stone.isHidden();
             if ((!vertical && !compactRow[row]) || (!interactive && !decoration)) continue;
-            groups.computeIfAbsent(vertical ? group(i) : row, ignored -> new ArrayList<>()).add(new Entry(i, stone, icon));
+            Entry entry = new Entry(i, stone, icon);
+            if (modern && i == 10)
+            {
+                // Reserve ordinary tab artwork, but keep both native widgets' sizes/actions.
+                Widget peer = client.getWidget(registry[11][0]);
+                if (peer == null || icon == null || !interactive || !backgrounds.isNativeRowVisible(false)) continue;
+                entry = new Entry(i, stone, icon, config.restoreLogoutTab() ? peer.getWidth() : stone.getWidth(),
+                    config.restoreLogoutTab() ? peer.getHeight() : stone.getHeight());
+                Widget friends = client.getWidget(registry[9][0]);
+                entry.sortX = friends == null ? WidgetGeometry.location(peer).x
+                    : (WidgetGeometry.location(friends).x + WidgetGeometry.location(peer).x) / 2;
+            }
+            groups.computeIfAbsent(vertical ? group(i) : row, ignored -> new ArrayList<>()).add(entry);
         }
         Map<Integer, Rectangle> nextGroups = new LinkedHashMap<>(), nextStones = new LinkedHashMap<>();
         List<Rectangle> nextGaps = new ArrayList<>();
@@ -217,7 +236,7 @@ public class MenuStoneController
             for (Map.Entry<Integer, List<Entry>> group : groups.entrySet())
                 intact |= intactNativeRow(group.getKey(), group.getValue()) == row;
             if (!modern && intact) continue;
-            if (modern) backgrounds.prepareRow(row == 0, vertical || hasSavedOrigin(row));
+            if (modern) backgrounds.prepareRow(row == 0, vertical || hasSavedOrigin(row) || (row == 1 && config.restoreLogoutTab()));
             else backgrounds.prepareRow(rowBackground(row), vertical || hasSavedOrigin(row));
         }
         for (Map.Entry<Integer, List<Entry>> group : groups.entrySet())
@@ -260,7 +279,7 @@ public class MenuStoneController
                 continue;
             }
             entries.sort(Comparator.comparingInt(entry -> vertical ? order(entry.index)
-                : WidgetGeometry.location(entry.stone).x));
+                : entry.sortX));
             boolean horizontal = !vertical || horizontal(id);
             int width = 0, height = 0;
             for (Entry entry : entries)
@@ -279,7 +298,7 @@ public class MenuStoneController
                 Point destination = new Point(origin.x + (horizontal ? offset : (width - entry.width) / 2),
                     origin.y + (horizontal ? (height - entry.height) / 2 : offset));
                 // Closing gaps within a native row must not resize its clipping layers.
-                boolean movable = vertical || hasSavedOrigin(id);
+                boolean movable = vertical || hasSavedOrigin(id) || (modern && entry.index == 10);
                 if (movable)
                 {
                     expander.allowCanvasPosition(entry.stone);
@@ -287,11 +306,11 @@ public class MenuStoneController
                 }
                 Rectangle placed = new Rectangle(destination.x, destination.y, entry.width, entry.height);
                 boolean covered = windowBounds.stream().anyMatch(bounds -> bounds.intersects(placed));
-                if (modern && !covered)
+                if (modern && !covered && (entry.index != 10 || config.restoreLogoutTab()))
                     backgrounds.place(entry.index, destination, entry.width, entry.height, movable);
-                else if (!covered)
+                else if (!modern && !covered)
                     backgrounds.placeFromRow(rowBackground(entry.index / 7), destination, entry.nativeBounds, movable);
-                move(entry.stone, destination);
+                move(entry.stone, new Point(destination.x + entry.stoneOffset.x, destination.y + entry.stoneOffset.y));
                 if (entry.icon != null) move(entry.icon, new Point(destination.x + entry.iconOffset.x, destination.y + entry.iconOffset.y));
                 if (covered) { states.hide(entry.stone, true); states.hide(entry.icon, true); }
                 boolean interactive = !covered && entry.interactive;
@@ -621,7 +640,8 @@ public class MenuStoneController
     {
         final int index, width, height;
         final Widget stone, icon;
-        final Point iconOffset;
+        final Point iconOffset, stoneOffset;
+        int sortX;
         final Rectangle nativeBounds;
         final boolean interactive;
         Entry(int index, Widget stone, Widget icon)
@@ -632,6 +652,16 @@ public class MenuStoneController
             Point position = WidgetGeometry.location(stone), graphic = icon == null ? position : WidgetGeometry.location(icon);
             nativeBounds = new Rectangle(position.x, position.y, width, height);
             iconOffset = new Point(graphic.x - position.x, graphic.y - position.y);
+            stoneOffset = new Point(); sortX = position.x;
+        }
+        Entry(int index, Widget stone, Widget icon, int width, int height)
+        {
+            this.index = index; this.stone = stone; this.icon = icon;
+            interactive = icon != null && !icon.isHidden();
+            this.width = Math.max(width, stone.getWidth()); this.height = Math.max(height, stone.getHeight());
+            nativeBounds = WidgetGeometry.bounds(stone); sortX = nativeBounds.x;
+            stoneOffset = new Point((this.width - stone.getWidth()) / 2, (this.height - stone.getHeight()) / 2);
+            iconOffset = new Point((this.width - icon.getWidth()) / 2, (this.height - icon.getHeight()) / 2);
         }
     }
 }

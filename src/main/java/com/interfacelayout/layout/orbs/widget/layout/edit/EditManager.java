@@ -117,7 +117,7 @@ public class EditManager
 
 	public boolean blockEditing(TargetWidget target)
 	{
-		return (target.isLogoutX() && (manager.isClassicResizable() || manager.isFixedMode())) ||
+		return (target.isLogoutX() && (manager.isClassicResizable() || manager.isFixedMode() || com.interfacelayout.layout.menu.MenuStoneController.managesModernLogout(config))) ||
 			(target.isCompass() && !manager.isCompactLayout()) ||
 			(target == Orbs.STORE_ORB_CONTAINER && manager.isStoreOrbDisabled()) ||
 			(target == Orbs.ACTIVITY_ORB_CONTAINER && manager.isActivityOrbDisabled()) ||

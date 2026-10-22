@@ -34,6 +34,10 @@ In Fixed and both resizable modes, **Free position** starts with separate top an
 
 ### Moving a whole bar
 
+**Restore logout stone (Modern)** is off by default: Modern's logout X has no added tab background. In Native rows it stays beside the minimap; in vertical or Free position arrangements it participates in menu-stone dragging and custom groups. Enable it to place that existing X on a normal tab background in Native rows, vertical bars or Free position. The X keeps its original click area and opens the native logout panel. Fixed and Classic retain their normal logout tabs regardless of this setting.
+
+In custom menu arrangements, both the bare X and the restored stone move with the menu bars; individual orb dragging and the separate minimap logout copy are suspended. **Hide Logout-X (Modern)** still applies, as do the logout-tab and bottom-row hiding settings. Game-hidden controls remain hidden. Turning restoration off removes the added background while retaining custom group membership and positions. Native rows returns the bare X to the minimap/orb arrangement.
+
 Hold **Alt** and drag a menu bar, using RuneLite's normal overlay positioning controls. The same control works with **Edit interface** on or off. If you changed RuneLite's overlay movement hotkey, use that key instead of Alt.
 
 **Stone spacing** sets the gap between visible stones. Hiding a stone closes its gap while keeping the group's saved position.

@@ -493,6 +493,16 @@ public class OrbEventHandler implements KeyListener
             }
             return;
         }
+        if (group.equals(GROUP_NAME) && (key.equals("menuRestoreLogoutTab") || key.equals("menuLayout")))
+        {
+            later(() -> {
+                if (manager.isEditingLayout) editManager.toggleEditMode(false);
+                gameframe.prepareNativeLayout();
+                manager.hideLogout(); manager.updateLogoutXPosition(); manager.updateLogoutXOverlay();
+                gameframe.refresh();
+            });
+            return;
+        }
 if (group.equals(GROUP_NAME) && (key.startsWith("free_") || key.startsWith("menu") || key.startsWith("hideStone")
     || key.equals("hiddenStones") || key.equals("hideTopMenu") || key.equals("hideBottomMenu")
     || key.equals("hideLeftBar") || key.equals("hideRightBar") || key.equals("showMenuToggle") || key.equals("editGrid"))) return;

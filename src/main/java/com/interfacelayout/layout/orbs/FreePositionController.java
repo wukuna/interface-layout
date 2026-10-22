@@ -44,6 +44,7 @@ public class FreePositionController
         for (TargetWidget[] choices : EditManager.EDIT_TARGETS)
         {
             TargetWidget target = choices[0];
+            if (target.isLogoutX() && com.interfacelayout.layout.menu.MenuStoneController.managesModernLogout(config) && !manager.isFixedMode() && !manager.isClassicResizable()) continue;
             if (!target.isMinimapButton() && !target.isCompass() && !editor.blockEditing(target)) result.add(target);
         }
         if (!manager.isFixedMode()) result.add(manager.isClassicResizable()
@@ -91,6 +92,7 @@ public class FreePositionController
     }
     public void move(TargetWidget target, Point desired)
     {
+        if (target.isLogoutX() && com.interfacelayout.layout.menu.MenuStoneController.managesModernLogout(config) && !manager.isFixedMode() && !manager.isClassicResizable()) return;
         Widget widget = widgets.getTargetWidget(target);
         if (widget == null || widget.isHidden()) return;
         Point location = LayoutGeometry.clamp(desired, widget.getWidth(), widget.getHeight(),

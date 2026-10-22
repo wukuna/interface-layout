@@ -110,7 +110,9 @@ public class MenuStoneControllerTest
                 when(mode.isFixedMode()).thenReturn(displayMode == 0);
                 when(mode.isClassicResizable()).thenReturn(displayMode == 1);
                 controller(client, config, new WidgetStateStore(), mode, configs).apply();
-                verify(stone).setHidden(true); verify(icon).setHidden(true);
+                if (displayMode == 2 && index == 10)
+                { verify(stone, never()).setHidden(true); verify(icon, never()).setHidden(true); }
+                else { verify(stone).setHidden(true); verify(icon).setHidden(true); }
             }
         }
     }

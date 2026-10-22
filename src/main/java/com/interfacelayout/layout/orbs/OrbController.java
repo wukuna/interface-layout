@@ -1035,7 +1035,7 @@ public class OrbController
 			return true;
 		}
 
-		return !config.showOverlayLogoutX() || isClassicResizable() || hideStonesAndIcons();
+		return !config.showOverlayLogoutX() || com.interfacelayout.layout.menu.MenuStoneController.managesModernLogout(config) || isClassicResizable() || hideStonesAndIcons();
 	}
 
 	//similar to how the cs2 script hides/shows the logout-x by referencing the containers hidden state
@@ -1058,7 +1058,7 @@ public class OrbController
 
 	boolean isOverlayLogoutVisible()
 	{
-		return isCompactLayout() &&
+		return !com.interfacelayout.layout.menu.MenuStoneController.managesModernLogout(config) && isCompactLayout() &&
 			isMinimapOverlayEnabled() && config.showOverlayLogoutX();
 	}
 
