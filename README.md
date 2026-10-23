@@ -4,7 +4,9 @@ Arrange your RuneLite interface around the way you play. Move menu bars, split t
 
 Start in Menu bars to choose an arrangement. Use Alt-drag to move supported controls, or enable Edit interface and Shift-drag to regroup menu tabs. Menu layouts are saved separately for Fixed, Resizable Classic and Resizable Modern.
 
-## Highlights
+[Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Related plugins and sources](#related-plugins-and-sources) · [Development](#development) · [Support](#support) · [License and attribution](#license-and-attribution)
+
+## Features
 
 - **Free-position orbs** — move individual orbs and the compass independently of the minimap in resizable modes.
 - **Compact orb layouts** — arrange orbs vertically, horizontally, in a wider row, or with a custom preset.
@@ -21,7 +23,9 @@ Start in Menu bars to choose an arrangement. Use Alt-drag to move supported cont
 3. **Alt-drag** moves a whole control or bar. **Shift-drag** detaches or joins menu stones when custom grouping is enabled.
 4. Turn off **Edit interface** when finished. Layouts remain saved separately for Fixed, Classic and Modern.
 
-## Moving menu stones and orbs
+## Usage
+
+### Moving menu stones and orbs
 
 Enable **Edit interface** to show editing outlines and allow **Shift-drag** stone grouping. RuneLite **Alt-drag** moves whole bars, detached stones, free orbs and the compass with Edit interface on or off. Choose **Free Position** under **Map and orb visibility → Orb arrangement** to move orbs individually, and choose a vertical or free-position menu arrangement to detach and regroup stones.
 
@@ -29,7 +33,7 @@ Enable **Edit interface** to show editing outlines and allow **Shift-drag** ston
 
 https://github.com/user-attachments/assets/fa3c1d99-eb0f-4b7d-9fb8-818fcd97df77
 
-## Menu bars and stone groups
+### Menu bars and stone groups
 
 Open **Menu bars** and choose a **Menu arrangement**:
 
@@ -39,7 +43,7 @@ Open **Menu bars** and choose a **Menu arrangement**:
 
 In Fixed and both resizable modes, **Free position** starts with separate top and bottom groups. Older combined defaults are split too, including moved bars; explicitly saved custom memberships, detached groups and ordering are retained. Choosing Column starts the default groups beside each other. In Resizable Classic, an untouched **Native rows** layout keeps the game's original stone artwork, spacing and icon alignment. Moving a native row with zero spacing translates it as a whole.
 
-### Moving a whole bar
+#### Moving a whole bar
 
 **Restore logout stone (Modern)** is off by default: Modern's logout X has no added tab background. In Native rows it stays beside the minimap; in vertical or Free position arrangements it participates in menu-stone dragging and custom groups. Enable it to place that existing X on a normal tab background in Native rows, vertical bars or Free position. The X keeps its original click area and opens the native logout panel. Fixed and Classic retain their normal logout tabs regardless of this setting.
 
@@ -51,7 +55,7 @@ Hold **Alt** and drag a menu bar, using RuneLite's normal overlay positioning co
 
 **Allow clicks through gaps** is enabled by default. Disable it to block clicks through the spacing between visible, clickable stones in a moved bar without selecting a neighboring tab. Overlapping supported game windows take priority. Native menu protection covers supported world actions; unfamiliar menu entries are left available rather than removed. Clicks on the stones, outside the bar, and selections in an already-open right-click menu remain unchanged.
 
-### Moving a single stone
+#### Moving a single stone
 
 Choose **Free position**, **Vertical left** or **Vertical right** first. Individual stone groups are not available in **Native rows**.
 
@@ -65,7 +69,7 @@ Joining an existing bar preserves that bar's direction. Joining two separate sto
 
 Stone grouping has a five-pixel movement threshold and shows a proposed-position outline while dragging. Membership and position are saved only when you release. Focus loss, native interface rebuilds, or display-mode changes cancel the pending edit without changing the saved group. Stretched Mode uses RuneLite's translated native canvas coordinates, so grouping does not depend on which plugin was enabled first. Existing layouts are preserved; there is no separate stretched layout or migration.
 
-## Hide menu tabs
+### Hide menu tabs
 
 Moved stones temporarily give way to overlapping Bank/PIN, Collection Log, skill-guide and Settings windows. Stones outside those windows stay available. Moving, resizing or closing a supported window restores uncovered stones in their saved positions; the plugin does not move or resize the windows themselves.
 
@@ -86,13 +90,13 @@ The **Menu bars** section also includes broader controls:
 
 The logout control depends on the game's display mode. **Fixed** and **Resizable Classic** have a Logout tab in the menu row. **Resizable Modern** uses the Logout-X beside the minimap instead.
 
-### Logout control in Modern
+#### Logout control in Modern
 
 **Restore logout stone (Modern)** places the existing logout X over a menu-stone background. Leave it off for the bare X. Both forms can be detached and joined to custom menu bars; changing the background preserves saved grouping. In Native rows, the bare X stays beside the minimap.
 
 Fixed and Resizable Classic keep their native Logout tabs. **Hide Logout-X (Modern)** and the individual logout visibility setting can hide the Modern control; check those settings if it is missing.
 
-## Map and orb visibility
+### Map and orb visibility
 
 Use **Map and orb visibility** to choose an orb arrangement and hide individual controls.
 
@@ -103,7 +107,7 @@ Use **Map and orb visibility** to choose an orb arrangement and hide individual 
 
 Showing a free-position orb or the compass again restores its saved location. A control that the game itself does not currently display will not appear just because its hide setting is off.
 
-### Free-position orbs and compass
+#### Free-position orbs and compass
 
 Choose **Orb arrangement → Free Position**, then **Alt-drag** an orb or the compass to its own position. Enable **Edit interface** if you want additional outlines and guidance. The compass can move separately from the minimap.
 
@@ -113,7 +117,7 @@ Free Position moves the orbs and compass; it does not move the minimap itself. T
 
 Moving another orb preserves the native Wiki and world-map button positions, even if you have not moved those buttons. Their positions are only saved when you move them yourself. Game-hidden controls remain hidden.
 
-### Compact orb arrangements
+#### Compact orb arrangements
 
 Choose **Vertical preset**, **Horizontal preset**, **Horizontal-wide preset** or **Custom preset**, then enable **Hide minimap** to activate the compact arrangement.
 
@@ -129,7 +133,7 @@ Preset anchoring, gap handling and slot swapping apply to compact arrangements. 
 
 **Prevent orb and minimap clickthrough** stops clicks on orbs and the minimap from reaching the game behind them. Minimap navigation still works, including the detached minimap in compact layouts. This applies to every orb arrangement and uses the existing clickthrough setting.
 
-## Separate minimap and shortcuts
+### Separate minimap and shortcuts
 
 **Show separate minimap**, under **Orb layout options**, displays a separate movable minimap while **Hide minimap** is enabled in a resizable mode. Use RuneLite's normal **Alt-drag** controls to position it.
 
@@ -140,7 +144,7 @@ This separate minimap does not support other plugins' minimap overlays, such as 
 
 The **Minimap toggle button** section controls the optional eye button, its location and whether it requires a right-click. The **Keyboard shortcut** section lets you select a keybind and the action it controls: the button, native minimap, separate minimap or editing mode.
 
-## Editing and saved layouts
+## Saved settings
 
 **Editing controls** includes:
 
@@ -165,14 +169,25 @@ Whole bars, detached stones, free orbs and the compass expose separate RuneLite 
 
 Use the native minimap when another plugin needs to draw on it. The separate minimap has the overlay limitation described above.
 
-## Focused alternatives and original projects
+Ctrl+M while the World Map button is hidden is marked **Beta** in the Hide World Map setting tooltip. This shortcut combination has not been verified in-game; show the button again if the shortcut stops working.
 
-Interface Layout combines and extends features from the projects below. If you only need one part of its feature set, these original plugins may be a better fit.
+## Related plugins and sources
 
-| Plugin | Author | Best fit |
+Interface Layout adapts **Compact Orbs** and **Menu Stones Hider**, plus RuneLite's WidgetOverlay implementation. Those are source credits; other plugins below are listed for feature overlap or compatibility, not as claims that their code was incorporated. Full attribution is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+| Project | Relationship | Relevant features and limits |
 | --- | --- | --- |
-| [Compact Orbs](https://github.com/its-cue/compact-orbs) | cue | Compact orb arrangements and a separate minimap. |
-| [Menu Stones Hider](https://github.com/Richardant/menustoneshider) | Richardant | Hiding native menu stones and decorations. |
+| [Compact Orbs](https://github.com/its-cue/compact-orbs) | Original source and overlapping alternative | Compact orb arrangements, orb editing and a separate minimap. Interface Layout extends this with custom menu bars and stone grouping. |
+| [Menu Stones Hider](https://github.com/Richardant/menustoneshider) | Original source and focused alternative | Native menu-stone and decoration visibility. Interface Layout also moves and groups stones. |
+| [Orb Hider](https://github.com/wizguin/runelite-orb-hider) | Focused alternative | Hiding minimap orbs when a larger layout toolset is unnecessary. |
+| [Movable Orbs](https://github.com/anonyser/runelite-movable-orbs) | Overlapping alternative | Moves native orbs within a bounded area around the minimap, with separate minimized-map positions. It does not provide Interface Layout's menu-stone grouping. |
+| [Fixed Resizable Hybrid](https://github.com/Lapask/fixed-resizable-hybrid) | Different layout approach; declared conflict | Gives Resizable Classic a Fixed-style gameframe. Interface Layout is not a replacement for its full reskin and background features. |
+
+**Custom UI Anchors** is a companion for positioning the movement overlays exposed by Interface Layout, not a replacement for stone grouping. Other plugins' minimap drawings require the native minimap; the separate minimap cannot reproduce them. See Compatibility before enabling overlapping layout plugins.
+
+## Development
+
+Use Java 11 and the repository's Gradle wrapper. Run `./gradlew test build` (Windows: `gradlew.bat test build`). Release commits are selected explicitly in the Plugin Hub manifest; the default branch and the Hub build can differ.
 
 ## Support
 
@@ -183,5 +198,3 @@ If a layout does not behave as expected, check for another enabled plugin that m
 ## License and attribution
 
 Interface Layout is distributed under the [BSD-2-Clause license](LICENSE). The license attributes all contributing authors. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the original projects and adapted code.
-
-Ctrl+M while the World Map button is hidden is marked **Beta** in the Hide World Map setting tooltip. This shortcut combination has not been verified in-game; show the button again if the shortcut stops working.
