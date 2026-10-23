@@ -1,6 +1,6 @@
 # Interface Layout
 
-Arrange your RuneLite interface around the way you play. Move menu bars, split tabs into custom groups, position orbs and the compass, and hide controls you do not need. Choose compact orb layouts or a separate movable minimap in resizable modes, with optional protection against clicks passing through orbs and the minimap.
+Build a RuneLite layout that fits the way you play. Move whole menu bars, detach individual menu stones, and reattach them into your own rows and columns. Position orbs and the compass independently, hide unwanted controls, and choose compact orb layouts or a separate movable minimap in resizable modes. Optional clickthrough protection helps prevent clicks reaching the game behind your orbs and minimap.
 
 Start in Menu bars to choose an arrangement. Use Alt-drag to move supported controls, or enable Edit interface and Shift-drag to regroup menu tabs. Menu layouts are saved separately for Fixed, Resizable Classic and Resizable Modern.
 
@@ -15,6 +15,8 @@ Start in Menu bars to choose an arrangement. Use Alt-drag to move supported cont
 - **Individual visibility** — hide orbs, the compass, the minimap or specific menu tabs. Hidden menu stones also lose their backgrounds, and the remaining stones close the gap.
 - **Saved layouts** — keep separate menu arrangements for Fixed, Resizable Classic and Resizable Modern.
 - **Editing controls** — use drag handles, optional grid snapping and resets to adjust your layout.
+- **Modern logout stone** — optionally give the existing logout X a stone background; both forms can join custom menu bars. Fixed and Classic keep their normal logout tabs.
+- **Shortcuts and protection** — toggle editing or minimap visibility, restore the native menu temporarily, and choose whether clicks pass through gaps between stones.
 
 ## Getting started
 
@@ -23,17 +25,25 @@ Start in Menu bars to choose an arrangement. Use Alt-drag to move supported cont
 3. **Alt-drag** moves a whole control or bar. **Shift-drag** detaches or joins menu stones when custom grouping is enabled.
 4. Turn off **Edit interface** when finished. Layouts remain saved separately for Fixed, Classic and Modern.
 
+![Settings overview showing the editing, menu, visibility, orb and shortcut sections](docs/media/settings-overview.png)
+
+The captures below were supplied on 23 October 2026. Their **TEST** suffix identifies the local demonstration build; install **Interface Layout** from the Plugin Hub. Checked visibility controls hide their named element. The captures show an example setup, not the default settings. Other overlays visible in the recording are not Interface Layout features.
+
 ## Usage
 
 ### Moving menu stones and orbs
 
 Enable **Edit interface** to show editing outlines and allow **Shift-drag** stone grouping. RuneLite **Alt-drag** moves whole bars, detached stones, free orbs and the compass with Edit interface on or off. Choose **Free Position** under **Map and orb visibility → Orb arrangement** to move orbs individually, and choose a vertical or free-position menu arrangement to detach and regroup stones.
 
-> Moving menu bars as groups, splitting stones into separate groups, and positioning individual orbs and the compass. The recording uses an earlier settings panel; the option names below match the current release.
+> Move, detach and reattach: the new recording shows individual stones leaving a menu bar and joining it again, alongside independently positioned orbs.
 
-https://github.com/user-attachments/assets/fa3c1d99-eb0f-4b7d-9fb8-818fcd97df77
+[![Animated demonstration of moving, detaching and reattaching menu stones](docs/media/move-detach-reattach.gif)](docs/media/move-detach-reattach.mp4)
+
+[Watch or download the full-resolution 18-second video](docs/media/move-detach-reattach.mp4?raw=true). The preview loops; the video can be paused. Audio was removed from the documentation copy.
 
 ### Menu bars and stone groups
+
+![Editing controls and Menu bars settings, including Free position and Restore logout stone](docs/media/editing-and-menu-bars.png)
 
 Open **Menu bars** and choose a **Menu arrangement**:
 
@@ -44,10 +54,6 @@ Open **Menu bars** and choose a **Menu arrangement**:
 In Fixed and both resizable modes, **Free position** starts with separate top and bottom groups. Older combined defaults are split too, including moved bars; explicitly saved custom memberships, detached groups and ordering are retained. Choosing Column starts the default groups beside each other. In Resizable Classic, an untouched **Native rows** layout keeps the game's original stone artwork, spacing and icon alignment. Moving a native row with zero spacing translates it as a whole.
 
 #### Moving a whole bar
-
-**Restore logout stone (Modern)** is off by default: Modern's logout X has no added tab background. In Native rows it stays beside the minimap; in vertical or Free position arrangements it participates in menu-stone dragging and custom groups. Enable it to place that existing X on a normal tab background in Native rows, vertical bars or Free position. The X keeps its original click area and opens the native logout panel. Fixed and Classic retain their normal logout tabs regardless of this setting.
-
-In custom menu arrangements, both the bare X and the restored stone move with the menu bars; individual orb dragging and the separate minimap logout copy are suspended. **Hide Logout-X (Modern)** still applies, as do the logout-tab and bottom-row hiding settings. Game-hidden controls remain hidden. Turning restoration off removes the added background while retaining custom group membership and positions. Native rows returns the bare X to the minimap/orb arrangement.
 
 Hold **Alt** and drag a menu bar, using RuneLite's normal overlay positioning controls. The same control works with **Edit interface** on or off. If you changed RuneLite's overlay movement hotkey, use that key instead of Alt.
 
@@ -77,6 +83,8 @@ This also covers Combat Achievements overview, tasks, boss lists/details and rew
 
 Banking can hide tab icons as part of the game's normal behavior. Interface Layout preserves stone backgrounds that the game still displays without forcing hidden icons back on or making them clickable. Bank and PIN windows keep their native positions and sizing. Window protection covers the interfaces listed above; it does not promise coverage for every game interface.
 
+![Hide menu tabs settings with individual visibility controls](docs/media/hide-menu-tabs.png)
+
 Open **Hide menu tabs** to hide individual tabs, including Combat options, Skills, Quests, Inventory, Equipment, Prayer, Spellbook, Clan, Account Management, Friends, Logout, Settings, Emotes and Music.
 
 Hiding a tab removes its icon and stone background. The remaining stones close the gap, and the bar stays movable. Show the tab again by clearing its visibility setting.
@@ -94,11 +102,13 @@ The logout control depends on the game's display mode. **Fixed** and **Resizable
 
 **Restore logout stone (Modern)** places the existing logout X over a menu-stone background. Leave it off for the bare X. Both forms can be detached and joined to custom menu bars; changing the background preserves saved grouping. In Native rows, the bare X stays beside the minimap.
 
-Fixed and Resizable Classic keep their native Logout tabs. **Hide Logout-X (Modern)** and the individual logout visibility setting can hide the Modern control; check those settings if it is missing.
+Fixed and Resizable Classic keep their native Logout tabs. **Hide Logout-X (Modern)**, the individual logout visibility setting and **Hide clan–music tabs** can hide the Modern control; check those settings if it is missing. In custom menu arrangements, the logout control belongs to the menu group, so individual orb dragging and the separate minimap logout copy are suspended. Turning restoration off removes only the added background and keeps custom group membership. The X opens the native logout panel; game-hidden controls remain hidden.
 
 ### Map and orb visibility
 
 Use **Map and orb visibility** to choose an orb arrangement and hide individual controls.
+
+![Map and orb visibility settings with Free Position selected](docs/media/map-and-orb-visibility.png)
 
 - **Hide minimap** removes the native minimap in resizable modes. In Free Position, the orbs keep their saved locations.
 - **Hide compass** hides the compass independently.
@@ -134,6 +144,8 @@ Preset anchoring, gap handling and slot swapping apply to compact arrangements. 
 **Prevent orb and minimap clickthrough** stops clicks on orbs and the minimap from reaching the game behind them. Minimap navigation still works, including the detached minimap in compact layouts. This applies to every orb arrangement and uses the existing clickthrough setting.
 
 ### Separate minimap and shortcuts
+
+![Orb layout options, minimap toggle and keyboard shortcut settings](docs/media/orb-layout-and-shortcuts.png)
 
 **Show separate minimap**, under **Orb layout options**, displays a separate movable minimap while **Hide minimap** is enabled in a resizable mode. Use RuneLite's normal **Alt-drag** controls to position it.
 
