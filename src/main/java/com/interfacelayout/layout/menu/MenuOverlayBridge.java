@@ -41,7 +41,7 @@ public class MenuOverlayBridge
         if (!running) return;
         // Retire old incarnations of numeric group slots. Keeping them registered
         // would accumulate invisible overlays after repeated detach/join gestures.
-        String prefix = "INTERFACE_LAYOUT_MENU_" + menu.mode() + "_"
+        String prefix = "INTERFACE_LAYOUT_MENU_" + menu.layoutMode() + "_"
             + (menu.individualDragging() ? "group_" : "row_");
         groups.values().removeIf(overlay -> {
             if (!overlay.name.startsWith(prefix) || overlay.name.equals(name(overlay.id))) return false;
@@ -98,7 +98,7 @@ public class MenuOverlayBridge
     }
     private String name(int id)
     {
-        return "INTERFACE_LAYOUT_MENU_" + menu.mode() + "_"
+        return "INTERFACE_LAYOUT_MENU_" + menu.layoutMode() + "_"
             + (menu.individualDragging() ? "group_" : "row_") + id
             + (menu.individualDragging() && menu.groupGeneration(id) > 0 ? "_" + menu.groupGeneration(id) : "");
     }
@@ -123,7 +123,7 @@ public class MenuOverlayBridge
     public void resetAll()
     {
         // Clear preferences for modes/groups not instantiated in this session too.
-        for (String mode : new String[]{"fixed", "classic", "modern"})
+        for (String mode : new String[]{"fixed", "classic", "modern", "fixed_overlay", "classic_overlay", "modern_overlay"})
             for (String kind : new String[]{"group_", "row_"})
                 for (int id = 0; id <= 14; id++)
                 {

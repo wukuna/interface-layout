@@ -16,6 +16,15 @@ Interface Layout adapts these BSD-2-Clause plugins:
   - Copyright (c) 2018, Tomas Slusny <slusnucky@gmail.com>.
   - The detached minimap overlay retains adapted WidgetOverlay code.
 
+- **Custom Game Tabs**, Frederick Campbell, https://github.com/FrederickCampbell/custom-game-tabs
+  - Reference commit: `f7c861fe0a19995d401cabb3361a4812ed43a88d`.
+  - Copyright (c) 2016-2017, Adam <Adam@sigterm.info>; Copyright (c) 2026, Frederick Campbell.
+  - Native menu-operation projection and its MenuEntryAdded integration are adapted
+    in MenuButtonOverlay. Replacement surfaces are implemented using Interface
+    Layout's existing grouping and native Fixed/Classic/Modern artwork.
+  - The original BSD-2-Clause license is retained in LICENSE-CUSTOM-GAME-TABS and
+    packaged in META-INF/LICENSE-CUSTOM-GAME-TABS.
+
 All authors are attributed in the single BSD-2-Clause LICENSE at the repository
 root. The same license is included in the plugin JAR as META-INF/LICENSE, alongside
 this provenance notice. Original source copyright/license headers remain intact.

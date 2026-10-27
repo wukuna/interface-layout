@@ -23,7 +23,7 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 
-/** Overlay is an editing indicator only; all gameplay controls remain native widgets. */
+/** Editing indicators and grouping gestures for native or replacement menu buttons. */
 @Singleton
 public class InterfaceEditor extends Overlay implements MouseListener
 {

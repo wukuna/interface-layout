@@ -74,6 +74,11 @@ public class GameframeCoordinator
         refreshPending = true;
         clientThread.invokeLater(() -> { refreshPending = false; refresh(); });
     }
+    @Subscribe public void onVarClientIntChanged(net.runelite.api.events.VarClientIntChanged event)
+    {
+        if (running && event.getIndex() == net.runelite.api.gameval.VarClientID.TOPLEVEL_PANEL)
+            scheduleRefresh();
+    }
     public void resetPositions()
     {
         editor.cancel(); free.resetAll(); freeOverlays.resetAll(); menu.resetAll(); menuOverlays.resetAll(); manager.resetSavedPositionConfigs();
@@ -85,7 +90,8 @@ public class GameframeCoordinator
             || id == Script.PROC_TOPLEVEL_SUBCHANGE || id == Script.TOPLEVEL_SIDE_CUSTOMIZE
             || id == Script.TOPLEVEL_RESIZE_CUSTOMIZE || id == Script.ORBS_UPDATE_STORE
             || id == Script.ORBS_UPDATE_ACTIVITY || id == Script.WORLD_MAP_UPDATE
-            || id == Script.WIKI_ICON_INIT || id == Script.WIKI_ICON_UPDATE;
+            || id == Script.WIKI_ICON_INIT || id == Script.WIKI_ICON_UPDATE
+            || id == Script.TOPLEVEL_SIDEBUTTON_OP;
     }
     @Subscribe(priority = 2) public void onScriptPreFired(ScriptPreFired event)
     {
@@ -139,6 +145,7 @@ public class GameframeCoordinator
     {
         if (!event.getGroup().equals("interfacelayout")) return;
         if (event.getKey().equals("editInterface") || event.getKey().equals("menuLayout")
+            || event.getKey().equals("menuOverlayButtons") || event.getKey().equals("menuGroupSize") || event.getKey().startsWith("sizeStone")
             || event.getKey().equals(com.interfacelayout.layout.orbs.OrbConstants.ConfigKeys.ORB_LAYOUT))
             editor.cancel();
         scheduleRefresh();

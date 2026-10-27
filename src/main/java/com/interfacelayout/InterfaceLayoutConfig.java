@@ -582,10 +582,74 @@ public interface InterfaceLayoutConfig extends Config
     default com.interfacelayout.layout.menu.MenuStoneController.Layout menuLayout() { return com.interfacelayout.layout.menu.MenuStoneController.Layout.VANILLA_HORIZONTAL; }
     @ConfigItem(keyName = "menuDirection", name = "Initial bar direction", description = "Initial direction in Free position. Existing bars keep their direction. Joining two separate stones side-by-side makes a row; above or below makes a column.", section = menu, position = 1)
     default com.interfacelayout.layout.menu.MenuStoneController.Direction menuDirection() { return com.interfacelayout.layout.menu.MenuStoneController.Direction.VERTICAL; }
+    @ConfigItem(keyName = "menuOverlayButtons", name = "Use overlay menu buttons", description = "Replace visible menu tabs with scalable overlay buttons using the current game/resource-pack artwork. Works in Fixed, Classic and Modern. Existing bars, hiding and grouping are retained; native interface contents are unchanged.", section = menu, position = 9)
+    default boolean menuOverlayButtons() { return false; }
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "menuGroupSize", name = "Resize menu tabs (%)", description = "Size of replacement menu buttons and their click areas. Only applies with Use overlay menu buttons enabled. 100% follows the native tab size. Orbs and interface contents are unchanged.", section = menu, position = 10)
+    default int menuGroupSize() { return 100; }
+    @ConfigSection(name = "Individual overlay tab sizes", description = "Relative sizes for replacement menu buttons only; 100% follows Resize menu tabs. Native controls and panel contents are unchanged.", closedByDefault = true, position = 10)
+    String overlaySizes = "overlayTabSizes";
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "sizeStoneCombat", name = "Combat tab", description = "Relative to Resize menu tabs: 100% follows the group. Combined size is limited to 25-200%. Changes only this replacement tab button and its icon; requires Use overlay menu buttons.", section = overlaySizes, position = 0)
+    default int sizeStoneCombat() { return 100; }
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "sizeStoneSkills", name = "Skills tab", description = "Relative to Resize menu tabs: 100% follows the group. Combined size is limited to 25-200%. Changes only this replacement tab button and its icon; requires Use overlay menu buttons.", section = overlaySizes, position = 1)
+    default int sizeStoneSkills() { return 100; }
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "sizeStoneQuests", name = "Quests tab", description = "Relative to Resize menu tabs: 100% follows the group. Combined size is limited to 25-200%. Changes only this replacement tab button and its icon; requires Use overlay menu buttons.", section = overlaySizes, position = 2)
+    default int sizeStoneQuests() { return 100; }
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "sizeStoneInventory", name = "Inventory tab", description = "Relative to Resize menu tabs: 100% follows the group. Combined size is limited to 25-200%. Changes only this replacement tab button and its icon; requires Use overlay menu buttons.", section = overlaySizes, position = 3)
+    default int sizeStoneInventory() { return 100; }
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "sizeStoneEquipment", name = "Equipment tab", description = "Relative to Resize menu tabs: 100% follows the group. Combined size is limited to 25-200%. Changes only this replacement tab button and its icon; requires Use overlay menu buttons.", section = overlaySizes, position = 4)
+    default int sizeStoneEquipment() { return 100; }
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "sizeStonePrayer", name = "Prayer tab", description = "Relative to Resize menu tabs: 100% follows the group. Combined size is limited to 25-200%. Changes only this replacement tab button and its icon; requires Use overlay menu buttons.", section = overlaySizes, position = 5)
+    default int sizeStonePrayer() { return 100; }
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "sizeStoneSpellbook", name = "Spellbook tab", description = "Relative to Resize menu tabs: 100% follows the group. Combined size is limited to 25-200%. Changes only this replacement tab button and its icon; requires Use overlay menu buttons.", section = overlaySizes, position = 6)
+    default int sizeStoneSpellbook() { return 100; }
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "sizeStoneClan", name = "Clan tab", description = "Relative to Resize menu tabs: 100% follows the group. Combined size is limited to 25-200%. Changes only this replacement tab button and its icon; requires Use overlay menu buttons.", section = overlaySizes, position = 7)
+    default int sizeStoneClan() { return 100; }
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "sizeStoneAccount", name = "Account tab", description = "Relative to Resize menu tabs: 100% follows the group. Combined size is limited to 25-200%. Changes only this replacement tab button and its icon; requires Use overlay menu buttons.", section = overlaySizes, position = 8)
+    default int sizeStoneAccount() { return 100; }
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "sizeStoneFriends", name = "Friends tab", description = "Relative to Resize menu tabs: 100% follows the group. Combined size is limited to 25-200%. Changes only this replacement tab button and its icon; requires Use overlay menu buttons.", section = overlaySizes, position = 9)
+    default int sizeStoneFriends() { return 100; }
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "sizeStoneLogout", name = "Logout tab", description = "Relative to Resize menu tabs: 100% follows the group. Combined size is limited to 25-200%. Changes only this replacement tab button and its icon; requires Use overlay menu buttons.", section = overlaySizes, position = 10)
+    default int sizeStoneLogout() { return 100; }
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "sizeStoneSettings", name = "Settings tab", description = "Relative to Resize menu tabs: 100% follows the group. Combined size is limited to 25-200%. Changes only this replacement tab button and its icon; requires Use overlay menu buttons.", section = overlaySizes, position = 11)
+    default int sizeStoneSettings() { return 100; }
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "sizeStoneEmotes", name = "Emotes tab", description = "Relative to Resize menu tabs: 100% follows the group. Combined size is limited to 25-200%. Changes only this replacement tab button and its icon; requires Use overlay menu buttons.", section = overlaySizes, position = 12)
+    default int sizeStoneEmotes() { return 100; }
+    @Range(min = 25, max = 200)
+    @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+    @ConfigItem(keyName = "sizeStoneMusic", name = "Music tab", description = "Relative to Resize menu tabs: 100% follows the group. Combined size is limited to 25-200%. Changes only this replacement tab button and its icon; requires Use overlay menu buttons.", section = overlaySizes, position = 13)
+    default int sizeStoneMusic() { return 100; }
     @Range(min = 0, max = 20)
     @ConfigItem(keyName = "menuSpacing", name = "Stone spacing", description = "Pixels between visible stones. Hidden stones close the gap without changing the group's saved position.", section = menu, position = 2)
     default int menuSpacing() { return 0; }
-    @ConfigItem(keyName = "menuRestoreLogoutTab", name = "Restore logout stone (Modern)", description = "Move Modern's existing logout X onto a menu-tab background. Off uses the bare X. Both can join custom menu groups; Native rows leaves the bare X at the minimap. The original click area and Hide Logout-X are retained. Fixed and Classic are unchanged.", section = menu, position = 8)
+    @ConfigItem(keyName = "menuRestoreLogoutTab", name = "Restore logout stone (Modern)", description = "Move Modern's existing logout X onto a menu-tab background. Off uses the bare X. Both can join custom menu groups; Native rows leaves the bare X at the minimap. Native buttons retain the original click area; overlay buttons use the configured size. Hide Logout-X is retained. Fixed and Classic already have logout tabs.", section = menu, position = 8)
     default boolean restoreLogoutTab() { return false; }
     @ConfigItem(keyName = "allowClicksThroughGaps", name = "Allow clicks through gaps", description = "Allow game clicks between stones in a moved menu bar. Disable to block clicks inside these gaps without selecting a tab. Stone buttons are unchanged.", section = menu, position = 7)
     default boolean allowClicksThroughGaps() { return true; }

@@ -93,6 +93,8 @@ public class MenuStoneController
     @Inject private WidgetStateStore states;
     @Inject private WidgetBoundsExpander expander;
     @Inject private MenuStoneBackgrounds backgrounds;
+    @Inject private MenuButtonOverlay buttons;
+    @Inject private MenuOverlayState overlayState;
     private boolean temporarilyShown;
     private int dragSourceGroup = -1, dragStone = -1;
     private String dragMode;
@@ -144,11 +146,15 @@ public class MenuStoneController
         bounds.forEach((id, rectangle) -> result.put(id, new Rectangle(rectangle)));
         return result;
     }
-    public void restoreBackgrounds() { backgrounds.restore(); }
+    public void restoreBackgrounds() { buttons.clear(); backgrounds.restore(); }
     public String mode() { return orbs.isFixedMode() ? "fixed" : orbs.isClassicResizable() ? "classic" : "modern"; }
+
+    public String layoutMode() { return mode() + (config.menuOverlayButtons() ? "_overlay" : ""); }
 
     public void apply()
     {
+        overlayState.sync(config.menuOverlayButtons());
+        if (config.menuOverlayButtons()) overlayState.seedMode(mode());
         stack = new Rectangle();
         groupBounds = Map.of(); stoneBounds = Map.of();
         gapBounds = List.of();
@@ -170,6 +176,7 @@ public class MenuStoneController
         boolean vertical = config.menuLayout() == Layout.VERTICAL_LEFT || config.menuLayout() == Layout.VERTICAL_RIGHT
             || config.menuLayout() == Layout.FREE_POSITION;
         boolean modern = !orbs.isFixedMode() && !orbs.isClassicResizable();
+        buttons.prepare(registry, new int[]{rowBackground(0), rowBackground(1)}, modern);
         initializeFreeRows(registry);
         // Own both native rows consistently, so visibility does not switch between
         // built-in and plugin overlay preferences (and lose the dragged origin).
@@ -212,6 +219,11 @@ public class MenuStoneController
                 entry.sortX = friends == null ? WidgetGeometry.location(peer).x
                     : (WidgetGeometry.location(friends).x + WidgetGeometry.location(peer).x) / 2;
             }
+            if (buttons.active())
+            {
+                buttons.dimensions(i, entry.width, entry.height, entry.stoneOffset, entry.iconOffset);
+                entry.width = buttons.scaled(i, entry.width); entry.height = buttons.scaled(i, entry.height);
+            }
             groups.computeIfAbsent(vertical ? group(i) : row, ignored -> new ArrayList<>()).add(entry);
         }
         Map<Integer, Rectangle> nextGroups = new LinkedHashMap<>(), nextStones = new LinkedHashMap<>();
@@ -235,6 +247,7 @@ public class MenuStoneController
             boolean intact = false;
             for (Map.Entry<Integer, List<Entry>> group : groups.entrySet())
                 intact |= intactNativeRow(group.getKey(), group.getValue()) == row;
+            if (buttons.active()) { buttons.hideRow(rowBackground(row)); continue; }
             if (!modern && intact) continue;
             if (modern) backgrounds.prepareRow(row == 0, vertical || hasSavedOrigin(row) || (row == 1 && config.restoreLogoutTab()));
             else backgrounds.prepareRow(rowBackground(row), vertical || hasSavedOrigin(row));
@@ -244,7 +257,7 @@ public class MenuStoneController
             int id = group.getKey();
             List<Entry> entries = group.getValue();
             int sourceRow = intactNativeRow(id, entries);
-            if (!modern && sourceRow >= 0)
+            if (!buttons.active() && !modern && sourceRow >= 0)
             {
                 // Native click targets have unequal widths/offsets and overlap the
                 // shared row artwork. Packing them edge-to-edge shifts the icons.
@@ -299,23 +312,33 @@ public class MenuStoneController
                     origin.y + (horizontal ? (height - entry.height) / 2 : offset));
                 // Closing gaps within a native row must not resize its clipping layers.
                 boolean movable = vertical || hasSavedOrigin(id) || (modern && entry.index == 10);
-                if (movable)
+                if (movable && !buttons.active())
                 {
                     expander.allowCanvasPosition(entry.stone);
                     if (entry.icon != null) expander.allowCanvasPosition(entry.icon);
                 }
                 Rectangle placed = new Rectangle(destination.x, destination.y, entry.width, entry.height);
                 boolean covered = windowBounds.stream().anyMatch(bounds -> bounds.intersects(placed));
-                if (modern && !covered && (entry.index != 10 || config.restoreLogoutTab()))
-                    backgrounds.place(entry.index, destination, entry.width, entry.height, movable);
-                else if (!modern && !covered)
-                    backgrounds.placeFromRow(rowBackground(entry.index / 7), destination, entry.nativeBounds, movable);
-                move(entry.stone, new Point(destination.x + entry.stoneOffset.x, destination.y + entry.stoneOffset.y));
-                if (entry.icon != null) move(entry.icon, new Point(destination.x + entry.iconOffset.x, destination.y + entry.iconOffset.y));
-                if (modern && entry.index == 10 && config.restoreLogoutTab() && !covered)
-                    backgrounds.placeLogoutIcon(entry.icon,
-                        new Point(destination.x + entry.iconOffset.x, destination.y + entry.iconOffset.y));
-                if (covered) { states.hide(entry.stone, true); states.hide(entry.icon, true); }
+                if (buttons.active())
+                {
+                    buttons.place(entry.index, placed, covered);
+                    // Decoration-only native entries must not remain at their old
+                    // position while their row is represented by overlay buttons.
+                    states.hide(entry.stone, true); states.hide(entry.icon, true);
+                }
+                else
+                {
+                    if (modern && !covered && (entry.index != 10 || config.restoreLogoutTab()))
+                        backgrounds.place(entry.index, destination, entry.width, entry.height, movable);
+                    else if (!modern && !covered)
+                        backgrounds.placeFromRow(rowBackground(entry.index / 7), destination, entry.nativeBounds, movable);
+                    move(entry.stone, new Point(destination.x + entry.stoneOffset.x, destination.y + entry.stoneOffset.y));
+                    if (entry.icon != null) move(entry.icon, new Point(destination.x + entry.iconOffset.x, destination.y + entry.iconOffset.y));
+                    if (modern && entry.index == 10 && config.restoreLogoutTab() && !covered)
+                        backgrounds.placeLogoutIcon(entry.icon,
+                            new Point(destination.x + entry.iconOffset.x, destination.y + entry.iconOffset.y));
+                    if (covered) { states.hide(entry.stone, true); states.hide(entry.icon, true); }
+                }
                 boolean interactive = !covered && entry.interactive;
                 if (interactive) nextStones.put(entry.index, placed);
                 if (interactive && previousInteractive && config.menuSpacing() > 0)
@@ -380,7 +403,7 @@ public class MenuStoneController
     private void initializeFreeRows(int[][] registry)
     {
         if (config.menuLayout() != Layout.FREE_POSITION) return;
-        String mode = mode();
+        String mode = layoutMode();
         if (Boolean.TRUE.equals(configs.getConfiguration("interfacelayout", "menuSeparateRows_" + mode, Boolean.class))) return;
         // Split legacy implicit defaults too, even when their bar was moved.
         // Explicit memberships/orders are deliberate edits and must survive.
@@ -517,17 +540,17 @@ public class MenuStoneController
     }
     private String positionKey(int group)
     {
-        if (config.menuLayout() == Layout.VANILLA_HORIZONTAL) return "menuNativePosition_" + mode() + "_" + group;
-        return group == 0 ? "menuPosition_" + mode() : "menuGroupPosition_" + mode() + "_" + group;
+        if (config.menuLayout() == Layout.VANILLA_HORIZONTAL) return "menuNativePosition_" + layoutMode() + "_" + group;
+        return group == 0 ? "menuPosition_" + layoutMode() : "menuGroupPosition_" + layoutMode() + "_" + group;
     }
     private int group(int index)
     {
-        Integer value = configs.getConfiguration("interfacelayout", "menuGroup_" + mode() + "_" + index, Integer.class);
+        Integer value = configs.getConfiguration("interfacelayout", "menuGroup_" + layoutMode() + "_" + index, Integer.class);
         return value == null || value < 0 || value > 14 ? 0 : value;
     }
     public int groupForStone(int index) { return group(index); }
     public int groupGeneration(int id)
-    { return groupGeneration(mode(), id); }
+    { return groupGeneration(layoutMode(), id); }
     public int groupGeneration(String mode, int id)
     {
         Integer value = configs.getConfiguration("interfacelayout", "menuGeneration_" + mode + "_" + id, Integer.class);
@@ -535,12 +558,12 @@ public class MenuStoneController
     }
     private int order(int index)
     {
-        Integer value = configs.getConfiguration("interfacelayout", "menuOrder_" + mode() + "_" + index, Integer.class);
+        Integer value = configs.getConfiguration("interfacelayout", "menuOrder_" + layoutMode() + "_" + index, Integer.class);
         return value == null ? index : value;
     }
     private boolean horizontal(int group)
     {
-        Boolean saved = configs.getConfiguration("interfacelayout", "menuHorizontal_" + mode() + "_" + group, Boolean.class);
+        Boolean saved = configs.getConfiguration("interfacelayout", "menuHorizontal_" + layoutMode() + "_" + group, Boolean.class);
         return saved != null ? saved : config.menuLayout() == Layout.FREE_POSITION
             && config.menuDirection() == Direction.HORIZONTAL;
     }
@@ -548,7 +571,7 @@ public class MenuStoneController
     public void detach(int index, Point point)
     {
         int currentGroup = group(index), members = 0;
-        dragStone = index; dragSourceGroup = currentGroup; dragMode = mode();
+        dragStone = index; dragSourceGroup = currentGroup; dragMode = layoutMode();
         dragSourceHorizontal = horizontal(currentGroup);
         for (int member : stoneBounds.keySet()) if (group(member) == currentGroup) members++;
         if (members <= 1) { saveGroup(currentGroup, point); return; }
@@ -557,9 +580,9 @@ public class MenuStoneController
         for (int member = 0; member < 14; member++) usedGroups.add(group(member));
         while (id < 14 && usedGroups.contains(id)) id++;
         // A reused numeric slot is a new bar, not the old bar's external anchor assignment.
-        configs.setConfiguration("interfacelayout", "menuGeneration_" + mode() + "_" + id, groupGeneration(id) + 1);
-        configs.setConfiguration("interfacelayout", "menuGroup_" + mode() + "_" + index, id);
-        configs.setConfiguration("interfacelayout", "menuHorizontal_" + mode() + "_" + id, false);
+        configs.setConfiguration("interfacelayout", "menuGeneration_" + layoutMode() + "_" + id, groupGeneration(id) + 1);
+        configs.setConfiguration("interfacelayout", "menuGroup_" + layoutMode() + "_" + index, id);
+        configs.setConfiguration("interfacelayout", "menuHorizontal_" + layoutMode() + "_" + id, false);
         saveGroup(id, point);
     }
     public void moveStone(int index, Point point) { saveGroup(group(index), point); }
@@ -567,17 +590,17 @@ public class MenuStoneController
     {
         dragStone = -1;
         if (config.menuLayout() == Layout.FREE_POSITION
-            && Boolean.TRUE.equals(configs.getConfiguration("interfacelayout", "menuSeparateRows_" + mode(), Boolean.class)))
+            && Boolean.TRUE.equals(configs.getConfiguration("interfacelayout", "menuSeparateRows_" + layoutMode(), Boolean.class)))
         {
-            Integer bottom = configs.getConfiguration("interfacelayout", "menuBottomGroup_" + mode(), Integer.class);
-            configs.setConfiguration("interfacelayout", "menuGroup_" + mode() + "_" + index, index < 7 ? 0 : bottom == null ? 1 : bottom);
+            Integer bottom = configs.getConfiguration("interfacelayout", "menuBottomGroup_" + layoutMode(), Integer.class);
+            configs.setConfiguration("interfacelayout", "menuGroup_" + layoutMode() + "_" + index, index < 7 ? 0 : bottom == null ? 1 : bottom);
         }
-        else configs.unsetConfiguration("interfacelayout", "menuGroup_" + mode() + "_" + index);
-        configs.unsetConfiguration("interfacelayout", "menuOrder_" + mode() + "_" + index);
+        else configs.unsetConfiguration("interfacelayout", "menuGroup_" + layoutMode() + "_" + index);
+        configs.unsetConfiguration("interfacelayout", "menuOrder_" + layoutMode() + "_" + index);
     }
     public void dropStone(int index, Point cursor)
     {
-        boolean returning = dragStone == index && mode().equals(dragMode);
+        boolean returning = dragStone == index && layoutMode().equals(dragMode);
         dragStone = -1;
         Map.Entry<Integer, Rectangle> closest = null;
         double distance = Double.MAX_VALUE;
@@ -608,15 +631,15 @@ public class MenuStoneController
             members.sort(Comparator.comparingInt(this::order).thenComparingInt(Integer::intValue));
             int insertion = members.indexOf(candidate.getKey()) + (before ? 0 : 1);
             members.add(insertion, index);
-            configs.setConfiguration("interfacelayout", "menuGroup_" + mode() + "_" + index, targetGroup);
+            configs.setConfiguration("interfacelayout", "menuGroup_" + layoutMode() + "_" + index, targetGroup);
             for (int position = 0; position < members.size(); position++)
-                configs.setConfiguration("interfacelayout", "menuOrder_" + mode() + "_" + members.get(position), position);
-            configs.setConfiguration("interfacelayout", "menuHorizontal_" + mode() + "_" + targetGroup, row);
+                configs.setConfiguration("interfacelayout", "menuOrder_" + layoutMode() + "_" + members.get(position), position);
+            configs.setConfiguration("interfacelayout", "menuHorizontal_" + layoutMode() + "_" + targetGroup, row);
             return;
         }
     }
     public void resetGroup(int group) { configs.unsetConfiguration("interfacelayout", positionKey(group)); }
-    public void resetCurrent() { resetMode(mode()); }
+    public void resetCurrent() { resetMode(layoutMode()); }
     private void resetMode(String mode)
     {
         dragStone = -1;
@@ -637,11 +660,12 @@ public class MenuStoneController
     }
     public void resetAll()
     {
-        for (String mode : new String[]{"fixed", "classic", "modern"}) resetMode(mode);
+        for (String mode : new String[]{"fixed", "classic", "modern", "fixed_overlay", "classic_overlay", "modern_overlay"}) resetMode(mode);
     }
     private static final class Entry
     {
-        final int index, width, height;
+        final int index;
+        int width, height;
         final Widget stone, icon;
         final Point iconOffset, stoneOffset;
         int sortX;

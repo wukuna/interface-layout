@@ -23,7 +23,7 @@ public class MenuOverlayBridgeTest
     @Test public void newGroupIdentityRetiresOldOverlayAndGroupingSetsNativePreference()
     {
         MenuStoneController menu = mock(MenuStoneController.class);
-        when(menu.mode()).thenReturn("modern"); when(menu.individualDragging()).thenReturn(true);
+        when(menu.mode()).thenReturn("modern"); when(menu.layoutMode()).thenReturn("modern"); when(menu.individualDragging()).thenReturn(true);
         when(menu.groups()).thenReturn(Map.of(1, new Rectangle(100, 200, 33, 36)));
         when(menu.groupGeneration(1)).thenReturn(1);
         OverlayManager overlays = mock(OverlayManager.class);
@@ -56,7 +56,7 @@ public class MenuOverlayBridgeTest
     private void lifecycle(boolean individual)
     {
         MenuStoneController menu = mock(MenuStoneController.class);
-        when(menu.mode()).thenReturn("modern"); when(menu.individualDragging()).thenReturn(individual);
+        when(menu.mode()).thenReturn("modern"); when(menu.layoutMode()).thenReturn("modern"); when(menu.individualDragging()).thenReturn(individual);
         Rectangle actual = new Rectangle(400, 200, 33, 76);
         when(menu.groups()).thenAnswer(i -> Map.of(0, new Rectangle(actual)));
         doAnswer(i -> { actual.setLocation((Point)i.getArgument(1)); return null; }).when(menu).saveGroup(anyInt(), any(Point.class));
@@ -112,7 +112,7 @@ public class MenuOverlayBridgeTest
     @Test public void manualEditingClearsNativeOverlayPreferenceWithoutResettingSavedGroup()
     {
         MenuStoneController menu = mock(MenuStoneController.class);
-        when(menu.mode()).thenReturn("modern"); when(menu.individualDragging()).thenReturn(true);
+        when(menu.mode()).thenReturn("modern"); when(menu.layoutMode()).thenReturn("modern"); when(menu.individualDragging()).thenReturn(true);
         when(menu.groups()).thenReturn(Map.of(0, new Rectangle(100, 200, 33, 36)));
         OverlayManager overlays = mock(OverlayManager.class);
         List<Overlay> added = new ArrayList<>();
@@ -136,7 +136,7 @@ public class MenuOverlayBridgeTest
         for (boolean classic : new boolean[]{true, false})
         {
             MenuStoneController menu = mock(MenuStoneController.class);
-            when(menu.mode()).thenReturn(classic ? "classic" : "modern");
+            when(menu.mode()).thenReturn(classic ? "classic" : "modern"); when(menu.layoutMode()).thenReturn(classic ? "classic" : "modern");
             when(menu.groups()).thenReturn(Map.of());
             WidgetBoundsExpander expander = mock(WidgetBoundsExpander.class);
             int container = classic ? InterfaceID.ToplevelOsrsStretch.MAP_CONTAINER
@@ -175,7 +175,7 @@ public class MenuOverlayBridgeTest
         for (boolean column : new boolean[]{true, false})
         {
             MenuStoneController menu = mock(MenuStoneController.class);
-            when(menu.mode()).thenReturn("modern"); when(menu.individualDragging()).thenReturn(true);
+            when(menu.mode()).thenReturn("modern"); when(menu.layoutMode()).thenReturn("modern"); when(menu.individualDragging()).thenReturn(true);
             when(menu.groups()).thenReturn(Map.of(7, new Rectangle(20, 20, column ? 33 : 99, column ? 108 : 36)));
             List<Overlay> registered = new ArrayList<>();
             OverlayManager overlays = mock(OverlayManager.class);

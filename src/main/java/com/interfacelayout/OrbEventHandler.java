@@ -83,6 +83,7 @@ public class OrbEventHandler implements KeyListener
     @Inject private net.runelite.client.eventbus.EventBus eventBus;
     @Inject private com.interfacelayout.util.LegacyConfigImporter legacyConfigs;
     @Inject private com.interfacelayout.layout.menu.MenuStoneClickPriority stoneClickPriority;
+    @Inject private com.interfacelayout.layout.menu.MenuButtonOverlay menuButtons;
 
 	@Inject
 	private Client client;
@@ -151,6 +152,8 @@ public class OrbEventHandler implements KeyListener
 		legacyConfigs.importOnce();
         manager.migrateConfigs();
 		overlayManager.add(minimapOverlay);
+        overlayManager.add(menuButtons);
+        eventBus.register(menuButtons);
         overlayManager.add(interfaceEditor);
         eventBus.register(gameframe);
         stoneClickPriority.clear();
@@ -199,6 +202,8 @@ public class OrbEventHandler implements KeyListener
         lifecycleGeneration++;
         manager.active = false;
 		overlayManager.remove(minimapOverlay);
+        overlayManager.remove(menuButtons);
+        eventBus.unregister(menuButtons);
         overlayManager.remove(interfaceEditor);
         eventBus.unregister(gameframe);
         eventBus.unregister(stoneClickPriority);
@@ -207,7 +212,7 @@ public class OrbEventHandler implements KeyListener
         mouseManager.unregisterMouseListener(interfaceEditor);
 		keyManager.unregisterKeyListener(this);
 		mouseManager.unregisterMouseListener(dragListener);
-		clientThread.invoke(() -> { gameframe.stop(); manager.reset(); });
+		clientThread.invoke(() -> { gameframe.stop(); menuButtons.stop(); manager.reset(); });
 	}
 
 	@Subscribe
@@ -503,7 +508,7 @@ public class OrbEventHandler implements KeyListener
             });
             return;
         }
-if (group.equals(GROUP_NAME) && (key.startsWith("free_") || key.startsWith("menu") || key.startsWith("hideStone")
+if (group.equals(GROUP_NAME) && (key.startsWith("free_") || key.startsWith("menu") || key.startsWith("hideStone") || key.startsWith("sizeStone")
     || key.equals("hiddenStones") || key.equals("hideTopMenu") || key.equals("hideBottomMenu")
     || key.equals("hideLeftBar") || key.equals("hideRightBar") || key.equals("showMenuToggle") || key.equals("editGrid"))) return;
         if (group.equals(GROUP_NAME) && key.equals("editInterface"))

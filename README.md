@@ -1,6 +1,6 @@
 # Interface Layout
 
-Arrange RuneLite around the way you play. Move orbs and the compass, detach menu tabs and reconnect them into custom rows or columns, or choose a compact preset. Control which elements remain visible, restore the Modern logout stone, and protect orb and minimap clicks from reaching the game behind them.
+Arrange RuneLite around the way you play. Move orbs and the compass, detach menu tabs and reconnect them into custom rows or columns, or choose a compact preset. Control which elements remain visible, restore the Modern logout stone, and protect orb and minimap clicks from reaching the game behind them. Optional overlay menu buttons let you adjust tab size while retaining the active game or resource-pack artwork in Fixed, Resizable Classic and Resizable Modern.
 
 [Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Inspiration and recipe](#inspiration-and-recipe) · [Development](#development) · [Support](#support) · [License and attribution](#license-and-attribution)
 
@@ -9,6 +9,7 @@ Arrange RuneLite around the way you play. Move orbs and the compass, detach menu
 - **Free-position orbs** — move individual orbs and the compass independently of the minimap in resizable modes.
 - **Compact orb layouts** — arrange orbs vertically, horizontally, in a wider row, or with a custom preset.
 - **Movable menu bars** — keep native rows or start with vertical bars, then drag each bar wherever you want.
+- **Optional overlay menu buttons** — adjust menu-tab buttons from 25–200% as a group or individually, using the active game or resource-pack artwork. Native and overlay layouts are remembered separately. Off by default.
 - **Individual menu stones** — detach stones, leave them on their own, or join them into separate rows and columns.
 - **Individual visibility** — hide orbs, the compass, the minimap or specific menu tabs. Hidden menu stones also lose their backgrounds, and the remaining stones close the gap.
 - **Saved layouts** — keep separate menu arrangements for Fixed, Resizable Classic and Resizable Modern.
@@ -50,6 +51,20 @@ Open **Menu bars** and choose a **Menu arrangement**:
 - **Free position** lets you build your own arrangement. **Initial bar direction** chooses the starting direction of new bars; existing groups keep their direction.
 
 In Fixed and both resizable modes, **Free position** starts with separate top and bottom groups. Older combined defaults are split too, including moved bars; explicitly saved custom memberships, detached groups and ordering are retained. Choosing Column starts the default groups beside each other. In Resizable Classic, an untouched **Native rows** layout keeps the game's original stone artwork, spacing and icon alignment. Moving a native row with zero spacing translates it as a whole.
+
+#### Optional overlay menu buttons
+
+Under **Menu bars**, enable **Use overlay menu buttons**, then choose **Resize menu tabs (%)** (25–200%; 100% follows the native tab size). The setting is off by default. It supports **Fixed**, **Resizable Classic** and **Resizable Modern** and uses the same grouping, hiding controls and drag gestures as native buttons. First use copies the current arrangement into a separate overlay layout for that display mode.
+
+The replacements retain the active tab artwork, including Resource Packs and Interface Styles sprite overrides, with a subtle gold hover outline. Changing or disabling a resource pack refreshes the artwork without importing files or changing that plugin's settings. Fixed and Classic use their own row artwork; Modern uses its native stone background. Packs are not bundled and must support the selected display mode.
+
+Clicking a replacement opens the corresponding native tab. Existing native tab options and RuneLite-registered widget options remain on right-click. This changes the replacement menu-tab surfaces only: it does not resize orbs, the inventory contents, prayers, spells or other game interfaces. Native tab widgets retain their original dimensions. Controls hidden by the game remain unavailable, and supported overlapping windows take priority.
+
+The **Individual overlay tab sizes** section restores the per-tab size controls: 100% follows the menu-group percentage, and the combined size is bounded to 25–200%. Existing `menuGroupSize` and `sizeStone…` preferences from earlier test builds are retained; sizing only runs with overlay buttons enabled.
+
+Native and overlay menu positions/groups are stored separately for each display mode. Menu arrangement, spacing and tab visibility are remembered separately for the two button types. Turn overlays off to restore the previous native setup; turn them on again to return to your overlay setup. The snapshots belong to the current RuneLite profile and do not change another plugin’s settings. Orb controls remain unchanged. If the current gameframe does not expose a usable native tab operation, or a complete group will not fit the canvas, the native controls are retained. Stretched Mode still handles scaling the entire game view.
+
+The existing screenshots and video above show native buttons and grouping. New overlay-button captures will be added separately.
 
 #### Moving a whole bar
 
@@ -169,7 +184,7 @@ Legacy Compact Orbs and Menu Stones Hider settings are imported once per RuneLit
 
 ### Other orb, minimap and menu layout plugins
 
-Disable other plugins that move or hide the same controls before using Interface Layout. Declared conflicts include **Compact Orbs**, **Menu Stones Hider**, **Fixed Resizable Hybrid**, **Orb Hider**, **Minimap Hider** and **Movable Orbs**.
+Disable other plugins that move or hide the same controls before using Interface Layout. Declared conflicts include **Compact Orbs**, **Menu Stones Hider**, **Fixed Resizable Hybrid**, **Orb Hider**, **Minimap Hider**, **Movable Orbs** and **Custom Game Tabs**. Custom Game Tabs and Interface Layout both own the menu-tab surfaces; use one at a time.
 
 ### Custom UI Anchors
 
@@ -183,12 +198,13 @@ Ctrl+M while the World Map button is hidden is marked **Beta** in the Hide World
 
 ## Inspiration and recipe
 
-Interface Layout builds on Compact Orbs by cue and Menu Stones Hider by Richardant. Their adapted work supplies important parts of the orb and menu-visibility foundation. Interface Layout adds coordinated editing, detachable menu stones and custom bar grouping. The wider recipe is compact controls, deliberate placement and a readable gameframe.
+Interface Layout builds on Compact Orbs by cue and Menu Stones Hider by Richardant. Their adapted work supplies important parts of the orb and menu-visibility foundation. Interface Layout adds coordinated editing, detachable menu stones and custom bar grouping. Custom Game Tabs by Frederick Campbell provides the reference for replacement tab surfaces and native menu-operation projection; our implementation keeps the existing Interface Layout groups and the active gameframe artwork across all three modes. The wider recipe is compact controls, deliberate placement and a readable gameframe.
 
 | Project | Connection | What it contributes or complements |
 | --- | --- | --- |
 | [Compact Orbs](https://github.com/its-cue/compact-orbs) | Adapted foundation | Orb arrangements, editing and the separate minimap. Credit to cue; choose one plugin because both manage the same controls. |
 | [Menu Stones Hider](https://github.com/Richardant/menustoneshider) | Adapted foundation | Menu-stone and decoration visibility. Credit to Richardant; Interface Layout also moves and groups stones. Declared conflict. |
+| [Custom Game Tabs](https://github.com/FrederickCampbell/custom-game-tabs) | Adapted menu-operation approach | Replacement overlay tab buttons and native widget-operation projection. Interface Layout retains its own grouping, uses current resource-pack artwork and supports Fixed, Classic and Modern. Declared conflict. |
 | [Orb Hider](https://github.com/wizguin/runelite-orb-hider) | Focused alternative | Orb visibility without the larger layout toolset. Declared conflict. |
 | [Movable Orbs](https://github.com/anonyser/runelite-movable-orbs) | Related approach | Positions native orbs around the minimap. Both plugins manage orb placement; declared conflict. |
 | [Fixed Resizable Hybrid](https://github.com/Lapask/fixed-resizable-hybrid) | Different layout approach | A Fixed-style gameframe in Resizable Classic. Its reskin is distinct from custom stone grouping. Declared conflict. |
