@@ -83,29 +83,9 @@ public class MenuButtonOverlay extends Overlay
     public void clear() { active = false; prepared.clear(); placed.clear(); }
     public void stop() { clear(); sprites.clear(); }
     public boolean active() { return active; }
-    public int scaled(int index, int size)
+    public int scaled(int size)
     {
-        int individual;
-        switch (index)
-        {
-            case 0: individual = config.sizeStoneCombat(); break;
-            case 1: individual = config.sizeStoneSkills(); break;
-            case 2: individual = config.sizeStoneQuests(); break;
-            case 3: individual = config.sizeStoneInventory(); break;
-            case 4: individual = config.sizeStoneEquipment(); break;
-            case 5: individual = config.sizeStonePrayer(); break;
-            case 6: individual = config.sizeStoneSpellbook(); break;
-            case 7: individual = config.sizeStoneClan(); break;
-            case 8: individual = config.sizeStoneAccount(); break;
-            case 9: individual = config.sizeStoneFriends(); break;
-            case 10: individual = config.sizeStoneLogout(); break;
-            case 11: individual = config.sizeStoneSettings(); break;
-            case 12: individual = config.sizeStoneEmotes(); break;
-            case 13: individual = config.sizeStoneMusic(); break;
-            default: individual = 100;
-        }
-        int group = Math.max(25, Math.min(200, config.menuGroupSize()));
-        int percent = Math.max(25, Math.min(200, (group * Math.max(25, Math.min(200, individual)) + 50) / 100));
+        int percent = Math.max(25, Math.min(200, config.menuGroupSize()));
         return Math.max(1, (int) Math.round(size * percent / 100.0));
     }
 

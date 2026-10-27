@@ -9,7 +9,7 @@ Arrange RuneLite around the way you play. Move orbs and the compass, detach menu
 - **Free-position orbs** — move individual orbs and the compass independently of the minimap in resizable modes.
 - **Compact orb layouts** — arrange orbs vertically, horizontally, in a wider row, or with a custom preset.
 - **Movable menu bars** — keep native rows or start with vertical bars, then drag each bar wherever you want.
-- **Optional overlay menu buttons** — adjust menu-tab buttons from 25–200% as a group or individually, using the active game or resource-pack artwork. Native and overlay layouts are remembered separately. Off by default.
+- **Optional overlay menu buttons** — adjust menu-tab buttons from 25–200% together with one shared size setting, using the active game or resource-pack artwork. Native and overlay layouts are remembered separately. Off by default.
 - **Individual menu stones** — detach stones, leave them on their own, or join them into separate rows and columns.
 - **Individual visibility** — hide orbs, the compass, the minimap or specific menu tabs. Hidden menu stones also lose their backgrounds, and the remaining stones close the gap.
 - **Saved layouts** — keep separate menu arrangements for Fixed, Resizable Classic and Resizable Modern.
@@ -60,7 +60,7 @@ The replacements retain the active tab artwork, including Resource Packs and Int
 
 Clicking a replacement opens the corresponding native tab. Existing native tab options and RuneLite-registered widget options remain on right-click. This changes the replacement menu-tab surfaces only: it does not resize orbs, the inventory contents, prayers, spells or other game interfaces. Native tab widgets retain their original dimensions. Controls hidden by the game remain unavailable, and supported overlapping windows take priority.
 
-The **Individual overlay tab sizes** section restores the per-tab size controls: 100% follows the menu-group percentage, and the combined size is bounded to 25–200%. Existing `menuGroupSize` and `sizeStone…` preferences from earlier test builds are retained; sizing only runs with overlay buttons enabled.
+The shared size setting applies the same percentage to every replacement menu button, including detached buttons and custom bars. There are no individual tab-size controls. Existing `menuGroupSize` preferences are retained; old per-tab test preferences are ignored. Sizing only runs with overlay buttons enabled.
 
 Native and overlay menu positions/groups are stored separately for each display mode. Menu arrangement, spacing and tab visibility are remembered separately for the two button types. Turn overlays off to restore the previous native setup; turn them on again to return to your overlay setup. The snapshots belong to the current RuneLite profile and do not change another plugin’s settings. Orb controls remain unchanged. If the current gameframe does not expose a usable native tab operation, or a complete group will not fit the canvas, the native controls are retained. Stretched Mode still handles scaling the entire game view.
 

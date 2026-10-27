@@ -145,7 +145,7 @@ public class GameframeCoordinator
     {
         if (!event.getGroup().equals("interfacelayout")) return;
         if (event.getKey().equals("editInterface") || event.getKey().equals("menuLayout")
-            || event.getKey().equals("menuOverlayButtons") || event.getKey().equals("menuGroupSize") || event.getKey().startsWith("sizeStone")
+            || event.getKey().equals("menuOverlayButtons") || event.getKey().equals("menuGroupSize")
             || event.getKey().equals(com.interfacelayout.layout.orbs.OrbConstants.ConfigKeys.ORB_LAYOUT))
             editor.cancel();
         scheduleRefresh();

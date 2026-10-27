@@ -166,13 +166,11 @@ public class MenuButtonOverlayTest
         assertFalse(config.menuOverlayButtons()); assertEquals(100, config.menuGroupSize());
         Fixture f = new Fixture(0);
         when(f.config.menuGroupSize()).thenReturn(Integer.MAX_VALUE);
-        assertEquals(66, f.overlay.scaled(0, 33));
+        assertEquals(66, f.overlay.scaled(33));
         when(f.config.menuGroupSize()).thenReturn(Integer.MIN_VALUE);
-        assertEquals(8, f.overlay.scaled(0, 33));
+        assertEquals(8, f.overlay.scaled(33));
         when(f.config.menuGroupSize()).thenReturn(80);
-        when(f.config.sizeStoneInventory()).thenReturn(50);
-        assertEquals(13, f.overlay.scaled(3, 33));
-        assertEquals(26, f.overlay.scaled(4, 33));
+        assertEquals(26, f.overlay.scaled(33));
     }
 
     @Test public void unavailableSpritesLeaveNativeButtonsVisible()

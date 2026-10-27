@@ -222,7 +222,7 @@ public class MenuStoneController
             if (buttons.active())
             {
                 buttons.dimensions(i, entry.width, entry.height, entry.stoneOffset, entry.iconOffset);
-                entry.width = buttons.scaled(i, entry.width); entry.height = buttons.scaled(i, entry.height);
+                entry.width = buttons.scaled(entry.width); entry.height = buttons.scaled(entry.height);
             }
             groups.computeIfAbsent(vertical ? group(i) : row, ignored -> new ArrayList<>()).add(entry);
         }
