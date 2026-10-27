@@ -32,6 +32,7 @@ public class InterfaceLayoutModule implements Module
         for (Class<?> component : new Class<?>[]{
             OrbEventHandler.class, GameframeCoordinator.class, InterfaceEditor.class,
             MenuStoneController.class, com.interfacelayout.layout.menu.MenuStoneBackgrounds.class,
+            com.interfacelayout.layout.menu.MenuStoneClickPriority.class,
             com.interfacelayout.layout.menu.MenuOverlayBridge.class, FreePositionController.class, OrbController.class,
             OrbPositionStore.class, OrbConfigMigration.class, WidgetManager.class,
             com.interfacelayout.layout.orbs.FreeOrbOverlayBridge.class,

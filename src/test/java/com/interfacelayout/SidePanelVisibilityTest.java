@@ -15,6 +15,51 @@ import static org.mockito.Mockito.*;
 
 public class SidePanelVisibilityTest
 {
+    @Test public void intermediateCloseThenTabSwitchNeverHidesVisibleParents() throws Exception
+    {
+        Fixture f = new Fixture();
+        f.controller.hideMinimapOnTabClose(true);
+        assertFalse(f.map.isSelfHidden());
+        doReturn(false).when(f.controller).isSidePanelHidden();
+        f.controller.hideMinimapOnTabClose(true);
+        f.controller.flushSidePanelVisibility();
+        verify(f.map, never()).setHidden(true);
+        verify(f.orbs, never()).setHidden(true);
+    }
+
+    @Test public void intermediateOpenThenCloseKeepsHiddenParentsUntilFinalUpdate() throws Exception
+    {
+        Fixture f = new Fixture();
+        f.apply(true);
+        clearInvocations(f.map, f.orbs);
+        doReturn(false).when(f.controller).isSidePanelHidden();
+        f.controller.hideMinimapOnTabClose(true);
+        doReturn(true).when(f.controller).isSidePanelHidden();
+        f.controller.hideMinimapOnTabClose(true);
+        verify(f.map, never()).setHidden(anyBoolean());
+        f.controller.flushSidePanelVisibility();
+        assertTrue(f.map.isSelfHidden());
+        assertTrue(f.orbs.isSelfHidden());
+        clearInvocations(f.map);
+        f.controller.flushSidePanelVisibility();
+        verify(f.map, never()).setHidden(anyBoolean());
+    }
+
+    @Test public void disablingCancelsPendingHideAndRestoresImmediately() throws Exception
+    {
+        Fixture f = new Fixture();
+        f.apply(true);
+        f.controller.hideMinimapOnTabClose(true);
+        f.controller.hideMinimapOnTabClose(false);
+        assertFalse(f.map.isSelfHidden());
+        f.controller.flushSidePanelVisibility();
+        assertFalse(f.map.isSelfHidden());
+        f.controller.hideMinimapOnTabClose(true);
+        when(f.config.hideMinimapWithSidePanel()).thenReturn(false);
+        f.controller.flushSidePanelVisibility();
+        assertFalse(f.map.isSelfHidden());
+    }
+
     @Test public void normalAndCompactLayoutsFollowSidePanelWithoutChangingChildren() throws Exception
     {
         for (OrbLayout layout : OrbLayout.values())
@@ -30,11 +75,11 @@ public class SidePanelVisibilityTest
                 for (int i = 0; i < 3; i++)
                 {
                     doReturn(true).when(f.controller).isSidePanelHidden();
-                    f.controller.hideMinimapOnTabClose(true);
+                    f.apply(true);
                     assertTrue(f.map.isSelfHidden());
                     assertTrue(f.orbs.isSelfHidden());
                     doReturn(false).when(f.controller).isSidePanelHidden();
-                    f.controller.hideMinimapOnTabClose(true);
+                    f.apply(true);
                     assertFalse(f.map.isSelfHidden());
                     assertFalse(f.orbs.isSelfHidden());
                 }
@@ -50,8 +95,8 @@ public class SidePanelVisibilityTest
     {
         Fixture f = new Fixture();
         f.map.setHidden(true);
-        f.controller.hideMinimapOnTabClose(true);
-        f.controller.hideMinimapOnTabClose(false);
+        f.apply(true);
+        f.apply(false);
         assertTrue(f.map.isSelfHidden());
         assertFalse(f.orbs.isSelfHidden());
     }
@@ -61,7 +106,7 @@ public class SidePanelVisibilityTest
         for (int guard = 0; guard < 6; guard++)
         {
             Fixture f = new Fixture();
-            f.controller.hideMinimapOnTabClose(true);
+            f.apply(true);
             assertTrue(f.map.isSelfHidden());
             switch (guard)
             {
@@ -73,10 +118,10 @@ public class SidePanelVisibilityTest
                 case 5: doReturn(true).when(f.controller).isClassicResizable(); break;
                 default: fail();
             }
-            f.controller.hideMinimapOnTabClose(true);
+            f.apply(true);
             assertFalse("guard " + guard, f.map.isSelfHidden());
             assertFalse("guard " + guard, f.orbs.isSelfHidden());
-            f.controller.hideMinimapOnTabClose(false);
+            f.apply(false);
             assertFalse(f.map.isSelfHidden());
         }
     }
@@ -87,10 +132,10 @@ public class SidePanelVisibilityTest
         doReturn(true).when(f.controller).isWikiPluginConfigEnabled();
         Widget wiki = mock(Widget.class);
         doReturn(wiki).when(f.widgets).getTargetWidget(Orbs.WIKI_ICON_CONTAINER);
-        f.controller.hideMinimapOnTabClose(true);
+        f.apply(true);
         assertFalse(f.map.isSelfHidden());
         when(wiki.getChildren()).thenReturn(new Widget[]{mock(Widget.class)});
-        f.controller.hideMinimapOnTabClose(true);
+        f.apply(true);
         assertTrue(f.map.isSelfHidden());
         assertTrue(f.controller.wikiPluginBannerExists);
     }
@@ -98,11 +143,11 @@ public class SidePanelVisibilityTest
     @Test public void nativeScriptVisibilityAndShutdownJournalArePreserved() throws Exception
     {
         Fixture f = new Fixture();
-        f.controller.hideMinimapOnTabClose(true);
+        f.apply(true);
         f.states.restoreVisibility();
         assertFalse(f.map.isSelfHidden());
         f.map.setHidden(true); // A native script now owns this flag.
-        f.controller.hideMinimapOnTabClose(true);
+        f.apply(true);
         f.states.restore(); // The same final restoration used by reset().
         assertTrue(f.map.isSelfHidden());
         assertFalse(f.orbs.isSelfHidden());
@@ -111,13 +156,13 @@ public class SidePanelVisibilityTest
     @Test public void replacementWidgetsCaptureFreshNativeVisibility() throws Exception
     {
         Fixture f = new Fixture();
-        f.controller.hideMinimapOnTabClose(true);
+        f.apply(true);
         Widget replacement = widget(Minimap.MODERN_MAP_MINIMAP.getComponentId());
         when(f.client.getWidget(replacement.getId())).thenReturn(replacement);
         f.states.discardRetired(f.client);
-        f.controller.hideMinimapOnTabClose(true);
+        f.apply(true);
         assertTrue(replacement.isSelfHidden());
-        f.controller.hideMinimapOnTabClose(false);
+        f.apply(false);
         assertFalse(replacement.isSelfHidden());
         assertFalse(f.orbs.isSelfHidden());
     }
@@ -133,6 +178,7 @@ public class SidePanelVisibilityTest
         final Widget orbs = widget(Minimap.MODERN_ORBS_CONTAINER.getComponentId());
         Fixture() throws Exception
         {
+            when(config.hideMinimapWithSidePanel()).thenReturn(true);
             when(client.getWidget(map.getId())).thenReturn(map);
             when(client.getWidget(orbs.getId())).thenReturn(orbs);
             inject(widgets, "client", client);
@@ -147,6 +193,12 @@ public class SidePanelVisibilityTest
             doReturn(false).when(controller).isMinimapPluginConfigEnabled();
             doReturn(false).when(controller).isWikiPluginConfigEnabled();
             doNothing().when(controller).updateLogoutXPosition();
+        }
+
+        void apply(boolean hide)
+        {
+            controller.hideMinimapOnTabClose(hide);
+            controller.flushSidePanelVisibility();
         }
     }
 

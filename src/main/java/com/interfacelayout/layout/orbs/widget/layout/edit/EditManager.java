@@ -117,7 +117,7 @@ public class EditManager
 
 	public boolean blockEditing(TargetWidget target)
 	{
-		return (target.isLogoutX() && (manager.isClassicResizable() || manager.isFixedMode())) ||
+		return (target.isLogoutX() && (manager.isClassicResizable() || manager.isFixedMode() || com.interfacelayout.layout.menu.MenuStoneController.managesModernLogout(config))) ||
 			(target.isCompass() && !manager.isCompactLayout()) ||
 			(target == Orbs.STORE_ORB_CONTAINER && manager.isStoreOrbDisabled()) ||
 			(target == Orbs.ACTIVITY_ORB_CONTAINER && manager.isActivityOrbDisabled()) ||
@@ -137,6 +137,14 @@ public class EditManager
             widgetManager.setTargetOpacity(target, hidden ? EDIT_MODE_HIDDEN_OPACITY : 0);
             setupHandlerActions(binding.getHandler(), target, toggle, hidden);
         }
+    }
+
+    /** Rebuild handlers after ownership changes without turning off interface editing. */
+    public void refreshEditMode()
+    {
+        if (!manager.isEditingLayout) return;
+        closeEditMode();
+        toggleEditMode(true);
     }
 
 	public void toggleEditMode(boolean state)

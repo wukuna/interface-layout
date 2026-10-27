@@ -21,7 +21,42 @@ import static org.mockito.Mockito.*;
 
 public class LifecycleTest
 {
-    @Test public void sidePanelVarcRefreshRunsAfterNativeWorkAndCancelsOnDisable() throws Exception
+    @Test public void resetCheckboxRequiresConfirmationAndUnchecksBeforeDialog() throws Exception
+    {
+        Fixture f = new Fixture(); f.handler.startUp(); f.queue.forEach(Runnable::run); f.queue.clear();
+        when(f.config.resetLayoutPositions()).thenReturn(true);
+        net.runelite.client.events.ConfigChanged event = new net.runelite.client.events.ConfigChanged();
+        event.setGroup("interfacelayout"); event.setKey("resetLayoutPositions");
+        f.handler.onConfigChanged(event);
+        verify(f.configs).setConfiguration("interfacelayout", "resetLayoutPositions", false);
+        org.mockito.ArgumentCaptor<Runnable> answer = org.mockito.ArgumentCaptor.forClass(Runnable.class);
+        verify(f.confirmation).request(answer.capture());
+        verify(f.frame, never()).resetPositions();
+        assertTrue(f.queue.isEmpty()); // Cancel/close simply never invokes the accepted callback.
+        answer.getValue().run();
+        verify(f.frame, never()).resetPositions(); // Confirmation does not mutate game state on the EDT.
+        f.queue.forEach(Runnable::run);
+        verify(f.frame).resetPositions();
+    }
+
+    @Test public void resetConfirmationCannotApplyAfterDisableOrProfileChange() throws Exception
+    {
+        for (boolean switchProfile : new boolean[]{false, true})
+        {
+            Fixture f = new Fixture(); f.handler.startUp(); f.queue.forEach(Runnable::run); f.queue.clear();
+            when(f.config.resetLayoutPositions()).thenReturn(true);
+            net.runelite.client.events.ConfigChanged event = new net.runelite.client.events.ConfigChanged();
+            event.setGroup("interfacelayout"); event.setKey("resetLayoutPositions");
+            f.handler.onConfigChanged(event);
+            org.mockito.ArgumentCaptor<Runnable> answer = org.mockito.ArgumentCaptor.forClass(Runnable.class);
+            verify(f.confirmation).request(answer.capture());
+            if (switchProfile) f.handler.onProfileChanged(mock(net.runelite.client.events.ProfileChanged.class));
+            else { f.handler.shutDown(); f.handler.startUp(); }
+            answer.getValue().run(); f.queue.forEach(Runnable::run);
+            verify(f.frame, never()).resetPositions();
+        }
+    }
+    @Test public void sidePanelVarcRequestsRefreshAndOnlyActivePluginFlushesAtTickEnd() throws Exception
     {
         Fixture f = new Fixture();
         f.handler.startUp(); f.queue.forEach(Runnable::run); f.queue.clear();
@@ -29,15 +64,17 @@ public class LifecycleTest
         net.runelite.api.events.VarClientIntChanged event = new net.runelite.api.events.VarClientIntChanged(
             com.interfacelayout.layout.orbs.OrbConstants.VarClient.SIDE_PANEL_ID);
         f.handler.onVarClientIntChanged(event);
-        verify(f.manager, never()).hideMinimapOnTabClose(anyBoolean());
-        assertEquals(1, f.queue.size());
-        f.queue.forEach(Runnable::run); f.queue.clear();
         verify(f.manager).hideMinimapOnTabClose(false);
+        assertTrue(f.queue.isEmpty());
+        verify(f.manager, never()).flushSidePanelVisibility();
+        f.handler.onPostClientTick(new net.runelite.api.events.PostClientTick());
+        verify(f.manager).flushSidePanelVisibility();
         clearInvocations(f.manager);
         f.handler.onVarClientIntChanged(event);
         f.handler.shutDown();
         f.queue.forEach(Runnable::run);
-        verify(f.manager, never()).hideMinimapOnTabClose(anyBoolean());
+        f.handler.onPostClientTick(new net.runelite.api.events.PostClientTick());
+        verify(f.manager, never()).flushSidePanelVisibility();
     }
 
     @Test public void leavingLoggedInReleasesSidePanelVisibility()
@@ -104,6 +141,9 @@ public class LifecycleTest
         final com.interfacelayout.layout.orbs.widget.layout.edit.EditManager editor =
             mock(com.interfacelayout.layout.orbs.widget.layout.edit.EditManager.class);
         final OrbEventHandler handler;
+        final ConfigManager configs = mock(ConfigManager.class);
+        final InterfaceLayoutConfig config = mock(InterfaceLayoutConfig.class, CALLS_REAL_METHODS);
+        final LayoutResetConfirmation confirmation = mock(LayoutResetConfirmation.class);
         Fixture()
         {
             ClientThread thread = mock(ClientThread.class);
@@ -113,8 +153,9 @@ public class LifecycleTest
                 @Override protected void configure() {
                     bind(Client.class).toInstance(mock(Client.class));
                     bind(ClientThread.class).toInstance(thread);
-                    bind(ConfigManager.class).toInstance(mock(ConfigManager.class));
-                    bind(InterfaceLayoutConfig.class).toInstance(mock(InterfaceLayoutConfig.class, CALLS_REAL_METHODS));
+                    bind(ConfigManager.class).toInstance(configs);
+                    bind(InterfaceLayoutConfig.class).toInstance(config);
+                    bind(LayoutResetConfirmation.class).toInstance(confirmation);
                     bind(ChatMessageManager.class).toInstance(mock(ChatMessageManager.class));
                     bind(KeyManager.class).toInstance(mock(KeyManager.class));
                     bind(MouseManager.class).toInstance(mock(MouseManager.class));

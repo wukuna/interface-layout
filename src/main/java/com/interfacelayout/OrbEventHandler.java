@@ -55,6 +55,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.events.ClientTick;
+import net.runelite.api.events.PostClientTick;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.ScriptPostFired;
@@ -81,6 +82,7 @@ public class OrbEventHandler implements KeyListener
     @Inject private com.interfacelayout.layout.edit.InterfaceEditor interfaceEditor;
     @Inject private net.runelite.client.eventbus.EventBus eventBus;
     @Inject private com.interfacelayout.util.LegacyConfigImporter legacyConfigs;
+    @Inject private com.interfacelayout.layout.menu.MenuStoneClickPriority stoneClickPriority;
 
 	@Inject
 	private Client client;
@@ -131,6 +133,8 @@ public class OrbEventHandler implements KeyListener
 	private MouseManager mouseManager;
 
     private volatile int lifecycleGeneration;
+    private volatile int resetRequestGeneration;
+    @Inject private LayoutResetConfirmation resetConfirmation;
 
     private void later(Runnable task)
     {
@@ -149,7 +153,12 @@ public class OrbEventHandler implements KeyListener
 		overlayManager.add(minimapOverlay);
         overlayManager.add(interfaceEditor);
         eventBus.register(gameframe);
-        mouseManager.registerMouseListener(0, interfaceEditor);
+        stoneClickPriority.clear();
+        eventBus.register(stoneClickPriority.nativeListener());
+        eventBus.register(stoneClickPriority);
+        // Native Stretched Mode translation stays ahead of custom hit testing,
+        // regardless of which plugin is enabled first.
+        mouseManager.registerMouseListener(interfaceEditor);
 		keyManager.registerKeyListener(this);
 		mouseManager.registerMouseListener(dragListener);
 		orbRegistry.registerAll();
@@ -192,6 +201,9 @@ public class OrbEventHandler implements KeyListener
 		overlayManager.remove(minimapOverlay);
         overlayManager.remove(interfaceEditor);
         eventBus.unregister(gameframe);
+        eventBus.unregister(stoneClickPriority);
+        eventBus.unregister(stoneClickPriority.nativeListener());
+        stoneClickPriority.clear();
         mouseManager.unregisterMouseListener(interfaceEditor);
 		keyManager.unregisterKeyListener(this);
 		mouseManager.unregisterMouseListener(dragListener);
@@ -219,6 +231,12 @@ public class OrbEventHandler implements KeyListener
 		{
 			dragListener.finalizeDrag();
 		}
+	}
+
+	@Subscribe(priority = -2)
+	public void onPostClientTick(PostClientTick event)
+	{
+		if (manager.active) manager.flushSidePanelVisibility();
 	}
 
 	@Subscribe
@@ -398,8 +416,8 @@ public class OrbEventHandler implements KeyListener
 			{
 				editManager.toggleEditMode(false);
 			}
-			// Apply after the native script finishes, including varc-only toggles.
-			later(() -> manager.hideMinimapOnTabClose(config.hideMinimapWithSidePanel()));
+			// Coalesce varc-only toggles with script updates at the end of the tick.
+			if (manager.active) manager.hideMinimapOnTabClose(config.hideMinimapWithSidePanel());
 		}
 	}
 
@@ -462,10 +480,26 @@ public class OrbEventHandler implements KeyListener
 
 		                if (group.equals(GROUP_NAME) && key.equals("resetLayoutPositions"))
         {
-            if (config.resetLayoutPositions()) later(() -> {
-                editManager.toggleEditMode(false);
-                gameframe.resetPositions();
+            if (config.resetLayoutPositions()) {
                 configManager.setConfiguration(GROUP_NAME, "resetLayoutPositions", false);
+                if (manager.active) {
+                    final int generation = lifecycleGeneration, requestGeneration = resetRequestGeneration;
+                    resetConfirmation.request(() -> clientThread.invokeLater(() -> {
+                        if (!manager.active || generation != lifecycleGeneration || requestGeneration != resetRequestGeneration) return;
+                        editManager.toggleEditMode(false);
+                        gameframe.resetPositions();
+                    }));
+                }
+            }
+            return;
+        }
+        if (group.equals(GROUP_NAME) && (key.equals("menuRestoreLogoutTab") || key.equals("menuLayout")))
+        {
+            later(() -> {
+                gameframe.prepareNativeLayout();
+                editManager.refreshEditMode();
+                manager.hideLogout(); manager.updateLogoutXPosition(); manager.updateLogoutXOverlay();
+                gameframe.refresh();
             });
             return;
         }
@@ -611,6 +645,7 @@ if (!group.equals(GROUP_NAME))
 	@Subscribe
 	public void onProfileChanged(ProfileChanged event)
 	{
+        resetRequestGeneration++;
 		legacyConfigs.importOnce();
         manager.migrateConfigs();
 

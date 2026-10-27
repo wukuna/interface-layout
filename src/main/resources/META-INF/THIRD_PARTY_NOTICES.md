@@ -4,7 +4,7 @@ Interface Layout adapts these BSD-2-Clause plugins:
 
 - **Compact Orbs**, cue (its-cue), https://github.com/its-cue/compact-orbs
   - Reference commit: `43499544b000361346be6cad7e37d3d21f5f4767`.
-  - Copyright (c) 2025, cue <https://github.com/its-cue>.
+  - Copyright (c) 2025, its-cue (repository license); source headers also identify cue <https://github.com/its-cue>.
   - Orb configuration, controllers, widget models, offsets, slots, edit bindings,
     drag handling, detached minimap and migration helpers are adapted from it.
 - **Menu Stones Hider**, Richardant, https://github.com/Richardant/menustoneshider
@@ -23,4 +23,4 @@ this provenance notice. Original source copyright/license headers remain intact.
 New layout coordination, clipping expansion, state journals, free-position editing,
 menu-stone placement and tests were added for Interface Layout. These received live
 user testing and automated regression coverage; compatibility with every mode or
-other plugin is not established. Plugin Hub approval remains pending.
+other plugin is not established. The initial plugin is available through the Plugin Hub; subsequent changes require their own review.

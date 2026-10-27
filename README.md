@@ -1,10 +1,8 @@
 # Interface Layout
 
-Build a RuneLite layout that fits the way you play. Move whole menu bars, detach individual menu stones, and reattach them into your own rows and columns. Position orbs and the compass independently, hide unwanted controls, and choose compact orb layouts or a separate movable minimap in resizable modes. Optional clickthrough protection helps prevent clicks reaching the game behind your orbs and minimap.
+Arrange RuneLite around the way you play. Move orbs and the compass, detach menu tabs and reconnect them into custom rows or columns, or choose a compact preset. Control which elements remain visible, restore the Modern logout stone, and protect orb and minimap clicks from reaching the game behind them.
 
-Start in Menu bars to choose an arrangement. Use Alt-drag to move supported controls, or enable Edit interface and Shift-drag to regroup menu tabs. Menu layouts are saved separately for Fixed, Resizable Classic and Resizable Modern.
-
-[Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Related plugins and sources](#related-plugins-and-sources) · [Development](#development) · [Support](#support) · [License and attribution](#license-and-attribution)
+[Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Inspiration and recipe](#inspiration-and-recipe) · [Development](#development) · [Support](#support) · [License and attribution](#license-and-attribution)
 
 ## Features
 
@@ -183,19 +181,24 @@ Use the native minimap when another plugin needs to draw on it. The separate min
 
 Ctrl+M while the World Map button is hidden is marked **Beta** in the Hide World Map setting tooltip. This shortcut combination has not been verified in-game; show the button again if the shortcut stops working.
 
-## Related plugins and sources
+## Inspiration and recipe
 
-Interface Layout adapts **Compact Orbs** and **Menu Stones Hider**, plus RuneLite's WidgetOverlay implementation. Those are source credits; other plugins below are listed for feature overlap or compatibility, not as claims that their code was incorporated. Full attribution is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Interface Layout builds on Compact Orbs by cue and Menu Stones Hider by Richardant. Their adapted work supplies important parts of the orb and menu-visibility foundation. Interface Layout adds coordinated editing, detachable menu stones and custom bar grouping. The wider recipe is compact controls, deliberate placement and a readable gameframe.
 
-| Project | Relationship | Relevant features and limits |
+| Project | Connection | What it contributes or complements |
 | --- | --- | --- |
-| [Compact Orbs](https://github.com/its-cue/compact-orbs) | Original source and overlapping alternative | Compact orb arrangements, orb editing and a separate minimap. Interface Layout extends this with custom menu bars and stone grouping. |
-| [Menu Stones Hider](https://github.com/Richardant/menustoneshider) | Original source and focused alternative | Native menu-stone and decoration visibility. Interface Layout also moves and groups stones. |
-| [Orb Hider](https://github.com/wizguin/runelite-orb-hider) | Focused alternative | Hiding minimap orbs when a larger layout toolset is unnecessary. |
-| [Movable Orbs](https://github.com/anonyser/runelite-movable-orbs) | Overlapping alternative | Moves native orbs within a bounded area around the minimap, with separate minimized-map positions. It does not provide Interface Layout's menu-stone grouping. |
-| [Fixed Resizable Hybrid](https://github.com/Lapask/fixed-resizable-hybrid) | Different layout approach; declared conflict | Gives Resizable Classic a Fixed-style gameframe. Interface Layout is not a replacement for its full reskin and background features. |
+| [Compact Orbs](https://github.com/its-cue/compact-orbs) | Adapted foundation | Orb arrangements, editing and the separate minimap. Credit to cue; choose one plugin because both manage the same controls. |
+| [Menu Stones Hider](https://github.com/Richardant/menustoneshider) | Adapted foundation | Menu-stone and decoration visibility. Credit to Richardant; Interface Layout also moves and groups stones. Declared conflict. |
+| [Orb Hider](https://github.com/wizguin/runelite-orb-hider) | Focused alternative | Orb visibility without the larger layout toolset. Declared conflict. |
+| [Movable Orbs](https://github.com/anonyser/runelite-movable-orbs) | Related approach | Positions native orbs around the minimap. Both plugins manage orb placement; declared conflict. |
+| [Fixed Resizable Hybrid](https://github.com/Lapask/fixed-resizable-hybrid) | Different layout approach | A Fixed-style gameframe in Resizable Classic. Its reskin is distinct from custom stone grouping. Declared conflict. |
+| [Minimap Hider](https://github.com/Richardant/minimaphider) | Focused alternative | Native minimap hiding. Already covered by Interface Layout; declared conflict. |
+| [Custom UI Anchors](https://github.com/Car-Role/Custom-UI-Anchors) | Optional companion | Positions and stacks RuneLite overlays, including the movement overlays exposed by Interface Layout. Stone grouping remains in Interface Layout. |
+| [Interface Styles (built in)](https://github.com/runelite/runelite/tree/master/runelite-client/src/main/java/net/runelite/client/plugins/interfacestyles) | Optional appearance tool | Classic interface artwork. Styling and control placement are different jobs; check the selected gameframe when combining them. |
+| [Resource Packs](https://github.com/melkypie/resource-packs) | Optional appearance tool | Custom UI artwork. Follow its gameframe guidance, including Interface Styles set to Default when required; pack artwork is not bundled here. |
+| [Stretched Mode (built in)](https://github.com/runelite/runelite/tree/master/runelite-client/src/main/java/net/runelite/client/plugins/stretchedmode) | Optional display tool | Scales the game view. Interface Layout arranges controls within that view; it does not replace whole-client scaling. |
 
-**Custom UI Anchors** is a companion for positioning the movement overlays exposed by Interface Layout, not a replacement for stone grouping. Other plugins' minimap drawings require the native minimap; the separate minimap cannot reproduce them. See Compatibility before enabling overlapping layout plugins.
+The separate minimap does not reproduce other plugins' minimap overlays. Keep the native minimap for those drawings. Adapted code, original authors and license terms remain documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the packaged notices.
 
 ## Development
 

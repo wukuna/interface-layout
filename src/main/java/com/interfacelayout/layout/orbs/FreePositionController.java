@@ -44,6 +44,7 @@ public class FreePositionController
         for (TargetWidget[] choices : EditManager.EDIT_TARGETS)
         {
             TargetWidget target = choices[0];
+            if (target.isLogoutX() && com.interfacelayout.layout.menu.MenuStoneController.managesModernLogout(config) && !manager.isFixedMode() && !manager.isClassicResizable()) continue;
             if (!target.isMinimapButton() && !target.isCompass() && !editor.blockEditing(target)) result.add(target);
         }
         if (!manager.isFixedMode()) result.add(manager.isClassicResizable()
@@ -61,13 +62,22 @@ public class FreePositionController
         if (config.hideMinimap() && !manager.isFixedMode())
             for (TargetWidget component : Minimap.COMPONENTS) states.hide(widgets.getTargetWidget(component), true);
         if (config.hideCompass()) for (TargetWidget component : Compass.values()) states.hide(widgets.getTargetWidget(component), true);
+        Map<TargetWidget, Point> positions = new LinkedHashMap<>();
+        boolean hasSavedPosition = false;
+        // Snapshot moved controls and Wiki/map siblings before expanding any shared ancestor. Native
+        // Wiki/map layers can otherwise be clipped or shifted before their turn.
         for (TargetWidget target : targets())
         {
             Widget widget = widgets.getTargetWidget(target);
             if (widget == null || widget.isHidden()) continue;
             Point saved = configs.getConfiguration("interfacelayout", key(target), Point.class);
-            if (saved != null) move(target, saved);
+            hasSavedPosition |= saved != null;
+            if (saved != null || target == Orbs.WORLD_MAP_CONTAINER || target == Orbs.WIKI_ICON_CONTAINER)
+                positions.put(target, saved == null ? WidgetGeometry.location(widget) : saved);
         }
+        // Untouched controls keep their native positions without creating saved config.
+        // Expand their own clipping ancestors too, not just the moved orb's branch.
+        if (hasSavedPosition) positions.forEach(this::move);
     }
     public Map<TargetWidget, Rectangle> bounds()
     {
@@ -82,6 +92,7 @@ public class FreePositionController
     }
     public void move(TargetWidget target, Point desired)
     {
+        if (target.isLogoutX() && com.interfacelayout.layout.menu.MenuStoneController.managesModernLogout(config) && !manager.isFixedMode() && !manager.isClassicResizable()) return;
         Widget widget = widgets.getTargetWidget(target);
         if (widget == null || widget.isHidden()) return;
         Point location = LayoutGeometry.clamp(desired, widget.getWidth(), widget.getHeight(),

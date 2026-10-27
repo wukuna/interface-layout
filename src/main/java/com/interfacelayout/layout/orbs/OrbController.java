@@ -145,6 +145,7 @@ public class OrbController
 	private Widget overlayLogoutXStone;
 	private Widget overlayLogoutXIcon;
 	public volatile boolean active;
+	private boolean sidePanelVisibilityPending;
     private final java.util.List<Widget> overlayNoClickChildren = new java.util.ArrayList<>();
     private final Map<TargetWidget, Widget> noClickThroughChildren = new HashMap<>();
 
@@ -333,6 +334,21 @@ public class OrbController
 
 	public void hideMinimapOnTabClose(boolean hide)
 	{
+		// Native tab keys and a hotkey plugin can both change the tab in one tick.
+		// Read the final state only after both have finished processing input.
+		sidePanelVisibilityPending = hide;
+		if (!hide) applySidePanelVisibility(false);
+	}
+
+	public void flushSidePanelVisibility()
+	{
+		if (!sidePanelVisibilityPending) return;
+		sidePanelVisibilityPending = false;
+		applySidePanelVisibility(config.hideMinimapWithSidePanel());
+	}
+
+	private void applySidePanelVisibility(boolean hide)
+	{
 		// Release our previous parent flags even when a guard below prevents hiding.
 		// The ownership journal preserves flags set by the game and hidden children.
 		widgetManager.setHidden(Minimap.MODERN_MAP_MINIMAP.getComponentId(), false);
@@ -382,6 +398,7 @@ public class OrbController
 
 	public void updateNoClickThrough()
 	{
+		if (overlayMinimap != null) overlayMinimap.setNoClickThrough(config.enableNoClickthrough());
 		if (isFixedMode())
 		{
 			return;
@@ -1018,7 +1035,7 @@ public class OrbController
 			return true;
 		}
 
-		return !config.showOverlayLogoutX() || isClassicResizable() || hideStonesAndIcons();
+		return !config.showOverlayLogoutX() || com.interfacelayout.layout.menu.MenuStoneController.managesModernLogout(config) || isClassicResizable() || hideStonesAndIcons();
 	}
 
 	//similar to how the cs2 script hides/shows the logout-x by referencing the containers hidden state
@@ -1041,7 +1058,7 @@ public class OrbController
 
 	boolean isOverlayLogoutVisible()
 	{
-		return isCompactLayout() &&
+		return !com.interfacelayout.layout.menu.MenuStoneController.managesModernLogout(config) && isCompactLayout() &&
 			isMinimapOverlayEnabled() && config.showOverlayLogoutX();
 	}
 

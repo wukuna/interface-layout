@@ -118,8 +118,8 @@ public interface InterfaceLayoutConfig extends Config
 
 	@ConfigItem(
 		keyName = ConfigKeys.ENABLE_NO_CLICKTHROUGH,
-		name = "Prevent orb clickthrough",
-		description = "Stop clicks on orbs from reaching the game behind them. Applies to every orb arrangement.",
+		name = "Prevent orb and minimap clickthrough",
+		description = "Stop orb and minimap clicks from reaching the game behind them while keeping minimap navigation. Applies to every orb arrangement.",
 		section = layout,
 		position = 20
 	)
@@ -346,7 +346,7 @@ public interface InterfaceLayoutConfig extends Config
 	@ConfigItem(
 		keyName = ConfigKeys.COMPASS,
 		name = "Hide compass",
-		description = "Hide this control. Show it again here; Free Position keeps the saved location.",
+		description = "Hide the compass. Show it again here; Free Position keeps its saved location.",
 		section = hideAndSwapUpdate,
 		position = 2
 	)
@@ -508,7 +508,7 @@ public interface InterfaceLayoutConfig extends Config
 	@ConfigItem(
 		keyName = ConfigKeys.HIDE_WORLD,
 		name = "Hide World Map",
-		description = "Hide this control. Show it again here; Free Position keeps the saved location.",
+		description = "Hide the World Map button. Show it again here if you need to open the map with the button.",
 		section = hideAndSwapUpdate,
 		position = 8
 	)
@@ -585,6 +585,10 @@ public interface InterfaceLayoutConfig extends Config
     @Range(min = 0, max = 20)
     @ConfigItem(keyName = "menuSpacing", name = "Stone spacing", description = "Pixels between visible stones. Hidden stones close the gap without changing the group's saved position.", section = menu, position = 2)
     default int menuSpacing() { return 0; }
+    @ConfigItem(keyName = "menuRestoreLogoutTab", name = "Restore logout stone (Modern)", description = "Move Modern's existing logout X onto a menu-tab background. Off uses the bare X. Both can join custom menu groups; Native rows leaves the bare X at the minimap. The original click area and Hide Logout-X are retained. Fixed and Classic are unchanged.", section = menu, position = 8)
+    default boolean restoreLogoutTab() { return false; }
+    @ConfigItem(keyName = "allowClicksThroughGaps", name = "Allow clicks through gaps", description = "Allow game clicks between stones in a moved menu bar. Disable to block clicks inside these gaps without selecting a tab. Stone buttons are unchanged.", section = menu, position = 7)
+    default boolean allowClicksThroughGaps() { return true; }
     @ConfigItem(keyName = "hideTopMenu", name = "Hide combat–spellbook tabs", description = "Hide Combat, Skills, Quests, Inventory, Equipment, Prayer and Spellbook wherever they are placed.", section = menu, position = 3)
     default boolean hideTopMenu() { return false; }
     @ConfigItem(keyName = "hideBottomMenu", name = "Hide clan–music tabs", description = "Hide Clan, Account Management, Friends, Logout, Settings, Emotes and Music wherever they are placed.", section = menu, position = 4)
@@ -600,14 +604,14 @@ public interface InterfaceLayoutConfig extends Config
     default Keybind showMenuToggle() { return Keybind.NOT_SET; }
     @ConfigSection(name = "Editing controls", description = "RuneLite Alt-drag moves bars, detached stones and free orbs. Shift-drag detaches or joins stones. Edit interface shows guidance and enables preset orb swapping.", position = 3)
     String editor = "interfaceEditor";
-    @ConfigItem(keyName = "editInterface", name = "Edit interface", description = "Show editing outlines and guidance; enable preset orb slot swapping. RuneLite Alt-drag and Shift-drag stone grouping also work with this off.", position = 0)
+    @ConfigItem(keyName = "editInterface", name = "Edit interface", description = "Show editing outlines and guidance; enable Shift-drag stone grouping and preset orb slot swapping. Alt-drag bar positioning remains available with this off. Stone grouping is saved on release and cancelled by layout transitions.", position = 0)
     default boolean editInterface() { return false; }
     @Range(min = 1, max = 32)
     @ConfigItem(keyName = "editGrid", name = "Stone grouping grid", description = "Snap Shift-dragged stones to this pixel grid; 1 disables snapping. RuneLite controls Alt-drag positioning.", section = editor, position = 1)
     default int editGrid() { return 1; }
-    @ConfigItem(keyName = "resetLayoutPositions", name = "Reset positions and groups", description = "Check once to clear saved positions and menu groups in every display mode. Visibility choices are kept.", section = editor, position = 2)
+    @ConfigItem(keyName = "resetLayoutPositions", name = "Reset positions and groups", description = "Ask for confirmation before clearing saved positions and menu groups in every display mode. Cancel keeps the layout. Visibility choices are kept.", section = editor, position = 2)
     default boolean resetLayoutPositions() { return false; }
-    @ConfigSection(name = "Menu tab visibility", description = "Hide a tab, its icon and background; remaining tabs close the gap", closedByDefault = true, position = 5)
+    @ConfigSection(name = "Hide menu tabs", description = "Hide a tab, its icon and background; remaining tabs close the gap", closedByDefault = true, position = 5)
     String individualStones = "individualStones";
     @ConfigItem(keyName = "hideStone0", name = "Combat options", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 0)
     default boolean hideCombatStone() { return false; }

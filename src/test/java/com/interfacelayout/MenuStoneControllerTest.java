@@ -110,7 +110,9 @@ public class MenuStoneControllerTest
                 when(mode.isFixedMode()).thenReturn(displayMode == 0);
                 when(mode.isClassicResizable()).thenReturn(displayMode == 1);
                 controller(client, config, new WidgetStateStore(), mode, configs).apply();
-                verify(stone).setHidden(true); verify(icon).setHidden(true);
+                if (displayMode == 2 && index == 10)
+                { verify(stone, never()).setHidden(true); verify(icon, never()).setHidden(true); }
+                else { verify(stone).setHidden(true); verify(icon).setHidden(true); }
             }
         }
     }
@@ -138,6 +140,7 @@ public class MenuStoneControllerTest
                 bind(com.interfacelayout.layout.menu.MenuOverlayBridge.class).toProvider(() -> mock(com.interfacelayout.layout.menu.MenuOverlayBridge.class));
                 bind(WidgetStateStore.class).toInstance(states);
                 bind(FreePositionController.class).toProvider(() -> free);
+                bind(com.interfacelayout.layout.orbs.MinimapClickProtection.class).toProvider(() -> mock(com.interfacelayout.layout.orbs.MinimapClickProtection.class));
                 bind(com.interfacelayout.layout.orbs.FreeOrbOverlayBridge.class).toProvider(() -> mock(com.interfacelayout.layout.orbs.FreeOrbOverlayBridge.class));
                 bind(WidgetBoundsExpander.class).toProvider(() -> mock(WidgetBoundsExpander.class));
                 bind(InterfaceEditor.class).toProvider(() -> mock(InterfaceEditor.class));
