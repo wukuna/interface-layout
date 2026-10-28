@@ -43,6 +43,26 @@ import net.runelite.client.config.Range;
 @ConfigGroup(GROUP_NAME)
 public interface InterfaceLayoutConfig extends Config
 {
+	@ConfigSection(
+		name = "Presentation",
+		description = "Optional changes to the appearance of the game interface.",
+		closedByDefault = true,
+		position = 10
+	)
+	String presentation = "presentation";
+
+	@ConfigItem(
+		keyName = "hideExtraSpecialAttackBar",
+		name = "Hide extra special-attack bar",
+		description = "Hide the small secondary meter beneath the special-attack orb. Keeps the orb, its number and normal special-attack controls.",
+		section = presentation,
+		position = 0
+	)
+	default boolean hideExtraSpecialAttackBar()
+	{
+		return false;
+	}
+
 	enum HorizontalAnchor
 	{
 		LEFT, RIGHT;

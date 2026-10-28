@@ -122,6 +122,12 @@ The logout control depends on the game's display mode. **Fixed** and **Resizable
 
 Fixed and Resizable Classic keep their native Logout tabs. **Hide Logout-X (Modern)**, the individual logout visibility setting and **Hide clan–music tabs** can hide the Modern control; check those settings if it is missing. In custom menu arrangements, the logout control belongs to the menu group, so individual orb dragging and the separate minimap logout copy are suspended. Turning restoration off removes only the added background and keeps custom group membership. The X opens the native logout panel; game-hidden controls remain hidden.
 
+### Presentation
+
+Enable **Presentation > Hide extra special-attack bar** to hide the small secondary meter beneath the special-attack orb. This is optional and starts off. The orb's icon, number and normal special-attack controls remain available. Turning the setting off restores the meter when the game would normally show it.
+
+After an update, the chatbox lists up to five recent changes, newest first. Each update notice appears once per RuneLite profile when you are logged in, rather than every login.
+
 ### Map and orb visibility
 
 Use **Map and orb visibility** to choose an orb arrangement and hide individual controls.

@@ -43,6 +43,8 @@ public class InterfaceLayoutPlugin extends Plugin
 {
     @Inject private Provider<OrbEventHandler> events;
     @Inject private EventBus eventBus;
+    @Inject private com.interfacelayout.layout.PresentationController presentation;
+    @Inject private ReleaseNotesNotice releaseNotes;
 
     @Override public void configure(Binder binder)
     {
@@ -54,9 +56,17 @@ public class InterfaceLayoutPlugin extends Plugin
         OrbEventHandler handler = events.get();
         eventBus.register(handler);
         handler.startUp();
+        eventBus.register(presentation);
+        presentation.start();
+        eventBus.register(releaseNotes);
+        releaseNotes.start();
     }
     @Override protected void shutDown() throws Exception
     {
+        eventBus.unregister(releaseNotes);
+        releaseNotes.stop();
+        eventBus.unregister(presentation);
+        presentation.stop();
         OrbEventHandler handler = events.get();
         eventBus.unregister(handler);
         handler.shutDown();
