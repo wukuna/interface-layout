@@ -164,6 +164,7 @@ public class MenuButtonOverlayTest
         ConfigManager configs = mock(ConfigManager.class);
         InterfaceLayoutConfig config = RealConfigProxy.create(InterfaceLayoutConfig.class, configs);
         assertFalse(config.menuOverlayButtons()); assertEquals(100, config.menuGroupSize());
+        assertFalse(config.menuKeepNativeIcons());
         Fixture f = new Fixture(0);
         when(f.config.menuGroupSize()).thenReturn(Integer.MAX_VALUE);
         assertEquals(66, f.overlay.scaled(33));
@@ -171,6 +172,97 @@ public class MenuButtonOverlayTest
         assertEquals(8, f.overlay.scaled(33));
         when(f.config.menuGroupSize()).thenReturn(80);
         assertEquals(26, f.overlay.scaled(33));
+    }
+
+    @Test public void nativeIconsShrinkBelowOneHundredAndStayCentredWhenButtonsGrow()
+    {
+        int[] percentages = {25, 50, 90, 100, 125, 150, 200};
+        int[] widths = {6, 12, 20, 23, 23, 23, 23};
+        int[] heights = {6, 13, 23, 26, 26, 26, 26};
+        for (int mode = 0; mode < 3; mode++)
+        {
+            Fixture f = new Fixture(mode);
+            when(f.config.menuKeepNativeIcons()).thenReturn(true);
+            f.widgetOverrides.put(f.icons[3].getId(), pixels(Color.RED));
+            for (int p = 0; p < percentages.length; p++)
+            {
+                f.controller.restoreBackgrounds(); f.states.restore();
+                clearInvocations(f.icons[3]);
+                when(f.config.menuGroupSize()).thenReturn(percentages[p]);
+                f.apply();
+                Rectangle button = f.controller.stones().get(3);
+                Rectangle icon = colouredBounds(f.render(), button, Color.RED);
+                assertEquals(widths[p], icon.width);
+                assertEquals(heights[p], icon.height);
+                assertTrue(Math.abs(button.getCenterX() - icon.getCenterX()) <= 0.5);
+                assertTrue(Math.abs(button.getCenterY() - icon.getCenterY()) <= 0.5);
+                assertTrue(button.contains(icon));
+                verify(f.icons[3], never()).setOriginalWidth(anyInt());
+                verify(f.icons[3], never()).setOriginalHeight(anyInt());
+            }
+            verifyNoInteractions(f.configs);
+        }
+    }
+
+    @Test public void nativeIconToggleAndPackReloadKeepButtonBoundsAndClickArea()
+    {
+        Fixture f = new Fixture(2);
+        f.apply();
+        Rectangle button = new Rectangle(f.controller.stones().get(3));
+        f.widgetOverrides.put(f.icons[3].getId(), pixels(Color.RED));
+        assertEquals(46, colouredBounds(f.render(), button, Color.RED).width);
+        when(f.config.menuKeepNativeIcons()).thenReturn(true);
+        assertEquals(23, colouredBounds(f.render(), button, Color.RED).width);
+        f.widgetOverrides.put(f.icons[3].getId(), pixels(Color.BLUE));
+        assertEquals(23, colouredBounds(f.render(), button, Color.BLUE).width);
+        assertEquals(button, f.controller.stones().get(3));
+        // The larger button remains clickable outside the smaller icon.
+        when(f.client.getMouseCanvasPosition()).thenReturn(new Point(button.x + 1, button.y + 1));
+        f.overlay.onPostMenuSort(new PostMenuSort());
+        assertEquals("Tab 3", f.entries.get(f.entries.size() - 1).getOption());
+        when(f.client.getMouseCanvasPosition()).thenReturn(null);
+        when(f.config.menuKeepNativeIcons()).thenReturn(false);
+        assertEquals(46, colouredBounds(f.render(), button, Color.BLUE).width);
+        verifyNoInteractions(f.configs);
+    }
+
+    @Test public void centredIconsPreserveIncomingGraphicsTransformAndClip()
+    {
+        Fixture f = new Fixture(1);
+        when(f.config.menuKeepNativeIcons()).thenReturn(true);
+        f.widgetOverrides.put(f.icons[3].getId(), pixels(Color.RED));
+        f.apply();
+        Rectangle button = f.controller.stones().get(3);
+        BufferedImage image = new BufferedImage(3200, 2000, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = image.createGraphics();
+        graphics.scale(2, 2);
+        graphics.clip(button);
+        java.awt.geom.AffineTransform transform = graphics.getTransform();
+        Rectangle clip = graphics.getClipBounds();
+        f.overlay.render(graphics);
+        assertEquals(transform, graphics.getTransform());
+        assertEquals(clip, graphics.getClipBounds());
+        graphics.dispose();
+        Rectangle scaledButton = new Rectangle(button.x * 2, button.y * 2, button.width * 2, button.height * 2);
+        Rectangle icon = colouredBounds(image, scaledButton, Color.RED);
+        assertEquals(46, icon.width);
+        assertEquals(52, icon.height);
+        assertTrue(Math.abs(scaledButton.getCenterX() - icon.getCenterX()) <= 1);
+        assertEquals(0, image.getRGB(scaledButton.x - 1, scaledButton.y));
+    }
+
+    private static Rectangle colouredBounds(BufferedImage image, Rectangle area, Color color)
+    {
+        Rectangle result = null;
+        for (int y = area.y; y < area.y + area.height; y++)
+            for (int x = area.x; x < area.x + area.width; x++)
+                if (image.getRGB(x, y) == color.getRGB())
+                {
+                    Rectangle pixel = new Rectangle(x, y, 1, 1);
+                    result = result == null ? pixel : result.union(pixel);
+                }
+        assertNotNull("Expected icon pixels", result);
+        return result;
     }
 
     @Test public void unavailableSpritesLeaveNativeButtonsVisible()
@@ -275,9 +367,14 @@ public class MenuButtonOverlayTest
         void hover(int i) { Rectangle b = controller.stones().get(i); when(client.getMouseCanvasPosition()).thenReturn(new Point(b.x + b.width / 2, b.y + b.height / 2)); }
         int renderIcon(int i)
         {
+            BufferedImage image = render();
+            Rectangle bounds = controller.stones().get(i); return image.getRGB(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+        }
+        BufferedImage render()
+        {
             BufferedImage image = new BufferedImage(1600, 1000, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g = image.createGraphics(); overlay.render(g); g.dispose();
-            Rectangle bounds = controller.stones().get(i); return image.getRGB(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+            return image;
         }
     }
 }

@@ -69,7 +69,7 @@ The shared size setting applies the same percentage to every replacement menu bu
 
 Native and overlay menu positions/groups are stored separately for each display mode. Menu arrangement, spacing and tab visibility are remembered separately for the two button types. Turn overlays off to restore the previous native setup; turn them on again to return to your overlay setup. The snapshots belong to the current RuneLite profile and do not change another plugin’s settings. Orb controls remain unchanged. If the current gameframe does not expose a usable native tab operation, or a complete group will not fit the canvas, the native controls are retained. Stretched Mode still handles scaling the entire game view.
 
-**Icon appearance:** the button background and icon currently resize together. Small pixel-art icons can look uneven at fractional sizes such as 90%, and enlarging them makes their pixels more visible. Use 100% to retain native-size artwork; 200% can preserve a more regular pixel pattern. Resource-pack images remain the source artwork. There is currently no separate icon-size or smoothing setting.
+**Icon appearance:** enable **Menu bars > Keep icons at native size** to keep icons centred at their normal size inside enlarged buttons. Below 100%, the icons shrink with the buttons; above 100%, only the background and click area grow. The same rule applies to custom bars and detached tabs, and it retains your active resource-pack artwork. This option starts off, preserving the existing appearance where backgrounds and icons scale together. Small pixel-art icons can still look uneven at fractional sizes such as 90%; this option prevents enlargement rather than adding smoothing.
 
 #### Moving a whole bar
 

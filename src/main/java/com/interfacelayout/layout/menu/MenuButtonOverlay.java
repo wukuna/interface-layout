@@ -148,6 +148,7 @@ public class MenuButtonOverlay extends Overlay
     @Override public Dimension render(Graphics2D graphics)
     {
         if (!current()) return null;
+        boolean keepNativeIcons = config.menuKeepNativeIcons();
         net.runelite.api.Point mouse = client.getMouseCanvasPosition();
         for (Button button : placed)
         {
@@ -171,10 +172,24 @@ public class MenuButtonOverlay extends Overlay
                 if (!states.isHiddenByGame(button.stone))
                     paint(draw, button.stone, new Rectangle(button.stoneOffset.x, button.stoneOffset.y,
                         button.stone.getWidth(), button.stone.getHeight()), button.stone.getSpriteTiling());
-                paint(draw, button.icon, new Rectangle(button.iconOffset.x, button.iconOffset.y,
-                    button.icon.getWidth(), button.icon.getHeight()), button.icon.getSpriteTiling());
+                if (!keepNativeIcons)
+                    paint(draw, button.icon, new Rectangle(button.iconOffset.x, button.iconOffset.y,
+                        button.icon.getWidth(), button.icon.getHeight()), button.icon.getSpriteTiling());
             }
             finally { draw.dispose(); }
+            if (keepNativeIcons)
+            {
+                // Paint outside the background's scale transform, retaining any
+                // parent transform (such as client-wide display scaling).
+                Graphics2D iconDraw = (Graphics2D) graphics.create();
+                try
+                {
+                    iconDraw.clip(button.bounds);
+                    iconDraw.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+                    paint(iconDraw, button.icon, centredIconBounds(button), button.icon.getSpriteTiling());
+                }
+                finally { iconDraw.dispose(); }
+            }
             if (!client.isMenuOpen() && mouse != null && button.bounds.contains(mouse.getX(), mouse.getY()))
             {
                 graphics.setColor(new Color(255, 210, 100, 140));
@@ -182,6 +197,16 @@ public class MenuButtonOverlay extends Overlay
             }
         }
         return null;
+    }
+
+    private Rectangle centredIconBounds(Button button)
+    {
+        double scale = Math.min(1.0, Math.min((double) button.bounds.width / button.width,
+            (double) button.bounds.height / button.height));
+        int width = Math.min(button.bounds.width, Math.max(1, (int) Math.round(button.icon.getWidth() * scale)));
+        int height = Math.min(button.bounds.height, Math.max(1, (int) Math.round(button.icon.getHeight() * scale)));
+        return new Rectangle(button.bounds.x + (button.bounds.width - width) / 2,
+            button.bounds.y + (button.bounds.height - height) / 2, width, height);
     }
 
     private void paint(Graphics2D graphics, Widget widget, Rectangle area, boolean tiled)
