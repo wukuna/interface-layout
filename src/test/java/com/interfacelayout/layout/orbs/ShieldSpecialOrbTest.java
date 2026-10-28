@@ -10,6 +10,7 @@ import net.runelite.api.*;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.PostMenuSort;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
@@ -121,6 +122,27 @@ public class ShieldSpecialOrbTest
         when(orb.isHidden()).thenReturn(false); when(button.isHidden()).thenReturn(true); assertNull(overlay.resolve());
         when(button.isHidden()).thenReturn(false); when(client.getGameState()).thenReturn(GameState.LOGIN_SCREEN);
         assertNull(overlay.resolve());
+    }
+
+    @Test public void pvpFollowsNativeAvailabilityAndRejectsClicksAfterNativeControlDisappears()
+    {
+        // The former PVP_SPEC_ORB flag now only identifies a PvP area.
+        // Native orb use in PvP was enabled by Poll 78 on 2023-03-09.
+        when(client.getVarbitValue(VarbitID.PVP_AREA_CLIENT)).thenReturn(1);
+        paint(); when(client.getMouseCanvasPosition()).thenReturn(new Point(150, 115));
+        overlay.onPostMenuSort(new PostMenuSort());
+        verify(entry).setIdentifier(2);
+        MenuOptionClicked available = new MenuOptionClicked(entry);
+        overlay.onMenuOptionClicked(available); assertFalse(available.isConsumed());
+        when(button.isHidden()).thenReturn(true);
+        assertNull(overlay.resolve());
+        MenuOptionClicked restricted = new MenuOptionClicked(entry);
+        overlay.onMenuOptionClicked(restricted); assertTrue(restricted.isConsumed());
+        when(button.isHidden()).thenReturn(false);
+        when(button.getActions()).thenReturn(new String[]{"Use"});
+        assertNull(overlay.resolve());
+        MenuOptionClicked noOffhandAction = new MenuOptionClicked(entry);
+        overlay.onMenuOptionClicked(noOffhandAction); assertTrue(noOffhandAction.isConsumed());
     }
 
     @Test public void zeroChargeOrbStillShowsButUnknownChargeRangeDoesNot()

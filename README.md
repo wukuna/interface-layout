@@ -131,6 +131,8 @@ Enable **Presentation > Show shield special orb** for a separate special-attack 
 
 The shield orb starts beside the regular special-attack orb. Move it with RuneLite's overlay-drag modifier (normally Alt). Clicking it selects **Use Offhand** or **Deactivate Offhand** when both weapon and shield specials are available; when the shield supplies the primary special, it uses that action instead. Keep the native special orb visible. **Hide extra special-attack bar** is a separate choice, so you can hide the small meter while using the new orb. Unequipping the shield removes the extra orb; two-handed weapon stacks do not activate it.
 
+The shield orb follows the native control's availability, including in PvP areas. It does not expose hidden controls or activate an action the game has removed.
+
 After an update, the chatbox lists up to five recent changes, newest first. Each update notice appears once per RuneLite profile when you are logged in, rather than every login.
 
 ### Map and orb visibility
