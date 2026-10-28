@@ -15,6 +15,7 @@ Arrange RuneLite around the way you play. Move orbs and the compass, detach menu
 - **Saved layouts** — keep separate menu arrangements for Fixed, Resizable Classic and Resizable Modern.
 - **Editing controls** — use drag handles, optional grid snapping and resets to adjust your layout.
 - **Modern logout stone** — optionally give the existing logout X a stone background; both forms can join custom menu bars. Fixed and Classic keep their normal logout tabs.
+- **Shield special orb** — optionally show a separate, movable shield-charge orb under Presentation, using the game's existing off-hand special-attack action. Off by default.
 - **Shortcuts and protection** — toggle editing or minimap visibility, restore the native menu temporarily, and choose whether clicks pass through gaps between stones.
 
 ## Getting started
@@ -125,6 +126,10 @@ Fixed and Resizable Classic keep their native Logout tabs. **Hide Logout-X (Mode
 ### Presentation
 
 Enable **Presentation > Hide extra special-attack bar** to hide the small secondary meter beneath the special-attack orb. This is optional and starts off. The orb's icon, number and normal special-attack controls remain available. Turning the setting off restores the meter when the game would normally show it.
+
+Enable **Presentation > Show shield special orb** for a separate special-attack orb for supported shield-slot equipment, using the game's existing off-hand action. It uses the native shield icon, shows the shield's charges, and follows compatible resource-pack sprite replacements. It starts off and appears only while a supported shield and its native special-attack control are available. The current supported charge system has 20 charges and requires 10 to activate; other shield abilities are not assumed to work the same way.
+
+The shield orb starts beside the regular special-attack orb. Move it with RuneLite's overlay-drag modifier (normally Alt). Clicking it selects **Use Offhand** or **Deactivate Offhand** when both weapon and shield specials are available; when the shield supplies the primary special, it uses that action instead. Keep the native special orb visible. **Hide extra special-attack bar** is a separate choice, so you can hide the small meter while using the new orb. Unequipping the shield removes the extra orb; two-handed weapon stacks do not activate it.
 
 After an update, the chatbox lists up to five recent changes, newest first. Each update notice appears once per RuneLite profile when you are logged in, rather than every login.
 

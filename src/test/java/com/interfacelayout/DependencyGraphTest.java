@@ -44,6 +44,7 @@ public class DependencyGraphTest
                 bind(KeyManager.class).toInstance(mock(KeyManager.class));
                 bind(MouseManager.class).toInstance(mock(MouseManager.class));
                 bind(OverlayManager.class).toInstance(mock(OverlayManager.class));
+                bind(net.runelite.client.ui.overlay.tooltip.TooltipManager.class).toInstance(mock(net.runelite.client.ui.overlay.tooltip.TooltipManager.class));
                 bind(EventBus.class).toInstance(new EventBus());
             }
         });
@@ -71,6 +72,7 @@ public class DependencyGraphTest
                 bind(KeyManager.class).toInstance(mock(KeyManager.class));
                 bind(MouseManager.class).toInstance(mock(MouseManager.class));
                 bind(OverlayManager.class).toInstance(mock(OverlayManager.class));
+                bind(net.runelite.client.ui.overlay.tooltip.TooltipManager.class).toInstance(mock(net.runelite.client.ui.overlay.tooltip.TooltipManager.class));
                 bind(EventBus.class).toInstance(new EventBus());
                 bind(InterfaceLayoutConfig.class).toInstance(mock(InterfaceLayoutConfig.class, CALLS_REAL_METHODS));
             }

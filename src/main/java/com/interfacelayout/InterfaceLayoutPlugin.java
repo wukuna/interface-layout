@@ -35,7 +35,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 @PluginDescriptor(
 	name = "Interface Layout",
-	description = "Move orbs, compass and menu tabs; build custom bars, resize overlay tabs together, keep resource-pack artwork and control minimap visibility.",
+	description = "Move orbs and menu tabs, resize custom bars with resource-pack artwork, control minimap visibility and add an optional shield special orb.",
 	tags = {"compact", "orbs", "layout", "hide", "minimap", "resizable", "classic", "modern", "world", "map", "wiki", "swap", "overlay", "orb", "fixed"},
 	conflicts = {"Compact Orbs", "Menu Stones Hider", "Fixed Resizable Hybrid", "Orb Hider", "Minimap Hider", "Movable Orbs", "Custom Game Tabs"}
 )
@@ -45,6 +45,8 @@ public class InterfaceLayoutPlugin extends Plugin
     @Inject private EventBus eventBus;
     @Inject private com.interfacelayout.layout.PresentationController presentation;
     @Inject private ReleaseNotesNotice releaseNotes;
+    @Inject private com.interfacelayout.layout.orbs.ShieldSpecialOrb shieldOrb;
+    @Inject private net.runelite.client.ui.overlay.OverlayManager overlayManager;
 
     @Override public void configure(Binder binder)
     {
@@ -60,9 +62,15 @@ public class InterfaceLayoutPlugin extends Plugin
         presentation.start();
         eventBus.register(releaseNotes);
         releaseNotes.start();
+        shieldOrb.start();
+        eventBus.register(shieldOrb);
+        overlayManager.add(shieldOrb);
     }
     @Override protected void shutDown() throws Exception
     {
+        shieldOrb.stop();
+        overlayManager.remove(shieldOrb);
+        eventBus.unregister(shieldOrb);
         eventBus.unregister(releaseNotes);
         releaseNotes.stop();
         eventBus.unregister(presentation);

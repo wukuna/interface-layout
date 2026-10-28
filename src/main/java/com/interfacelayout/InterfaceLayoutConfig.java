@@ -63,6 +63,18 @@ public interface InterfaceLayoutConfig extends Config
 		return false;
 	}
 
+	@ConfigItem(
+		keyName = "showShieldSpecialOrb",
+		name = "Show shield special orb",
+		description = "Show a movable shield-charge orb using the game's existing shield special action. The native special orb must remain visible. Uses the current resource pack; off by default.",
+		section = presentation,
+		position = 1
+	)
+	default boolean showShieldSpecialOrb()
+	{
+		return false;
+	}
+
 	enum HorizontalAnchor
 	{
 		LEFT, RIGHT;

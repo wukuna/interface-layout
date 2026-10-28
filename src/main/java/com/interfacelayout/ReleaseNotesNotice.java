@@ -20,14 +20,14 @@ import net.runelite.client.events.ProfileChanged;
 @Singleton
 final class ReleaseNotesNotice
 {
-    static final String RELEASE = "2026-10-28-special-meter";
+    static final String RELEASE = "2026-10-28-shield-special";
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] RECENT = {
+        "Presentation: a separate shield special orb uses the game's existing off-hand action.",
         "Presentation: hide the extra bar beneath the special-attack orb.",
         "Keep menu icons centred at native size in larger buttons; smaller buttons still shrink them.",
         "Resize overlay menu buttons together (25-200%) with your resource-pack artwork and saved layouts.",
-        "Modern's restored logout stone keeps its X and joins custom menu bars.",
-        "Optional minimap clickthrough protection keeps navigation clicks from reaching the scene."
+        "Modern's restored logout stone keeps its X and joins custom menu bars."
     };
 
     @Inject private Client client;
