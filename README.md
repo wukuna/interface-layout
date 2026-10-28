@@ -1,6 +1,6 @@
 # Interface Layout
 
-Arrange RuneLite around the way you play. Move orbs and the compass, detach menu tabs and reconnect them into custom rows or columns, or choose a compact preset. Control which elements remain visible, restore the Modern logout stone, and protect orb and minimap clicks from reaching the game behind them. Optional overlay menu buttons let you adjust tab size while retaining the active game or resource-pack artwork in Fixed, Resizable Classic and Resizable Modern.
+Arrange RuneLite around the way you play. Move orbs and the compass, detach menu tabs and reconnect them into custom rows or columns, or choose a compact preset. Resize overlay menu buttons together from **25–200%**, keeping your active game or resource-pack artwork in **Fixed, Resizable Classic and Resizable Modern**. Control which elements remain visible, restore the Modern logout stone, and protect orb and minimap clicks from reaching the game behind them. Overlay buttons are optional and start off.
 
 [Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Inspiration and recipe](#inspiration-and-recipe) · [Development](#development) · [Support](#support) · [License and attribution](#license-and-attribution)
 
@@ -22,11 +22,12 @@ Arrange RuneLite around the way you play. Move orbs and the compass, detach menu
 1. Choose your game display mode, then open **Interface Layout** settings.
 2. Pick an orb arrangement and a menu arrangement. Enable **Edit interface** for editing guides.
 3. **Alt-drag** moves a whole control or bar. **Shift-drag** detaches or joins menu stones when custom grouping is enabled.
-4. Turn off **Edit interface** when finished. Layouts remain saved separately for Fixed, Classic and Modern.
+4. To resize the menu buttons together, open **Menu bars**, enable **Use overlay menu buttons**, and adjust **Resize menu tabs (%)**. Leave it at **100%** for native-size buttons.
+5. Turn off **Edit interface** when finished. Layouts remain saved separately for Fixed, Classic and Modern. Turn overlay buttons off to return to your saved native menu layout.
 
 ![Settings overview showing the editing, menu, visibility, orb and shortcut sections](docs/media/settings-overview.png)
 
-The captures below were supplied on 23 October 2026. Their **TEST** suffix identifies the local demonstration build; install **Interface Layout** from the Plugin Hub. Checked visibility controls hide their named element. The captures show an example setup, not the default settings. Other overlays visible in the recording are not Interface Layout features.
+The movement video and older settings captures were supplied on 23 October 2026. Their **TEST** suffix identifies the local demonstration build; install **Interface Layout** from the Plugin Hub. The resizing settings capture below was supplied on 28 October and shows the newer overlay-button controls. Checked visibility controls hide their named element. All captures show example setups, not the default settings. Other overlays visible in the recording are not Interface Layout features.
 
 ## Usage
 
@@ -56,6 +57,10 @@ In Fixed and both resizable modes, **Free position** starts with separate top an
 
 Under **Menu bars**, enable **Use overlay menu buttons**, then choose **Resize menu tabs (%)** (25–200%; 100% follows the native tab size). The setting is off by default. It supports **Fixed**, **Resizable Classic** and **Resizable Modern** and uses the same grouping, hiding controls and drag gestures as native buttons. First use copies the current arrangement into a separate overlay layout for that display mode.
 
+![Interface Layout settings showing Use overlay menu buttons enabled and Resize menu tabs set to 90 percent](docs/media/overlay-menu-resizing-settings.png)
+
+The screenshot shows an example at **90%**. One percentage applies to all overlay menu buttons, including custom bars and detached buttons. It does not give each tab a different size.
+
 The replacements retain the active tab artwork, including Resource Packs and Interface Styles sprite overrides, with a subtle gold hover outline. Changing or disabling a resource pack refreshes the artwork without importing files or changing that plugin's settings. Fixed and Classic use their own row artwork; Modern uses its native stone background. Packs are not bundled and must support the selected display mode.
 
 Clicking a replacement opens the corresponding native tab. Existing native tab options and RuneLite-registered widget options remain on right-click. This changes the replacement menu-tab surfaces only: it does not resize orbs, the inventory contents, prayers, spells or other game interfaces. Native tab widgets retain their original dimensions. Controls hidden by the game remain unavailable, and supported overlapping windows take priority.
@@ -64,7 +69,7 @@ The shared size setting applies the same percentage to every replacement menu bu
 
 Native and overlay menu positions/groups are stored separately for each display mode. Menu arrangement, spacing and tab visibility are remembered separately for the two button types. Turn overlays off to restore the previous native setup; turn them on again to return to your overlay setup. The snapshots belong to the current RuneLite profile and do not change another plugin’s settings. Orb controls remain unchanged. If the current gameframe does not expose a usable native tab operation, or a complete group will not fit the canvas, the native controls are retained. Stretched Mode still handles scaling the entire game view.
 
-The existing screenshots and video above show native buttons and grouping. New overlay-button captures will be added separately.
+**Icon appearance:** the button background and icon currently resize together. Small pixel-art icons can look uneven at fractional sizes such as 90%, and enlarging them makes their pixels more visible. Use 100% to retain native-size artwork; 200% can preserve a more regular pixel pattern. Resource-pack images remain the source artwork. There is currently no separate icon-size or smoothing setting.
 
 #### Moving a whole bar
 
