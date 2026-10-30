@@ -1,6 +1,6 @@
 # Interface Layout
 
-Arrange RuneLite around the way you play. Move orbs and the compass, detach menu tabs and reconnect them into custom rows or columns, or choose a compact preset. Resize overlay menu buttons together from **25–200%**, keeping your active game or resource-pack artwork in **Fixed, Resizable Classic and Resizable Modern**. Control which elements remain visible, restore the Modern logout stone, and protect orb and minimap clicks from reaching the game behind them. Overlay buttons are optional and start off.
+Arrange RuneLite around the way you play. Move orbs and the compass, detach menu tabs and reconnect them into custom rows or columns, or choose a compact preset. Resize overlay menu buttons together from **25–200%**, keeping your active game or resource-pack artwork in **Fixed, Resizable Classic and Resizable Modern**. Control which elements remain visible, restore the Modern logout stone, and protect orb and minimap clicks from reaching the game behind them. Overlay buttons are optional and start off. An optional Beta equipment sidebar adds compact gear bonuses, weight and spellbook information with a reduced-tooltip setting.
 
 [Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Inspiration and recipe](#inspiration-and-recipe) · [Development](#development) · [Support](#support) · [License and attribution](#license-and-attribution)
 
@@ -16,7 +16,12 @@ Arrange RuneLite around the way you play. Move orbs and the compass, detach menu
 - **Editing controls** — use drag handles, optional grid snapping and resets to adjust your layout.
 - **Modern logout stone** — optionally give the existing logout X a stone background; both forms can join custom menu bars. Fixed and Classic keep their normal logout tabs.
 - **Shield special orb** — optionally show a separate, movable shield-charge orb under Presentation, using the game's existing off-hand special-attack action. Off by default.
+- **Beta equipment sidebar** — compact stats and spellbook information beneath your gear, small utility buttons, and optional reduced tooltips. The expanded equipment window and bank equipment view keep their native layouts.
 - **Shortcuts and protection** — toggle editing or minimap visibility, restore the native menu temporarily, and choose whether clicks pass through gaps between stones.
+
+**Availability:** Install **Interface Layout** from RuneLite's Plugin Hub. [Update #19761](https://github.com/runelite/plugin-hub/pull/19761) merged on 30 October 2026. Enable the equipment sidebar under **Beta features**; it starts off.
+
+**More plugins:** [Banking, Looting, Right-Clicks, Interface Layout and Chat](https://github.com/wukuna#runelite-plugins).
 
 ## Getting started
 
