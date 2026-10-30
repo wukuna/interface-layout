@@ -32,6 +32,14 @@ The movement video and older settings captures were supplied on 23 October 2026.
 
 ## Usage
 
+### Local beta equipment panel
+
+This branch adds **Beta features → Beta equipment panel**, off by default. It places attack and defence bonuses, strength bonuses, magic damage, prayer, carried weight and the current spellbook beneath the equipment slots. The equipment tab's four native utility buttons become a small horizontal row at the bottom left, retaining their original actions. Actual equipment slots keep their native positions and sizes. Disabling the feature restores the original utility buttons.
+
+The bank equipment view and full equipment window use the same compact readout and read bonuses from their native text. Their target-specific, attack-speed and set-effect controls remain native. The equipment tab uses base item bonuses; conditional weapon, set and target effects can differ from the game's effective values. Missing item-stat data is shown as `?`, not zero. Hover a value for its full description and source.
+
+This is a local TEST feature, not a published or maintainer-approved change. Live checks are still needed in Fixed, Classic and Modern, including bank reopening, all four controls, resource packs and disabling/re-enabling the beta. If the native view is too small to fit the readout without overlapping gear, it keeps the native display.
+
 ### Moving menu stones and orbs
 
 Enable **Edit interface** to show editing outlines and allow **Shift-drag** stone grouping. RuneLite **Alt-drag** moves whole bars, detached stones, free orbs and the compass with Edit interface on or off. Choose **Free Position** under **Map and orb visibility → Orb arrangement** to move orbs individually, and choose a vertical or free-position menu arrangement to detach and regroup stones.

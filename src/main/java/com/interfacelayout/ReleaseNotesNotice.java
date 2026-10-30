@@ -20,9 +20,10 @@ import net.runelite.client.events.ProfileChanged;
 @Singleton
 final class ReleaseNotesNotice
 {
-    static final String RELEASE = "2026-10-28-shield-special";
+    static final String RELEASE = "2026-10-30-beta-equipment";
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] RECENT = {
+        "Beta features: optional Beta equipment panel adds compact bonuses and spellbook to equipment and bank views, with four small native utility buttons.",
         "Presentation: a separate shield special orb uses the game's existing off-hand action.",
         "Presentation: hide the extra bar beneath the special-attack orb.",
         "Keep menu icons centred at native size in larger buttons; smaller buttons still shrink them.",

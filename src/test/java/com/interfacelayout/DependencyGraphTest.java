@@ -38,6 +38,7 @@ public class DependencyGraphTest
             @Override protected void configure()
             {
                 bind(Client.class).toInstance(mock(Client.class));
+                bind(net.runelite.client.game.ItemManager.class).toInstance(mock(net.runelite.client.game.ItemManager.class));
                 bind(ClientThread.class).toInstance(mock(ClientThread.class));
                 bind(ConfigManager.class).toInstance(configs);
                 bind(ChatMessageManager.class).toInstance(mock(ChatMessageManager.class));
@@ -66,6 +67,7 @@ public class DependencyGraphTest
             @Override protected void configure()
             {
                 bind(Client.class).toInstance(mock(Client.class));
+                bind(net.runelite.client.game.ItemManager.class).toInstance(mock(net.runelite.client.game.ItemManager.class));
                 bind(ClientThread.class).toInstance(mock(ClientThread.class));
                 bind(ConfigManager.class).toInstance(mock(ConfigManager.class));
                 bind(ChatMessageManager.class).toInstance(mock(ChatMessageManager.class));
