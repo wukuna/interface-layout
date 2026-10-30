@@ -32,13 +32,13 @@ The movement video and older settings captures were supplied on 23 October 2026.
 
 ## Usage
 
-### Local beta equipment panel
+### Beta equipment panel
 
-This branch adds **Beta features → Beta equipment panel**, off by default. It places attack and defence bonuses, strength bonuses, magic damage, prayer, carried weight and the current spellbook beneath the equipment slots. The equipment tab's four native utility buttons become a small horizontal row at the bottom left, retaining their original actions. Actual equipment slots keep their native positions and sizes. Disabling the feature restores the original utility buttons.
+Enable **Beta features → Beta equipment panel**, off by default. It places attack and defence bonuses, strength bonuses, magic damage, prayer, carried weight and the current spellbook beneath the equipment slots. The equipment tab's four native utility buttons become a small horizontal row at the bottom left, retaining their original actions. Actual equipment slots keep their native positions and sizes. Disabling the feature restores the original utility buttons.
 
-The bank equipment view and full equipment window use the same compact readout and read bonuses from their native text. Their target-specific, attack-speed and set-effect controls remain native. The equipment tab uses base item bonuses; conditional weapon, set and target effects can differ from the game's effective values. Missing item-stat data is shown as `?`, not zero. Hover a value for its full description and source.
+The compact layout applies only to the equipment sidebar card. The expanded equipment window and bank equipment menu retain their native layouts and statistics. The sidebar uses base item bonuses; conditional weapon, set and target effects can differ from the game's effective values. Missing item-stat data is shown as `?`, not zero. Hover a value for its full description and source.
 
-This is a local TEST feature, not a published or maintainer-approved change. Live checks are still needed in Fixed, Classic and Modern, including bank reopening, all four controls, resource packs and disabling/re-enabling the beta. If the native view is too small to fit the readout without overlapping gear, it keeps the native display.
+Enable **Reduced tooltips** in Beta features to show only the relevant values and control names on hover. Leave it off for the full source and conditional-effect explanations. If the native sidebar is too small to fit the readout without overlapping gear, it keeps the native display.
 
 ### Moving menu stones and orbs
 

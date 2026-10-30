@@ -55,9 +55,14 @@ public interface InterfaceLayoutConfig extends Config
     String betaFeatures="betaFeatures";
 
     @ConfigItem(keyName="betaEquipmentPanel",name="Beta equipment panel",
-        description="Compact equipment bonuses and current spellbook in the equipment tab, equipment window and bank equipment view. Four small native utility controls; equipment slots stay in place. Off by default.",
+        description="Compact equipment bonuses and current spellbook on the equipment sidebar card. Four small native utility controls; equipment slots stay in place. Expanded and bank equipment views stay native. Off by default.",
         section=betaFeatures,position=0)
     default boolean betaEquipmentPanel() {return false;}
+
+    @ConfigItem(keyName="betaEquipmentReducedTooltips",name="Reduced tooltips",
+        description="Show only key values and control names when hovering the beta equipment card. Hide the longer source and conditional-effect explanations.",
+        section=betaFeatures,position=1)
+    default boolean betaEquipmentReducedTooltips() {return false;}
 
 	@ConfigItem(
 		keyName = "hideExtraSpecialAttackBar",
@@ -637,9 +642,9 @@ public interface InterfaceLayoutConfig extends Config
     default boolean restoreLogoutTab() { return false; }
     @ConfigItem(keyName = "allowClicksThroughGaps", name = "Allow clicks through gaps", description = "Allow game clicks between stones in a moved menu bar. Disable to block clicks inside these gaps without selecting a tab. Stone buttons are unchanged.", section = menu, position = 7)
     default boolean allowClicksThroughGaps() { return true; }
-    @ConfigItem(keyName = "hideTopMenu", name = "Hide combatâ€“spellbook tabs", description = "Hide Combat, Skills, Quests, Inventory, Equipment, Prayer and Spellbook wherever they are placed.", section = menu, position = 3)
+    @ConfigItem(keyName = "hideTopMenu", name = "Hide combat–spellbook tabs", description = "Hide Combat, Skills, Quests, Inventory, Equipment, Prayer and Spellbook wherever they are placed.", section = menu, position = 3)
     default boolean hideTopMenu() { return false; }
-    @ConfigItem(keyName = "hideBottomMenu", name = "Hide clanâ€“music tabs", description = "Hide Clan, Account Management, Friends, Logout, Settings, Emotes and Music wherever they are placed.", section = menu, position = 4)
+    @ConfigItem(keyName = "hideBottomMenu", name = "Hide clan–music tabs", description = "Hide Clan, Account Management, Friends, Logout, Settings, Emotes and Music wherever they are placed.", section = menu, position = 4)
     default boolean hideBottomMenu() { return false; }
     @ConfigItem(keyName = "hideLeftBar", name = "Hide classic left border", description = "Hide the decorative left border in resizable Classic mode.", section = menu, position = 5)
     default boolean hideLeftBar() { return false; }

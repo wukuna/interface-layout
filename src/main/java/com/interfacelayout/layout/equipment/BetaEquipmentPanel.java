@@ -35,12 +35,6 @@ public class BetaEquipmentPanel extends Overlay
     private static final int[] BUTTONS={InterfaceID.Wornitems.EQUIPMENT,InterfaceID.Wornitems.PRICECHECKER,InterfaceID.Wornitems.DEATHKEEP,InterfaceID.Wornitems.CALL_FOLLOWER};
     private static final int[] ICONS={InterfaceID.Wornitems.EQUIPMENT_ICON,InterfaceID.Wornitems.ROOT_GRAPHIC2,InterfaceID.Wornitems.ROOT_GRAPHIC3,InterfaceID.Wornitems.ROOT_GRAPHIC4};
     private static final String[] LABELS={"Stats","Prices","Death","Follower"};
-    private static final int[] BANK_STATS={InterfaceID.Bankmain.STABATT,InterfaceID.Bankmain.SLASHATT,InterfaceID.Bankmain.CRUSHATT,InterfaceID.Bankmain.MAGICATT,InterfaceID.Bankmain.RANGEATT,
-        InterfaceID.Bankmain.STABDEF,InterfaceID.Bankmain.SLASHDEF,InterfaceID.Bankmain.CRUSHDEF,InterfaceID.Bankmain.MAGICDEF,InterfaceID.Bankmain.RANGEDEF,
-        InterfaceID.Bankmain.MELEESTRENGTH,InterfaceID.Bankmain.RANGESTRENGTH,InterfaceID.Bankmain.MAGICDAMAGE,InterfaceID.Bankmain.PRAYER};
-    private static final int[] WINDOW_STATS={InterfaceID.Equipment.STABATT,InterfaceID.Equipment.SLASHATT,InterfaceID.Equipment.CRUSHATT,InterfaceID.Equipment.MAGICATT,InterfaceID.Equipment.RANGEATT,
-        InterfaceID.Equipment.STABDEF,InterfaceID.Equipment.SLASHDEF,InterfaceID.Equipment.CRUSHDEF,InterfaceID.Equipment.MAGICDEF,InterfaceID.Equipment.RANGEDEF,
-        InterfaceID.Equipment.MELEESTRENGTH,InterfaceID.Equipment.RANGESTRENGTH,InterfaceID.Equipment.MAGICDAMAGE,InterfaceID.Equipment.PRAYER};
     @Inject Client client;
     @Inject ClientThread clientThread;
     @Inject InterfaceLayoutConfig config;
@@ -97,9 +91,7 @@ public class BetaEquipmentPanel extends Overlay
         if(!running || !config.betaEquipmentPanel() || client.getGameState()!=GameState.LOGGED_IN) {restore();data=null;dirty=true;return;}
         views.clear();
         Widget tab=client.getWidget(InterfaceID.Wornitems.UNIVERSE);
-        Widget bank=client.getWidget(InterfaceID.Bankmain.WORNITEMS_CONTAINER);
-        Widget window=client.getWidget(InterfaceID.Equipment.CONTENTS);
-        if(!visible(tab) && !visible(bank) && !visible(window)) {restore();return;}
+        if(!visible(tab)) {restore();return;}
         if(dirty || data==null) {data=EquipmentReadout.capture(client,items);dirty=false;}
         Set<Widget> retained=Collections.newSetFromMap(new IdentityHashMap<>());
         if(visible(tab) && tab.getWidth()>=184 && tab.getHeight()>=261) {
@@ -116,34 +108,9 @@ public class BetaEquipmentPanel extends Overlay
                 Widget[] frame=button.getDynamicChildren();
                 if(frame!=null) for(Widget piece:frame) hide(piece,retained);
             }
-            views.add(new View(tab,footer,data,true,available));
+            views.add(new View(tab,footer,data,available));
         }
-        addFullView(bank,InterfaceID.Bankmain.WORNITEMS_CONTAINER_TEXT22,InterfaceID.Bankmain.WORNITEMS_CONTAINER_GRAPHIC21,
-            InterfaceID.Bankmain.STAT_GROUP,BANK_STATS,retained);
-        addFullView(window,InterfaceID.Equipment.CONTENTS_TEXT23,InterfaceID.Equipment.CONTENTS_GRAPHIC22,
-            InterfaceID.Equipment.STAT_GROUP,WINDOW_STATS,retained);
         restoreUnused(retained);
-    }
-    private void addFullView(Widget root,int weightText,int weightIcon,int statGroup,int[] stats,Set<Widget> retained) {
-        if(!visible(root) || !visible(client.getWidget(statGroup)))return;
-        // The native left-hand gear diagram ends at the ring slot. Place the
-        // readout beneath it; leave model, gear, set-effect paging and close controls alone.
-        int ringId=root.getId()==InterfaceID.Bankmain.WORNITEMS_CONTAINER?InterfaceID.Bankmain.WORNSLOT12:InterfaceID.Equipment.SLOT12;
-        Widget ring=client.getWidget(ringId);if(!visible(ring))return;
-        Rectangle parent=root.getBounds(),gear=ring.getBounds();int y=gear.y+gear.height+3;
-        Rectangle footer=new Rectangle(parent.x+3,y,184,EquipmentReadoutRenderer.READOUT_HEIGHT);
-        if(!parent.contains(footer))return;
-        double[] nativeValues=new double[14];boolean known=true;
-        for(int i=0;i<stats.length;i++) {Widget widget=client.getWidget(stats[i]);Double value=widget==null || (widget.isSelfHidden() && !hidden.contains(widget))?null:EquipmentReadout.nativeBonus(widget.getText());if(value==null){known=false;break;}nativeValues[i]=value;}
-        EquipmentReadout current=known?new EquipmentReadout(nativeValues,true,true,data.spellbook,data.weight):data;
-        // Preserve the native target-specific, weapon-speed and set-effect information.
-        // Only replace the three ordinary bonus headings and their values.
-        if(known) {
-            for(int id:stats)hide(client.getWidget(id),retained);
-            for(int id:new int[]{stats[0]-1,stats[5]-1,stats[10]-1})hide(client.getWidget(id),retained);
-        }
-        hide(client.getWidget(weightText),retained);hide(client.getWidget(weightIcon),retained);
-        views.add(new View(root,footer,current,false,new boolean[0]));
     }
     private static boolean visible(Widget widget) {return widget!=null && !widget.isHidden();}
     private void hide(Widget widget,Set<Widget> retained) {
@@ -172,8 +139,9 @@ public class BetaEquipmentPanel extends Overlay
         net.runelite.api.Point mouse=client.getMouseCanvasPosition();
         for(View view:views) {
             if(!visible(view.root) || !current(view.root))continue;
-            List<EquipmentReadoutRenderer.Hint> hints=EquipmentReadoutRenderer.draw(graphics,view.bounds,view.data,view.buttons);
-            if(view.buttons) for(int i=0;i<4;i++) if(view.available[i]) {
+            boolean reducedTooltips=config.betaEquipmentReducedTooltips();
+            List<EquipmentReadoutRenderer.Hint> hints=EquipmentReadoutRenderer.draw(graphics,view.bounds,view.data,reducedTooltips);
+            for(int i=0;i<4;i++) if(view.available[i]) {
                 Rectangle r=new Rectangle(view.bounds.x+4+i*21,view.bounds.y+45,18,18);
                 Graphics2D g=(Graphics2D)graphics.create();try {
                     g.setColor(new Color(55,53,44));g.fillRect(r.x,r.y,r.width,r.height);
@@ -182,15 +150,15 @@ public class BetaEquipmentPanel extends Overlay
                     if(icon!=null)g.drawImage(icon,r.x+2,r.y+2,14,14,null);
                     else {g.setFont(new Font("Arial",Font.BOLD,9));g.setColor(Color.WHITE);g.drawString(LABELS[i].substring(0,1),r.x+5,r.y+12);}
                 } finally {g.dispose();}
-                hints.add(new EquipmentReadoutRenderer.Hint(r,LABELS[i]+" — native equipment control"));
+                hints.add(new EquipmentReadoutRenderer.Hint(r,LABELS[i]+(reducedTooltips?"":" - native equipment control")));
             }
             if(tooltips!=null && mouse!=null && !client.isMenuOpen())for(var hint:hints)if(hint.bounds.contains(mouse.getX(),mouse.getY()))tooltips.add(new Tooltip(hint.text));
         }
         return null;
     }
     private static final class View {
-        final Widget root;final Rectangle bounds;final EquipmentReadout data;final boolean buttons;final boolean[] available;
-        View(Widget root,Rectangle bounds,EquipmentReadout data,boolean buttons,boolean[] available){this.root=root;this.bounds=bounds;this.data=data;this.buttons=buttons;this.available=available;}
+        final Widget root;final Rectangle bounds;final EquipmentReadout data;final boolean[] available;
+        View(Widget root,Rectangle bounds,EquipmentReadout data,boolean[] available){this.root=root;this.bounds=bounds;this.data=data;this.available=available;}
     }
     private static final class Geometry {
         final int[] values;Geometry applied;

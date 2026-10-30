@@ -19,8 +19,8 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.ui.overlay.tooltip.Tooltip;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
+import net.runelite.client.ui.overlay.tooltip.Tooltip;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import static org.junit.Assert.*;
@@ -29,6 +29,21 @@ import static org.mockito.Mockito.*;
 
 public class BetaEquipmentPanelTest
 {
+    @Test public void reducedTooltipsKeepValuesAndControlNamesWithoutLongExplanations()
+    {
+        Fixture f=new Fixture(); f.tab(); f.refresh();
+        f.renderAt(30,210);
+        ArgumentCaptor<Tooltip> tooltip=ArgumentCaptor.forClass(Tooltip.class);
+        verify(f.panel.tooltips).add(tooltip.capture());
+        assertTrue(tooltip.getValue().getText().contains("Base item bonuses"));
+        when(f.panel.config.betaEquipmentReducedTooltips()).thenReturn(true);
+        clearInvocations(f.panel.tooltips); f.renderAt(30,210);
+        verify(f.panel.tooltips).add(tooltip.capture());
+        assertEquals("Stab attack: 0<br>Stab defence: 0",tooltip.getValue().getText());
+        clearInvocations(f.panel.tooltips); f.renderAt(12,248);
+        verify(f.panel.tooltips).add(tooltip.capture()); assertEquals("Stats",tooltip.getValue().getText());
+        assertFalse(new InterfaceLayoutConfig() {}.betaEquipmentReducedTooltips());
+    }
     @Test public void onlyTheFourNativeUtilityButtonsMoveAndDisableRestoresThem()
     {
         Fixture f=new Fixture(); f.tab();
@@ -94,31 +109,29 @@ public class BetaEquipmentPanelTest
         assertEquals(111,f.buttons[1].getOriginalX());
     }
 
-    @Test public void bankAndEquipmentWindowUseNativeTotalsWithoutChangingGearSlots()
+    @Test public void bankAndExpandedEquipmentRemainNativeWithBetaEnabled()
     {
         for(boolean bank:new boolean[]{true,false}) {
             Fixture f=new Fixture(); Widget ring=f.full(bank); f.refresh();
-            f.renderAt(30,bank?250:270);
-            ArgumentCaptor<Tooltip> tooltip=ArgumentCaptor.forClass(Tooltip.class);
-            verify(f.panel.tooltips).add(tooltip.capture());
-            assertTrue(tooltip.getValue().getText().contains("+123"));
-            assertTrue(tooltip.getValue().getText().contains("game's equipment screen"));
-            assertTrue(f.nativeStat.isSelfHidden());
-            verify(ring,never()).setPos(anyInt(),anyInt(),anyInt(),anyInt());
-            verify(ring,never()).setSize(anyInt(),anyInt(),anyInt(),anyInt());
-            when(f.panel.config.betaEquipmentPanel()).thenReturn(false); f.refresh();
-            assertFalse(f.nativeStat.isSelfHidden());
+            assertEquals(0,f.renderAt(30,250).getRGB(30,250));
+            verifyNoInteractions(ring,f.nativeStat,f.panel.tooltips);
+            verifyNoInteractions(f.widgets.get(bank?InterfaceID.Bankmain.WORNITEMS_CONTAINER:InterfaceID.Equipment.CONTENTS));
+            verifyNoInteractions(f.widgets.get(bank?InterfaceID.Bankmain.STAT_GROUP:InterfaceID.Equipment.STAT_GROUP));
         }
     }
 
-    @Test public void bankPageVisibilityAndInsufficientSpacePreserveNativeDisplay()
+    @Test public void sidebarCanCoexistWithNativeEquipmentViewsAndRestoresOnClose()
     {
-        Fixture f=new Fixture(); f.full(true);
-        f.widgets.get(InterfaceID.Bankmain.STAT_GROUP).setHidden(true); f.refresh();
-        assertFalse(f.nativeStat.isSelfHidden());
-        f.widgets.get(InterfaceID.Bankmain.STAT_GROUP).setHidden(false);
-        when(f.widgets.get(InterfaceID.Bankmain.WORNITEMS_CONTAINER).getBounds()).thenReturn(new Rectangle(0,0,500,280));
-        f.refresh(); assertFalse(f.nativeStat.isSelfHidden());
+        for(boolean bank:new boolean[]{true,false}) {
+            Fixture f=new Fixture(); Widget ring=f.full(bank); f.tab(); f.refresh();
+            assertEquals(18,f.buttons[0].getWidth());
+            assertNotEquals(0,f.renderAt(30,210).getRGB(30,210));
+            verifyNoInteractions(ring,f.nativeStat);
+            f.widgets.get(InterfaceID.Wornitems.UNIVERSE).setHidden(true); f.refresh();
+            assertEquals(40,f.buttons[0].getWidth());
+            assertEquals(0,f.renderAt(30,210).getRGB(30,210));
+            verifyNoInteractions(ring,f.nativeStat);
+        }
     }
 
     @Test public void shutdownAndStaleProfileCallbacksCannotMutateReenabledPanel()

@@ -28,7 +28,7 @@ public class EquipmentReadoutTest
         when(client.getVarbitValue(VarbitID.SPELLBOOK)).thenReturn(3);
         when(client.getWeight()).thenReturn(61);
         EquipmentReadout result=EquipmentReadout.capture(client,manager);
-        assertTrue(result.complete); assertFalse(result.nativeValues);
+        assertTrue(result.complete);
         assertEquals("+74",result.value(0)); assertEquals("-11",result.value(3));
         assertEquals("+60",result.value(11)); assertEquals("+3.5%",result.value(12));
         assertEquals("Arceuus",result.spellbook); assertEquals(61,result.weight);
@@ -45,14 +45,6 @@ public class EquipmentReadoutTest
         assertEquals("?",EquipmentReadout.capture(client,manager).value(12));
         when(worn.getItems()).thenReturn(new Item[0]);
         assertEquals("0%",EquipmentReadout.capture(client,manager).value(12));
-    }
-
-    @Test public void nativeTextPreservesSignedAndFractionalValuesAndRejectsStalePlaceholders()
-    {
-        assertEquals(-11d,EquipmentReadout.nativeBonus("<col=ffff00>Magic: -11</col>"),0);
-        assertEquals(3.5d,EquipmentReadout.nativeBonus("Magic damage: +3.5%"),0);
-        for(String text:new String[]{null,"","Stab: ?","Stab: NaN","Stab: Infinity","+123"})
-            assertNull(text,EquipmentReadout.nativeBonus(text));
     }
 
     @Test public void spellbooksAndOptInDefaultAreExplicit()
