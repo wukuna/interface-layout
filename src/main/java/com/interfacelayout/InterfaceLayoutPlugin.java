@@ -47,6 +47,7 @@ public class InterfaceLayoutPlugin extends Plugin
     @Inject private ReleaseNotesNotice releaseNotes;
     @Inject private com.interfacelayout.layout.orbs.ShieldSpecialOrb shieldOrb;
     @Inject private net.runelite.client.ui.overlay.OverlayManager overlayManager;
+    @Inject private com.interfacelayout.layout.equipment.BetaEquipmentPanel equipmentPanel;
 
     @Override public void configure(Binder binder)
     {
@@ -65,9 +66,11 @@ public class InterfaceLayoutPlugin extends Plugin
         shieldOrb.start();
         eventBus.register(shieldOrb);
         overlayManager.add(shieldOrb);
+        equipmentPanel.start();eventBus.register(equipmentPanel);overlayManager.add(equipmentPanel);
     }
     @Override protected void shutDown() throws Exception
     {
+        equipmentPanel.stop();overlayManager.remove(equipmentPanel);eventBus.unregister(equipmentPanel);
         shieldOrb.stop();
         overlayManager.remove(shieldOrb);
         eventBus.unregister(shieldOrb);

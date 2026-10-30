@@ -42,7 +42,7 @@ public class ReleaseNotesNoticeTest
         notice.start(); flush();
         ArgumentCaptor<QueuedMessage> messages=ArgumentCaptor.forClass(QueuedMessage.class);
         verify(chat,times(6)).queue(messages.capture());
-        assertTrue(messages.getAllValues().get(1).getRuneLiteFormattedMessage().contains("shield special orb"));
+        assertTrue(messages.getAllValues().get(1).getRuneLiteFormattedMessage().contains("Beta equipment panel"));
         assertEquals(ReleaseNotesNotice.RELEASE,seen);
         notice.onGameStateChanged(loggedIn()); flush();
         notice.stop(); notice.start(); flush();
