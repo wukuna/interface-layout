@@ -20,10 +20,10 @@ import net.runelite.client.events.ProfileChanged;
 @Singleton
 final class ReleaseNotesNotice
 {
-    static final String RELEASE = "2026-11-01-circular-orbs";
+    static final String RELEASE = "2026-11-01-circular-orb-input";
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] RECENT = {
-        "Presentation: optional circular orbs hide the side tabs, with number only, icon only, or a small icon and number.",
+        "Circular orbs: clicks now fit the visible orb, with a complete smooth rim and clearer small icons. Choose number, icon, or both.",
         "Beta features: optional Beta equipment panel adds compact bonuses, spellbook and four small native utility buttons to the equipment sidebar card, with optional reduced tooltips.",
         "Presentation: a separate shield special orb uses the game's existing off-hand action.",
         "Presentation: hide the extra bar beneath the special-attack orb.",

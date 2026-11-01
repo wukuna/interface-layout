@@ -15,6 +15,9 @@ import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.events.BeforeRender;
 import net.runelite.api.events.ScriptPreFired;
+import net.runelite.api.events.ScriptPostFired;
+import net.runelite.api.events.ClientTick;
+import net.runelite.api.events.PostMenuSort;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
@@ -24,7 +27,7 @@ import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.*;
 import net.runelite.client.util.Text;
 
-/** Cosmetic orb clipping. Native fill, availability, positions and actions remain native. */
+/** Orb artwork and native button clipping; actions and game availability stay native. */
 @Singleton
 public final class CircularOrbs extends Overlay {
     private static final Orbs[] ORBS={Orbs.HP_ORB_CONTAINER,Orbs.PRAYER_ORB_CONTAINER,Orbs.RUN_ORB_CONTAINER,Orbs.SPEC_ORB_CONTAINER};
@@ -34,6 +37,8 @@ public final class CircularOrbs extends Overlay {
     @Inject InterfaceLayoutConfig config;
     @Inject MenuButtonSprites sprites;
     private final Map<Widget,Integer> opacities=new IdentityHashMap<>();
+    private final CircularOrbInput input = new CircularOrbInput();
+    private final CircularOrbArtwork artwork = new CircularOrbArtwork();
     private final List<View> views=new ArrayList<>();
     private volatile boolean running;
     private int generation;
@@ -42,7 +47,7 @@ public final class CircularOrbs extends Overlay {
         @Override public Dimension render(Graphics2D g) {
             if(running && config.hideOrbTabs())for(View v:views)if(!v.parent.isHidden()) {
                 Graphics2D draw=(Graphics2D)g.create();
-                try {draw.setComposite(AlphaComposite.SrcOver.derive((255-v.frameOpacity)/255f));paintFrame(draw,v.frame,v.backing,v.circle);}
+                try {draw.setComposite(AlphaComposite.SrcOver.derive((255-v.frameOpacity)/255f));artwork.paint(draw,v.frame,v.backing,v.circle);}
                 finally {draw.dispose();}
             }
             return null;
@@ -51,14 +56,18 @@ public final class CircularOrbs extends Overlay {
     public CircularOrbs() {setPosition(OverlayPosition.DYNAMIC);setLayer(OverlayLayer.ABOVE_WIDGETS);}
     public Overlay frames() {return frames;}
     public void start() {running=true;generation++;}
-    public void stop() {running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation)restore();});}
+    public void stop() {running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation){restore();artwork.clear();}});}
     private void restore() {
+        input.restore(client);
         opacities.forEach((widget,opacity)->{if(client.getWidget(widget.getId())==widget && widget.getOpacity()==255)widget.setOpacity(opacity);});
         opacities.clear();views.clear();
     }
     @Subscribe(priority=4) public void onScriptPreFired(ScriptPreFired event) {if(running)restore();}
     @Subscribe public void onGameStateChanged(GameStateChanged event) {if(event.getGameState()!=GameState.LOGGED_IN)restore();}
-    @Subscribe(priority=-4) public void onBeforeRender(BeforeRender event) {
+    @Subscribe(priority=-4) public void onBeforeRender(BeforeRender event) {refresh();}
+    @Subscribe(priority=-4) public void onClientTick(ClientTick event) {refresh();}
+    @Subscribe(priority=-4) public void onScriptPostFired(ScriptPostFired event) {refresh();}
+    private void refresh() {
         restore();
         if(!running || !config.hideOrbTabs() || config.editInterface() || client.getGameState()!=GameState.LOGGED_IN)return;
         for(int i=0;i<ORBS.length;i++) {
@@ -72,7 +81,23 @@ public final class CircularOrbs extends Overlay {
             Rectangle circle=new Rectangle(fill);circle.grow(4,4);
             View v=new View(parent,frame,picture,new Rectangle(bounds),circle,Text.removeTags(number.getText()),new Color(number.getTextColor()),backing.getOpacity(),icon.getOpacity(),number.getOpacity());
             views.add(v);hide(backing);hide(number);hide(icon);
+            input.apply(parent,backing,client.getWidget(orb.getButtonId()),number,circle);
         }
+    }
+    @Subscribe(priority=-30) public void onPostMenuSort(PostMenuSort event) {
+        if(!running || !config.hideOrbTabs() || config.editInterface() || client.isMenuOpen() || client.getMenu()==null)return;
+        net.runelite.api.Point mouse=client.getMouseCanvasPosition();if(mouse==null)return;
+        // Covers the transition tick if a menu was built before the setting or
+        // native script changed. Keep opened menus and unrelated entries intact.
+        net.runelite.api.MenuEntry[] entries=client.getMenu().getMenuEntries();
+        net.runelite.api.MenuEntry[] kept=java.util.Arrays.stream(entries).filter(e->{
+            for(View view:views)if(!view.circle.contains(mouse.getX(),mouse.getY()))
+                for(Orbs orb:ORBS)if(orb.getComponentId()==view.parent.getId()
+                    && (e.getParam1()==orb.getButtonId() || e.getParam1()==orb.getBackingId())
+                    && (e.getType()==net.runelite.api.MenuAction.CC_OP || e.getType()==net.runelite.api.MenuAction.CC_OP_LOW_PRIORITY))return false;
+            return true;
+        }).toArray(net.runelite.api.MenuEntry[]::new);
+        if(kept.length!=entries.length)client.getMenu().setMenuEntries(kept);
     }
     private static boolean visible(Widget w) {return w!=null && !w.isHidden() && w.getOpacity()<255;}
     private void hide(Widget w) {opacities.put(w,w.getOpacity());w.setOpacity(255);}
@@ -80,25 +105,16 @@ public final class CircularOrbs extends Overlay {
         if(running && config.hideOrbTabs())for(View v:views)if(!v.parent.isHidden())paintContent(g,v.circle,v.icon,v.number,v.color,config.orbContent(),v.iconOpacity,v.numberOpacity);
         return null;
     }
-    static void paintFrame(Graphics2D g,BufferedImage frame,Rectangle backing,Rectangle circle) {
-        Graphics2D draw=(Graphics2D)g.create();
-        try {
-            // Paint only the frame ring above the native widgets. Painting the
-            // entire backing here would cover the game's fill/poison/regen state.
-            java.awt.geom.Area ring=new java.awt.geom.Area(new Ellipse2D.Double(circle.x,circle.y,circle.width,circle.height));
-            ring.subtract(new java.awt.geom.Area(new Ellipse2D.Double(circle.x+4,circle.y+4,circle.width-8,circle.height-8)));
-            draw.clip(ring);draw.drawImage(frame,backing.x,backing.y,backing.width,backing.height,null);
-        }
-        finally {draw.dispose();}
-    }
     static void paintContent(Graphics2D g,Rectangle circle,BufferedImage icon,String number,Color color,OrbContent mode,int iconOpacity,int numberOpacity) {
         Graphics2D draw=(Graphics2D)g.create();
         try {
+            draw.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            draw.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
             draw.clip(new Ellipse2D.Double(circle.x,circle.y,circle.width,circle.height));
             int cx=circle.x+circle.width/2;
             if(mode!=OrbContent.NUMBER_ONLY && icon!=null) {
                 int size=mode==OrbContent.ICON_ONLY?Math.min(26,circle.width-8):12;
-                double scale=Math.min((double)size/icon.getWidth(),(double)size/icon.getHeight());
+                double scale=Math.min(1,Math.min((double)size/icon.getWidth(),(double)size/icon.getHeight()));
                 int w=Math.max(1,(int)(icon.getWidth()*scale)),h=Math.max(1,(int)(icon.getHeight()*scale));
                 draw.setComposite(AlphaComposite.SrcOver.derive((255-iconOpacity)/255f));
                 draw.drawImage(icon,cx-w/2,mode==OrbContent.ICON_ONLY?circle.y+(circle.height-h)/2:circle.y+3,w,h,null);
