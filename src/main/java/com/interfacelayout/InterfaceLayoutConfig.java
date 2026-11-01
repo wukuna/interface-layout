@@ -88,6 +88,20 @@ public interface InterfaceLayoutConfig extends Config
 		return false;
 	}
 
+    @ConfigItem(keyName="hideOrbTabs",name="Circular orbs (hide number tabs)",
+        description="Hide the number tabs beside HP, Prayer, Run and Special, leaving circular artwork. Keeps native positions, fill and actions. Temporarily shows native artwork while editing the layout.",section=presentation,position=2)
+    default boolean hideOrbTabs() {return false;}
+
+    enum OrbContent {
+        NUMBER_ONLY("Number only"), ICON_ONLY("Icon only"), ICON_AND_NUMBER("Small icon and number");
+        private final String label;
+        OrbContent(String label) {this.label=label;}
+        @Override public String toString() {return label;}
+    }
+    @ConfigItem(keyName="orbContent",name="Circular orb contents",
+        description="Contents inside circular orbs: the native number, the icon, or a small icon above the number. Used with Circular orbs enabled.",section=presentation,position=3)
+    default OrbContent orbContent() {return OrbContent.ICON_AND_NUMBER;}
+
 	enum HorizontalAnchor
 	{
 		LEFT, RIGHT;

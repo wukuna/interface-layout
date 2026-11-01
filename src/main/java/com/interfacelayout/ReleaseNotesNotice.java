@@ -20,15 +20,14 @@ import net.runelite.client.events.ProfileChanged;
 @Singleton
 final class ReleaseNotesNotice
 {
-    static final String RELEASE = "2026-10-30-beta-equipment";
+    static final String RELEASE = "2026-11-01-circular-orbs";
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] RECENT = {
+        "Presentation: optional circular orbs hide the side tabs, with number only, icon only, or a small icon and number.",
         "Beta features: optional Beta equipment panel adds compact bonuses, spellbook and four small native utility buttons to the equipment sidebar card, with optional reduced tooltips.",
         "Presentation: a separate shield special orb uses the game's existing off-hand action.",
         "Presentation: hide the extra bar beneath the special-attack orb.",
-        "Keep menu icons centred at native size in larger buttons; smaller buttons still shrink them.",
-        "Resize overlay menu buttons together (25-200%) with your resource-pack artwork and saved layouts.",
-        "Modern's restored logout stone keeps its X and joins custom menu bars."
+        "Resize overlay menu buttons together (25-200%) with your resource-pack artwork and saved layouts."
     };
 
     @Inject private Client client;
