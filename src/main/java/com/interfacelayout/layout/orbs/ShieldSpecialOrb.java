@@ -153,7 +153,9 @@ public final class ShieldSpecialOrb extends Overlay
         BufferedImage shield = sprites.getSprite(SHIELD_SPRITE);
         if (frame == null || fill == null || empty == null || shield == null) return null;
         boolean wideFrame = backing != null && (backing.getSpriteId() == 5791 || backing.getSpriteId() == 5792);
-        int width = wideFrame ? 65 : WIDTH;
+        int sourceWidth = wideFrame ? 65 : WIDTH;
+        boolean circular = config.hideOrbTabs() && !config.editInterface();
+        int width = circular ? 34 : sourceWidth;
         int circleX = width - 30;
         int baseline = wideFrame ? 22 : 26;
         int previousX = getBounds().x, previousY = getBounds().y;
@@ -169,7 +171,13 @@ public final class ShieldSpecialOrb extends Overlay
         try
         {
             draw.translate(getBounds().x - previousX, getBounds().y - previousY);
-            draw.drawImage(frame, 0, 0, width, HEIGHT, null);
+            if (circular) {
+                Graphics2D crop = (Graphics2D) draw.create();
+                try {
+                    crop.clip(new java.awt.geom.Ellipse2D.Double(0, 0, 34, 34));
+                    crop.drawImage(frame, 34 - sourceWidth, 0, sourceWidth, HEIGHT, null);
+                } finally { crop.dispose(); }
+            } else draw.drawImage(frame, 0, 0, width, HEIGHT, null);
             draw.drawImage(fill, circleX, 4, 26, 26, null);
             Graphics2D mask = (Graphics2D) draw.create();
             try
@@ -178,13 +186,17 @@ public final class ShieldSpecialOrb extends Overlay
                 mask.drawImage(empty, circleX, 4, 26, 26, null);
             }
             finally { mask.dispose(); }
+            Color chargeColor = state.charges < state.cost ? Color.RED : state.charges == MAX_CHARGES ? Color.GREEN : Color.YELLOW;
+            if (circular) CircularOrbs.paintContent(draw,new Rectangle(0,0,34,34),shield,Integer.toString(state.charges),chargeColor,config.orbContent(),0,0);
+            else {
             draw.drawImage(shield, circleX, 4, 26, 26, null);
             draw.setFont(FontManager.getRunescapeSmallFont());
             String number = Integer.toString(state.charges);
             int textX = (circleX + 3) / 2 - draw.getFontMetrics().stringWidth(number) / 2;
             draw.setColor(Color.BLACK); draw.drawString(number, textX + 1, baseline + 1);
-            draw.setColor(state.charges < state.cost ? Color.RED : state.charges == MAX_CHARGES ? Color.GREEN : Color.YELLOW);
+            draw.setColor(chargeColor);
             draw.drawString(number, textX, baseline);
+            }
         }
         finally { draw.dispose(); }
         hitbox.setBounds(getBounds().x, getBounds().y, width, HEIGHT);
