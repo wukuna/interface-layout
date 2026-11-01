@@ -79,6 +79,7 @@ public final class ShieldSpecialOrb extends Overlay
     private volatile boolean active;
     private State painted;
     private final Rectangle hitbox = new Rectangle();
+    private final CircularOrbArtwork artwork = new CircularOrbArtwork();
     private MenuEntry projected;
     private State projectedState;
 
@@ -102,7 +103,7 @@ public final class ShieldSpecialOrb extends Overlay
             if (menu != null && oldEntry != null)
                 for (MenuEntry entry : menu.getMenuEntries())
                     if (entry == oldEntry) menu.removeMenuEntry(entry);
-            if (!active) { painted = null; hitbox.setBounds(0, 0, 0, 0); }
+            if (!active) { painted = null; hitbox.setBounds(0, 0, 0, 0); artwork.clear(); }
         });
     }
 
@@ -172,11 +173,7 @@ public final class ShieldSpecialOrb extends Overlay
         {
             draw.translate(getBounds().x - previousX, getBounds().y - previousY);
             if (circular) {
-                Graphics2D crop = (Graphics2D) draw.create();
-                try {
-                    crop.clip(new java.awt.geom.Ellipse2D.Double(0, 0, 34, 34));
-                    crop.drawImage(frame, 34 - sourceWidth, 0, sourceWidth, HEIGHT, null);
-                } finally { crop.dispose(); }
+                artwork.paint(draw, frame, new Rectangle(34 - sourceWidth, 0, sourceWidth, HEIGHT), new Rectangle(0, 0, 34, 34));
             } else draw.drawImage(frame, 0, 0, width, HEIGHT, null);
             draw.drawImage(fill, circleX, 4, 26, 26, null);
             Graphics2D mask = (Graphics2D) draw.create();
