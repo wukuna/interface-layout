@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 
 public class CircularOrbsTest {
     @Test public void inputSurvivesScriptsAndRestoresOnEditingDisablingLogoutAndStop() {
-        CircularOrbs orb=new CircularOrbs();orb.client=mock(Client.class);orb.thread=mock(ClientThread.class);orb.config=mock(InterfaceLayoutConfig.class,CALLS_REAL_METHODS);orb.sprites=mock(MenuButtonSprites.class);
+        CircularOrbs orb=new CircularOrbs();orb.client=mock(Client.class);orb.manager=mock(OrbController.class);orb.thread=mock(ClientThread.class);orb.config=mock(InterfaceLayoutConfig.class,CALLS_REAL_METHODS);orb.sprites=mock(MenuButtonSprites.class);
         doAnswer(i->{((Runnable)i.getArgument(0)).run();return null;}).when(orb.thread).invoke(any(Runnable.class));
         when(orb.client.getGameState()).thenReturn(GameState.LOGGED_IN);when(orb.config.hideOrbTabs()).thenReturn(true);
         com.interfacelayout.layout.orbs.widget.elements.Orbs[] types={com.interfacelayout.layout.orbs.widget.elements.Orbs.HP_ORB_CONTAINER,com.interfacelayout.layout.orbs.widget.elements.Orbs.PRAYER_ORB_CONTAINER,com.interfacelayout.layout.orbs.widget.elements.Orbs.RUN_ORB_CONTAINER,com.interfacelayout.layout.orbs.widget.elements.Orbs.SPEC_ORB_CONTAINER};
@@ -60,7 +60,7 @@ public class CircularOrbsTest {
         AtomicInteger opacity=new AtomicInteger();when(w.getOpacity()).thenAnswer(i->opacity.get());doAnswer(i->{opacity.set(i.getArgument(0));return w;}).when(w).setOpacity(anyInt());return w;
     }
     @Test public void lifecyclePreservesNativeVisibilityScriptsAndActionsAndWaitsForArtwork() {
-        CircularOrbs orb=new CircularOrbs();orb.client=mock(Client.class);orb.thread=mock(ClientThread.class);orb.config=mock(InterfaceLayoutConfig.class,CALLS_REAL_METHODS);orb.sprites=mock(MenuButtonSprites.class);
+        CircularOrbs orb=new CircularOrbs();orb.client=mock(Client.class);orb.manager=mock(OrbController.class);orb.thread=mock(ClientThread.class);orb.config=mock(InterfaceLayoutConfig.class,CALLS_REAL_METHODS);orb.sprites=mock(MenuButtonSprites.class);
         doAnswer(i->{((Runnable)i.getArgument(0)).run();return null;}).when(orb.thread).invoke(any(Runnable.class));
         when(orb.client.getGameState()).thenReturn(GameState.LOGGED_IN);
         Widget parent=widget(orb,InterfaceID.Orbs.ORB_HEALTH,new Rectangle(0,0,57,34));
@@ -85,7 +85,7 @@ public class CircularOrbsTest {
         BufferedImage preview=new BufferedImage(160,60,2);int offset=0;
         for(InterfaceLayoutConfig.OrbContent mode:InterfaceLayoutConfig.OrbContent.values()) {
             BufferedImage image=new BufferedImage(57,34,2);Graphics2D g=image.createGraphics();
-            new CircularOrbArtwork().paint(g,backing,new Rectangle(0,0,57,34),new Rectangle(23,0,34,34));
+            new CircularOrbArtwork().paint(g,new Rectangle(23,0,34,34));
             assertEquals(0,image.getRGB(10,15));assertEquals(0,image.getRGB(40,17));assertEquals(0,image.getRGB(23,0));
             CircularOrbs.paintContent(g,new Rectangle(23,0,34,34),icon,"99",Color.YELLOW,mode,0,0);g.dispose();
             int blue=0,yellow=0;for(int y=0;y<34;y++)for(int x=0;x<57;x++){blue+=image.getRGB(x,y)==Color.BLUE.getRGB()?1:0;yellow+=image.getRGB(x,y)==Color.YELLOW.getRGB()?1:0;}

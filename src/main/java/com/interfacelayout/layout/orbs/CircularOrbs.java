@@ -37,19 +37,24 @@ public final class CircularOrbs extends Overlay {
     @Inject ClientThread thread;
     @Inject InterfaceLayoutConfig config;
     @Inject MenuButtonSprites sprites;
+    @Inject OrbController manager;
     private final Map<Widget,Integer> opacities=new IdentityHashMap<>();
     private final CircularOrbInput input = new CircularOrbInput();
     private final CircularOrbArtwork artwork = new CircularOrbArtwork();
+    private final CircularCompassFrame compass = new CircularCompassFrame();
     private final List<View> views=new ArrayList<>();
     private volatile boolean running;
     private int generation;
     private final Overlay frames=new Overlay() {
         {setPosition(OverlayPosition.DYNAMIC);setLayer(OverlayLayer.ABOVE_WIDGETS);}
         @Override public Dimension render(Graphics2D g) {
-            if(running && config.hideOrbTabs())for(View v:views)if(!v.parent.isHidden()) {
+            if(running && config.hideOrbTabs()) {
+                compass.paint(g, artwork);
+                for(View v:views)if(!v.parent.isHidden()) {
                 Graphics2D draw=(Graphics2D)g.create();
-                try {draw.setComposite(AlphaComposite.SrcOver.derive((255-v.frameOpacity)/255f));artwork.paint(draw,v.frame,v.backing,v.circle);}
+                try {draw.setComposite(AlphaComposite.SrcOver.derive((255-v.frameOpacity)/255f));artwork.paint(draw,v.circle);}
                 finally {draw.dispose();}
+                }
             }
             return null;
         }
@@ -59,6 +64,7 @@ public final class CircularOrbs extends Overlay {
     public void start() {running=true;generation++;}
     public void stop() {running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation){restore();artwork.clear();}});}
     private void restore() {
+        compass.restore(manager);
         input.restore(client);
         opacities.forEach((widget,opacity)->{if(client.getWidget(widget.getId())==widget && widget.getOpacity()==255)widget.setOpacity(opacity);});
         opacities.clear();views.clear();
@@ -71,16 +77,17 @@ public final class CircularOrbs extends Overlay {
     private void refresh() {
         restore();
         if(!running || !config.hideOrbTabs() || config.editInterface() || client.getGameState()!=GameState.LOGGED_IN)return;
+        compass.refresh(client,manager);
         for(int i=0;i<ORBS.length;i++) {
             Orbs orb=ORBS[i];Widget parent=client.getWidget(orb.getComponentId()),backing=client.getWidget(orb.getBackingId());
             Widget indicator=client.getWidget(orb.getIndicatorId()),icon=client.getWidget(orb.getIconId()),number=client.getWidget(NUMBERS[i]);
             if(!visible(parent)||!visible(backing)||!visible(indicator)||!visible(icon)||!visible(number))continue;
-            BufferedImage frame=sprites.get(backing),picture=sprites.get(icon);
-            if(frame==null || picture==null)continue; // Never hide before artwork is ready.
+            BufferedImage picture=sprites.get(icon);
+            if(picture==null)continue; // Never hide before artwork is ready.
             Rectangle fill=WidgetGeometry.bounds(indicator),bounds=WidgetGeometry.bounds(backing);
             if(fill==null || bounds==null || fill.width<=0 || fill.height<=0 || bounds.width<=0 || bounds.height<=0)continue;
-            Rectangle circle=new Rectangle(fill);circle.grow(4,4);
-            View v=new View(parent,frame,picture,new Rectangle(bounds),circle,Text.removeTags(number.getText()),new Color(number.getTextColor()),backing.getOpacity(),icon.getOpacity(),number.getOpacity());
+            Rectangle circle=CircularOrbArtwork.around(fill);
+            View v=new View(parent,picture,circle,Text.removeTags(number.getText()),new Color(number.getTextColor()),backing.getOpacity(),icon.getOpacity(),number.getOpacity());
             views.add(v);hide(backing);hide(number);hide(icon);
             input.apply(parent,backing,client.getWidget(orb.getButtonId()),number,circle);
         }
@@ -130,9 +137,9 @@ public final class CircularOrbs extends Overlay {
         }finally {draw.dispose();}
     }
     private static final class View {
-        final Widget parent;final BufferedImage frame,icon;final Rectangle backing,circle;final String number;final Color color;final int frameOpacity,iconOpacity,numberOpacity;
-        View(Widget p,BufferedImage f,BufferedImage i,Rectangle b,Rectangle c,String n,Color col,int fo,int io,int no) {
-            parent=p;frame=f;icon=i;backing=b;circle=c;number=n;color=col;frameOpacity=fo;iconOpacity=io;numberOpacity=no;
+        final Widget parent;final BufferedImage icon;final Rectangle circle;final String number;final Color color;final int frameOpacity,iconOpacity,numberOpacity;
+        View(Widget p,BufferedImage i,Rectangle c,String n,Color col,int fo,int io,int no) {
+            parent=p;icon=i;circle=c;number=n;color=col;frameOpacity=fo;iconOpacity=io;numberOpacity=no;
         }
     }
 }
