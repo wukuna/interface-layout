@@ -173,7 +173,7 @@ public final class ShieldSpecialOrb extends Overlay
         {
             draw.translate(getBounds().x - previousX, getBounds().y - previousY);
             if (circular) {
-                artwork.paint(draw, frame, new Rectangle(34 - sourceWidth, 0, sourceWidth, HEIGHT), new Rectangle(0, 0, 34, 34));
+                artwork.paint(draw, new Rectangle(0, 0, 34, 34));
             } else draw.drawImage(frame, 0, 0, width, HEIGHT, null);
             draw.drawImage(fill, circleX, 4, 26, 26, null);
             Graphics2D mask = (Graphics2D) draw.create();

@@ -89,7 +89,7 @@ public interface InterfaceLayoutConfig extends Config
 	}
 
     @ConfigItem(keyName="hideOrbTabs",name="Circular orbs (hide number tabs)",
-        description="Hide the number tabs beside HP, Prayer, Run and Special, leaving circular artwork and matching click areas. Keeps native positions, fill and actions. Temporarily shows native artwork while editing the layout.",section=presentation,position=2)
+        description="Hide the number tabs beside HP, Prayer, Run and Special, with a clean circular rim and matching click areas. Adds the same rim to the compass. Keeps native fill, icons and actions. Temporarily shows native artwork while editing the layout.",section=presentation,position=2)
     default boolean hideOrbTabs() {return false;}
 
     enum OrbContent {

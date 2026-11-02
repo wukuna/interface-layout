@@ -23,7 +23,7 @@ final class ReleaseNotesNotice
     static final String RELEASE = "2026-11-02-orb-hover";
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] RECENT = {
-        "Circular orbs: prayer tooltips and clicks follow the visible orb after moving or redrawing it; the removed number tab no longer keeps a stale hover area. Choose number, icon, or both.",
+        "Circular orbs: clean, continuous rims for the orbs and compass. Prayer tooltips and clicks follow the visible orb after moving or redrawing it, without the removed number tab's stale hover area.",
         "Beta features: optional Beta equipment panel adds compact bonuses, spellbook and four small native utility buttons to the equipment sidebar card, with optional reduced tooltips.",
         "Presentation: a separate shield special orb uses the game's existing off-hand action.",
         "Presentation: hide the extra bar beneath the special-attack orb.",
