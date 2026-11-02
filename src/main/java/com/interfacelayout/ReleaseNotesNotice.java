@@ -22,12 +22,9 @@ final class ReleaseNotesNotice
 {
     static final String RELEASE = "2026-11-02-orb-hover";
     static final String SEEN_KEY = "releaseNotesShown";
-    private static final String[] RECENT = {
-        "Circular orbs: clean, continuous rims for the orbs and compass. Prayer tooltips and clicks follow the visible orb after moving or redrawing it, without the removed number tab's stale hover area.",
-        "Beta features: optional Beta equipment panel adds compact bonuses, spellbook and four small native utility buttons to the equipment sidebar card, with optional reduced tooltips.",
-        "Presentation: a separate shield special orb uses the game's existing off-hand action.",
-        "Presentation: hide the extra bar beneath the special-attack orb.",
-        "Resize overlay menu buttons together (25-200%) with your resource-pack artwork and saved layouts."
+    private static final String[] UPDATES = {
+        "Added clean circular rims to orbs, the shield orb and the compass.",
+        "Fixed prayer-orb hover areas after moving or redrawing orbs.",
     };
 
     @Inject private Client client;
@@ -53,8 +50,7 @@ final class ReleaseNotesNotice
         if (client.getGameState() != GameState.LOGGED_IN
             || RELEASE.equals(configManager.getConfiguration(OrbConstants.ConfigGroup.GROUP_NAME, SEEN_KEY)))
             return;
-        send("Recent updates (newest first):");
-        for (int i = 0; i < Math.min(5, RECENT.length); i++) send((i + 1) + ". " + RECENT[i]);
+        send("Updates:<br>* " + String.join("<br>* ", UPDATES));
         configManager.setConfiguration(OrbConstants.ConfigGroup.GROUP_NAME, SEEN_KEY, RELEASE);
     }
 
@@ -62,7 +58,7 @@ final class ReleaseNotesNotice
     {
         String message = new ChatMessageBuilder().append(ChatColorType.NORMAL).append("[")
             .append(ChatColorType.HIGHLIGHT).append("Interface Layout")
-            .append(ChatColorType.NORMAL).append("] ").append(text).build();
+            .append(ChatColorType.NORMAL).append("] ").build() + text;
         chat.queue(QueuedMessage.builder().type(ChatMessageType.CONSOLE)
             .runeLiteFormattedMessage(message).build());
     }
