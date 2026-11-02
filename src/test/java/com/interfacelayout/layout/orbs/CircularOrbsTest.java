@@ -56,6 +56,7 @@ public class CircularOrbsTest {
     }
     private static Widget widget(CircularOrbs orb,int id,Rectangle bounds) {
         Widget w=mock(Widget.class);when(w.getId()).thenReturn(id);when(w.getBounds()).thenReturn(bounds);when(orb.client.getWidget(id)).thenReturn(w);
+        when(w.getRelativeX()).thenReturn(bounds.x);when(w.getRelativeY()).thenReturn(bounds.y);when(w.getWidth()).thenReturn(bounds.width);when(w.getHeight()).thenReturn(bounds.height);
         AtomicInteger opacity=new AtomicInteger();when(w.getOpacity()).thenAnswer(i->opacity.get());doAnswer(i->{opacity.set(i.getArgument(0));return w;}).when(w).setOpacity(anyInt());return w;
     }
     @Test public void lifecyclePreservesNativeVisibilityScriptsAndActionsAndWaitsForArtwork() {

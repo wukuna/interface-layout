@@ -21,6 +21,8 @@ public class CircularOrbInputTest {
         when(w.getOriginalY()).thenAnswer(i->py.get()); doAnswer(i->{py.set(i.getArgument(0));return w;}).when(w).setOriginalY(anyInt());
         when(w.getOriginalWidth()).thenAnswer(i->pw.get()); doAnswer(i->{pw.set(i.getArgument(0));return w;}).when(w).setOriginalWidth(anyInt());
         when(w.getOriginalHeight()).thenAnswer(i->ph.get()); doAnswer(i->{ph.set(i.getArgument(0));return w;}).when(w).setOriginalHeight(anyInt());
+        when(w.getRelativeX()).thenAnswer(i->px.get());when(w.getRelativeY()).thenAnswer(i->py.get());
+        when(w.getWidth()).thenAnswer(i->pw.get());when(w.getHeight()).thenAnswer(i->ph.get());
         when(w.getXPositionMode()).thenAnswer(i->xm.get()); doAnswer(i->{xm.set(i.getArgument(0));return w;}).when(w).setXPositionMode(anyInt());
         when(w.getYPositionMode()).thenAnswer(i->ym.get()); doAnswer(i->{ym.set(i.getArgument(0));return w;}).when(w).setYPositionMode(anyInt());
         when(w.getWidthMode()).thenAnswer(i->wm.get()); doAnswer(i->{wm.set(i.getArgument(0));return w;}).when(w).setWidthMode(anyInt());
@@ -69,5 +71,25 @@ public class CircularOrbInputTest {
         when(parent.getChildren()).thenReturn(new Widget[]{blocker});blocker.setNoClickThrough(true);
         input.apply(parent,backing,null,null,new Rectangle(23,0,34,34));assertEquals(34,blocker.getOriginalWidth());
         input.restore(client);assertEquals(57,blocker.getOriginalWidth());
+    }
+
+    @Test public void staleDrawCoordinatesNeverRestoreTheTabHitboxOrDriftOnRepeatedFrames() {
+        Client client=mock(Client.class);CircularOrbInput input=new CircularOrbInput();
+        Widget parent=widget(client,1,null,300,70,57,34),backing=widget(client,2,parent,0,0,57,34);
+        Widget prayer=widget(client,3,parent,0,0,57,34),number=widget(client,4,parent,0,0,25,34);
+        // Native getBounds keeps the last rendered position despite revalidate.
+        when(parent.getBounds()).thenReturn(new Rectangle(100,70,57,34));
+        when(backing.getBounds()).thenReturn(new Rectangle(123,70,34,34));
+        when(prayer.getBounds()).thenReturn(new Rectangle(100,70,57,34));
+        backing.setNoClickThrough(true);when(parent.getChildren()).thenReturn(new Widget[]{backing});
+        Rectangle circle=new Rectangle(323,70,34,34);
+        for(int frame=0;frame<12;frame++) {
+            input.apply(parent,backing,prayer,number,circle);
+            assertEquals(circle,com.interfacelayout.util.WidgetGeometry.bounds(prayer));
+            assertFalse(com.interfacelayout.util.WidgetGeometry.bounds(prayer).contains(305,85));
+            assertEquals(circle,com.interfacelayout.util.WidgetGeometry.bounds(backing));
+            input.restore(client);assertEquals(0,prayer.getOriginalX());assertEquals(57,prayer.getOriginalWidth());
+            assertEquals(0,backing.getOriginalX());assertEquals(57,backing.getOriginalWidth());
+        }
     }
 }
