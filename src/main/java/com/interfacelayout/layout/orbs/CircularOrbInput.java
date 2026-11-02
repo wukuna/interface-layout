@@ -75,11 +75,22 @@ final class CircularOrbInput {
             w.setOriginalX(nextX);w.setOriginalY(nextY);w.setOriginalWidth(nextWidth);w.setOriginalHeight(nextHeight);w.revalidate();
         }
         void restore(Widget w) {
-            // Do not overwrite a newer geometry supplied by another owner.
-            if(w.getOriginalX()!=nextX || w.getOriginalY()!=nextY || w.getOriginalWidth()!=nextWidth || w.getOriginalHeight()!=nextHeight
-                || w.getXPositionMode()!=0 || w.getYPositionMode()!=0 || w.getWidthMode()!=0 || w.getHeightMode()!=0)return;
-            w.setOriginalX(x);w.setOriginalY(y);w.setOriginalWidth(width);w.setOriginalHeight(height);
-            w.setXPositionMode(xMode);w.setYPositionMode(yMode);w.setWidthMode(widthMode);w.setHeightMode(heightMode);w.revalidate();
+            // Position and size have separate owners. A new X position must not
+            // leave our narrowed width behind and squash the restored artwork.
+            // Keep each value paired with its mode so newer native layout wins.
+            if(w.getOriginalX()==nextX && w.getXPositionMode()==0) {
+                w.setOriginalX(x);w.setXPositionMode(xMode);
+            }
+            if(w.getOriginalY()==nextY && w.getYPositionMode()==0) {
+                w.setOriginalY(y);w.setYPositionMode(yMode);
+            }
+            if(w.getOriginalWidth()==nextWidth && w.getWidthMode()==0) {
+                w.setOriginalWidth(width);w.setWidthMode(widthMode);
+            }
+            if(w.getOriginalHeight()==nextHeight && w.getHeightMode()==0) {
+                w.setOriginalHeight(height);w.setHeightMode(heightMode);
+            }
+            w.revalidate();
         }
     }
 }

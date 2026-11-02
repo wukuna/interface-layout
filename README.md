@@ -7,7 +7,7 @@ Arrange RuneLite around the way you play. Move orbs and the compass, detach menu
 ## Features
 
 - **Free-position orbs** — move individual orbs and the compass independently of the minimap in resizable modes.
-- **Circular orbs** — under Presentation, hide the number tabs beside HP, Prayer, Run and Special (including the optional shield orb). Choose number only, icon only, or a small icon and number inside the circle. The button and click-blocking area fit the circle; the removed tab no longer intercepts clicks. The rim is completed from the active artwork, with smooth edges and small-icon scaling. Native fill/availability/actions and saved positions remain. Off by default; Edit interface temporarily uses native artwork.
+- **Circular orbs** — under Presentation, hide the number tabs beside HP, Prayer, Run and Special (including the optional shield orb). Choose number only, icon only, or a small icon and number inside the circle. The button and click-blocking area fit the circle; the removed tab no longer intercepts clicks. Orbs and the compass use a clean graphite rim with a thin silver edge. Native fill/availability/actions and saved positions remain. Turning the option off restores the native background, number tab and full click area. Off by default; Edit interface temporarily uses native artwork.
 - **Compact orb layouts** — arrange orbs vertically, horizontally, in a wider row, or with a custom preset.
 - **Movable menu bars** — keep native rows or start with vertical bars, then drag each bar wherever you want.
 - **Optional overlay menu buttons** — adjust menu-tab buttons from 25–200% together with one shared size setting, using the active game or resource-pack artwork. Native and overlay layouts are remembered separately. Off by default.

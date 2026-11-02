@@ -24,6 +24,8 @@ import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.*;
 import net.runelite.client.util.Text;
@@ -44,7 +46,8 @@ public final class CircularOrbs extends Overlay {
     private final CircularCompassFrame compass = new CircularCompassFrame();
     private final List<View> views=new ArrayList<>();
     private volatile boolean running;
-    private int generation;
+    private volatile int generation;
+    private int scriptDepth;
     private final Overlay frames=new Overlay() {
         {setPosition(OverlayPosition.DYNAMIC);setLayer(OverlayLayer.ABOVE_WIDGETS);}
         @Override public Dimension render(Graphics2D g) {
@@ -62,19 +65,42 @@ public final class CircularOrbs extends Overlay {
     public CircularOrbs() {setPosition(OverlayPosition.DYNAMIC);setLayer(OverlayLayer.ABOVE_WIDGETS);}
     public Overlay frames() {return frames;}
     public void start() {running=true;generation++;}
-    public void stop() {running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation){restore();artwork.clear();}});}
+    public void stop() {running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation){scriptDepth=0;restore();artwork.clear();}});}
     private void restore() {
         compass.restore(manager);
         input.restore(client);
         opacities.forEach((widget,opacity)->{if(client.getWidget(widget.getId())==widget && widget.getOpacity()==255)widget.setOpacity(opacity);});
         opacities.clear();views.clear();
     }
-    @Subscribe(priority=4) public void onScriptPreFired(ScriptPreFired event) {if(running)restore();}
-    @Subscribe public void onGameStateChanged(GameStateChanged event) {if(event.getGameState()!=GameState.LOGGED_IN)restore();}
-    @Subscribe(priority=-4) public void onBeforeRender(BeforeRender event) {refresh();}
+    @Subscribe(priority=4) public void onScriptPreFired(ScriptPreFired event) {
+        if(running && scriptDepth++==0)restore();
+    }
+    @Subscribe public void onGameStateChanged(GameStateChanged event) {
+        if(event.getGameState()!=GameState.LOGGED_IN){scriptDepth=0;restore();}
+    }
+    @Subscribe(priority=-4) public void onBeforeRender(BeforeRender event) {
+        // A script that aborts need not deliver its matching return event.
+        scriptDepth=0;refresh();
+    }
     @Subscribe(priority=-4) public void onClientTick(ClientTick event) {refresh();}
-    @Subscribe(priority=-4) public void onScriptPostFired(ScriptPostFired event) {refresh();}
+    @Subscribe(priority=-4) public void onScriptPostFired(ScriptPostFired event) {
+        if(!running)return;
+        if(scriptDepth>0)--scriptDepth;
+        // A nested helper's caller can still read or change native dimensions.
+        // Keep temporary artwork and hitboxes out until the root script returns.
+        if(scriptDepth==0)refresh();
+    }
+    private void releaseBeforeLayout() {
+        if(!running)return;
+        int token=generation;
+        thread.invoke(()->{if(running && token==generation)restore();});
+    }
+    @Subscribe(priority=4) public void onConfigChanged(ConfigChanged event) {
+        if(OrbConstants.ConfigGroup.GROUP_NAME.equals(event.getGroup()))releaseBeforeLayout();
+    }
+    @Subscribe(priority=4) public void onProfileChanged(ProfileChanged event) {releaseBeforeLayout();}
     private void refresh() {
+        if(scriptDepth>0)return;
         restore();
         if(!running || !config.hideOrbTabs() || config.editInterface() || client.getGameState()!=GameState.LOGGED_IN)return;
         compass.refresh(client,manager);
