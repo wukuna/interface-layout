@@ -23,6 +23,7 @@ final class ReleaseNotesNotice
     static final String RELEASE = "2026-11-02-orb-hover";
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] UPDATES = {
+        "Added equipment help with set effects, target conditions and adjusted weapon speed to the Beta equipment panel.",
         "Added clean circular rims to orbs, the shield orb and the compass.",
         "Fixed prayer-orb hover areas after moving or redrawing orbs.",
     };

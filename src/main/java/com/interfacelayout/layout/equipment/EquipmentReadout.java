@@ -17,8 +17,13 @@ public final class EquipmentReadout
     public final boolean complete;
     public final String spellbook;
     public final int weight;
+    public final String details;
     EquipmentReadout(double[] bonuses,boolean complete,String spellbook,int weight) {
+        this(bonuses,complete,spellbook,weight,"Equipment details unavailable");
+    }
+    EquipmentReadout(double[] bonuses,boolean complete,String spellbook,int weight,String details) {
         this.bonuses=bonuses.clone();this.complete=complete;this.spellbook=spellbook;this.weight=weight;
+        this.details=details;
     }
     static EquipmentReadout capture(Client client,ItemManager manager) {
         double[] totals=new double[14];boolean complete=true;
@@ -29,7 +34,8 @@ public final class EquipmentReadout
             if(stats==null || stats.getEquipment()==null) {complete=false;continue;}
             add(totals,stats.getEquipment());
         }
-        return new EquipmentReadout(totals,complete,book(client.getVarbitValue(VarbitID.SPELLBOOK)),client.getWeight());
+        return new EquipmentReadout(totals,complete,book(client.getVarbitValue(VarbitID.SPELLBOOK)),client.getWeight(),
+            EquipmentDetails.capture(client,manager));
     }
     static void add(double[] values,ItemEquipmentStats stats) {
         double[] item={stats.getAstab(),stats.getAslash(),stats.getAcrush(),stats.getAmagic(),stats.getArange(),
