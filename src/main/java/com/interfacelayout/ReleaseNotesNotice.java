@@ -25,7 +25,7 @@ final class ReleaseNotesNotice
     private static final String[] UPDATES = {
         "Added equipment help with set effects, target conditions and adjusted weapon speed to the Beta equipment panel.",
         "Added clean circular rims to orbs, the shield orb and the compass.",
-        "Fixed prayer-orb hover areas after moving or redrawing orbs.",
+        "Fixed orb click areas after moving, redrawing or turning off circular orbs, including restored native backgrounds.",
     };
 
     @Inject private Client client;

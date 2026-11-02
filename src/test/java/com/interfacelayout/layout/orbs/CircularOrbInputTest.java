@@ -62,6 +62,9 @@ public class CircularOrbInputTest {
         input.apply(parent,backing,button,null,new Rectangle(33,10,34,34));button.setOriginalX(99);
         Widget replacement=mock(Widget.class);when(client.getWidget(2)).thenReturn(replacement);
         input.restore(client);assertEquals(99,button.getOriginalX());verifyNoInteractions(replacement);
+        // A new position does not transfer ownership of our temporary width.
+        assertEquals(57,button.getOriginalWidth());
+        assertEquals(34,button.getOriginalHeight());
     }
 
     @Test public void restoresOwnedDynamicBlockerUsingParentAndIndex() {
