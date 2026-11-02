@@ -1,5 +1,6 @@
 package com.interfacelayout.layout.orbs;
 
+import com.interfacelayout.util.WidgetGeometry;
 import java.awt.Rectangle;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -35,9 +36,10 @@ final class CircularOrbInput {
     }
 
     private void clip(Widget widget, Rectangle circle) {
-        if (widget == null || widget.getParent() == null) return;
-        Rectangle original = widget.getBounds(), parent = widget.getParent().getBounds();
-        if (original == null || parent == null) return;
+        if (widget == null || widget.getParent() == null || geometry.containsKey(widget)) return;
+        // getBounds() retains the last draw's position after revalidate(). That
+        // position may already include our previous clip or a previous free-drag.
+        Rectangle original = WidgetGeometry.bounds(widget), parent = WidgetGeometry.bounds(widget.getParent());
         Rectangle clipped = original.intersection(circle);
         if (clipped.equals(original)) return;
         int x = clipped.x - parent.x + widget.getParent().getScrollX();

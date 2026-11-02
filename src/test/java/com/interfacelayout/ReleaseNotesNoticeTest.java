@@ -42,7 +42,7 @@ public class ReleaseNotesNoticeTest
         notice.start(); flush();
         ArgumentCaptor<QueuedMessage> messages=ArgumentCaptor.forClass(QueuedMessage.class);
         verify(chat,times(6)).queue(messages.capture());
-        assertTrue(messages.getAllValues().get(1).getRuneLiteFormattedMessage().contains("clicks now fit the visible orb"));
+        assertTrue(messages.getAllValues().get(1).getRuneLiteFormattedMessage().contains("prayer tooltips and clicks"));
         assertEquals(ReleaseNotesNotice.RELEASE,seen);
         notice.onGameStateChanged(loggedIn()); flush();
         notice.stop(); notice.start(); flush();

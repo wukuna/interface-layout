@@ -4,6 +4,7 @@ import com.interfacelayout.InterfaceLayoutConfig;
 import com.interfacelayout.InterfaceLayoutConfig.OrbContent;
 import com.interfacelayout.layout.menu.MenuButtonSprites;
 import com.interfacelayout.layout.orbs.widget.elements.Orbs;
+import com.interfacelayout.util.WidgetGeometry;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
@@ -76,7 +77,7 @@ public final class CircularOrbs extends Overlay {
             if(!visible(parent)||!visible(backing)||!visible(indicator)||!visible(icon)||!visible(number))continue;
             BufferedImage frame=sprites.get(backing),picture=sprites.get(icon);
             if(frame==null || picture==null)continue; // Never hide before artwork is ready.
-            Rectangle fill=indicator.getBounds(),bounds=backing.getBounds();
+            Rectangle fill=WidgetGeometry.bounds(indicator),bounds=WidgetGeometry.bounds(backing);
             if(fill==null || bounds==null || fill.width<=0 || fill.height<=0 || bounds.width<=0 || bounds.height<=0)continue;
             Rectangle circle=new Rectangle(fill);circle.grow(4,4);
             View v=new View(parent,frame,picture,new Rectangle(bounds),circle,Text.removeTags(number.getText()),new Color(number.getTextColor()),backing.getOpacity(),icon.getOpacity(),number.getOpacity());
