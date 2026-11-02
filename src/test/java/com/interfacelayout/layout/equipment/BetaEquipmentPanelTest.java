@@ -29,6 +29,18 @@ import static org.mockito.Mockito.*;
 
 public class BetaEquipmentPanelTest
 {
+    @Test public void helpIsHoverOnlyAtTopLeftAndDisappearsWhenBetaIsDisabled()
+    {
+        Fixture f=new Fixture();f.tab();f.refresh();f.renderAt(13,13);
+        ArgumentCaptor<Tooltip> tooltip=ArgumentCaptor.forClass(Tooltip.class);
+        verify(f.panel.tooltips).add(tooltip.capture());
+        assertTrue(tooltip.getValue().getText().contains("Weapon speed"));
+        assertTrue(tooltip.getValue().getText().contains("Target-specific conditions"));
+        clearInvocations(f.panel.tooltips);
+        when(f.panel.config.betaEquipmentPanel()).thenReturn(false);f.refresh();f.renderAt(13,13);
+        verifyNoInteractions(f.panel.tooltips);
+        assertEquals(new Rectangle(106,206,16,16),BetaEquipmentPanel.helpBounds(new Rectangle(100,200,190,261)));
+    }
     @Test public void reducedTooltipsKeepValuesAndControlNamesWithoutLongExplanations()
     {
         Fixture f=new Fixture(); f.tab(); f.refresh();

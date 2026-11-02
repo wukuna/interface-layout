@@ -59,6 +59,7 @@ public class BetaEquipmentPanel extends Overlay
         clientThread.invoke(()->{if(!running && stopped==generation){restore();data=null;scriptDepth=0;refreshAfterScript=false;}});
     }
     @Subscribe public void onGameTick(GameTick event) {dirty=true;}
+    @Subscribe public void onVarbitChanged(net.runelite.api.events.VarbitChanged event) {dirty=true;}
     @Subscribe public void onItemContainerChanged(ItemContainerChanged event) {if(event.getContainerId()==InventoryID.WORN)dirty=true;}
     @Subscribe public void onConfigChanged(ConfigChanged event) {dirty=true;}
     @Subscribe public void onProfileChanged(ProfileChanged event) {
@@ -141,6 +142,16 @@ public class BetaEquipmentPanel extends Overlay
             if(!visible(view.root) || !current(view.root))continue;
             boolean reducedTooltips=config.betaEquipmentReducedTooltips();
             List<EquipmentReadoutRenderer.Hint> hints=EquipmentReadoutRenderer.draw(graphics,view.bounds,view.data,reducedTooltips);
+            Rectangle help=helpBounds(view.root.getBounds());
+            Graphics2D helpGraphics=(Graphics2D)graphics.create();
+            try {
+                helpGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+                helpGraphics.setColor(new Color(39,38,32));helpGraphics.fillOval(help.x,help.y,16,16);
+                helpGraphics.setColor(new Color(165,150,112));helpGraphics.drawOval(help.x,help.y,15,15);
+                helpGraphics.setFont(new Font("Arial",Font.BOLD,12));helpGraphics.setColor(new Color(255,224,154));
+                helpGraphics.drawString("?",help.x+4,help.y+12);
+            } finally {helpGraphics.dispose();}
+            hints.add(new EquipmentReadoutRenderer.Hint(help,view.data.details));
             for(int i=0;i<4;i++) if(view.available[i]) {
                 Rectangle r=new Rectangle(view.bounds.x+4+i*21,view.bounds.y+45,18,18);
                 Graphics2D g=(Graphics2D)graphics.create();try {
@@ -156,6 +167,7 @@ public class BetaEquipmentPanel extends Overlay
         }
         return null;
     }
+    static Rectangle helpBounds(Rectangle panel) {return new Rectangle(panel.x+6,panel.y+6,16,16);}
     private static final class View {
         final Widget root;final Rectangle bounds;final EquipmentReadout data;final boolean[] available;
         View(Widget root,Rectangle bounds,EquipmentReadout data,boolean[] available){this.root=root;this.bounds=bounds;this.data=data;this.available=available;}

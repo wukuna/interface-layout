@@ -55,12 +55,12 @@ public interface InterfaceLayoutConfig extends Config
     String betaFeatures="betaFeatures";
 
     @ConfigItem(keyName="betaEquipmentPanel",name="Beta equipment panel",
-        description="Compact equipment bonuses and current spellbook on the equipment sidebar card. Four small native utility controls; equipment slots stay in place. Expanded and bank equipment views stay native. Off by default.",
+        description="Compact equipment bonuses and current spellbook on the equipment sidebar card. The top-left question mark explains set effects, target conditions and weapon speed adjusted for style and gear. Off by default.",
         section=betaFeatures,position=0)
     default boolean betaEquipmentPanel() {return false;}
 
     @ConfigItem(keyName="betaEquipmentReducedTooltips",name="Reduced tooltips",
-        description="Show only key values and control names when hovering the beta equipment card. Hide the longer source and conditional-effect explanations.",
+        description="Shorten the numeric card and control tooltips. The question mark still shows equipment-effect details.",
         section=betaFeatures,position=1)
     default boolean betaEquipmentReducedTooltips() {return false;}
 
