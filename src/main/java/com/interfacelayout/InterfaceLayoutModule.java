@@ -24,7 +24,6 @@ import com.interfacelayout.util.WidgetBoundsExpander;
 import com.interfacelayout.util.WidgetStateStore;
 import javax.inject.Singleton;
 
-/** Keep the mutually dependent controllers in RuneLite's plugin child injector. */
 public class InterfaceLayoutModule implements Module
 {
     @Override public void configure(Binder binder)

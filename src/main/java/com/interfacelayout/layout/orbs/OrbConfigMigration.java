@@ -94,7 +94,7 @@ public void migrateConfigs()
 					{
 						if (enabled && manager.getCurrentLayout().isVertical())
 						{
-							//max offset possible from the old config
+
 							return 35;
 						}
 						return null;
@@ -119,14 +119,12 @@ public void migrateConfigs()
 	}
 
 	private static final String[] REMOVED_KEYS = {
-		//removed in 1.1 (d2f5247)
+
 		"hideToggle",
 
-		//removed in 1.7.5 (e60c595)
 		"enableWorldMapOverlay",
 		"enableXPDropOverlay",
 
-		//removed in 1.9.0 (83a3a2d)
 		"hideCompassButton"
 	};
 

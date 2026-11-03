@@ -28,7 +28,6 @@ import net.runelite.client.ui.overlay.*;
 import net.runelite.client.ui.overlay.tooltip.Tooltip;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 
-/** Compacts only four utility controls. Equipment slots and native operations are untouched. */
 @Singleton
 public class BetaEquipmentPanel extends Overlay
 {
@@ -67,9 +66,7 @@ public class BetaEquipmentPanel extends Overlay
         clientThread.invokeLater(()->{if(running && requested==generation){restore();data=null;}});
     }
     @Subscribe(priority=3) public void onScriptPreFired(ScriptPreFired event) {
-        // Release owned geometry/visibility before native scripts update, hide or
-        // rebuild these widgets. Reapply only after the outer script finishes.
-        // This also preserves native page changes and activity-disabled controls.
+
         if(!running)return;
         scriptDepth++;
         if(!moved.isEmpty() || !hidden.isEmpty()){restore();refreshAfterScript=true;}
@@ -79,8 +76,7 @@ public class BetaEquipmentPanel extends Overlay
         scriptDepth=Math.max(0,scriptDepth-1);
         if(scriptDepth==0 && refreshAfterScript) {
             refreshAfterScript=false;
-            // Restore the compact geometry before subsequent native menu hit-testing,
-            // rather than leaving the old button positions active until the next draw.
+
             onBeforeRender(null);
         }
     }
@@ -104,8 +100,7 @@ public class BetaEquipmentPanel extends Overlay
                 available[i]=true;
                 place(button,7+i*21,243,18,18);retained.add(button);
                 hide(icon,retained);
-                // The button's dynamic descendants are decorative native frame pieces.
-                // Retain the native parent and its action/listeners, so clicks remain native.
+
                 Widget[] frame=button.getDynamicChildren();
                 if(frame!=null) for(Widget piece:frame) hide(piece,retained);
             }

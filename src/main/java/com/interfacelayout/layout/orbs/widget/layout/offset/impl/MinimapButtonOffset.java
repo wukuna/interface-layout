@@ -95,7 +95,7 @@ public class MinimapButtonOffset implements OffsetTarget
 
 			if (!manager.isEditingLayout)
 			{
-				//offset when store is hidden and minimap is visible
+
 				if (manager.allowReordering() &&
 					manager.getTogglePlacement() == TogglePlacement.BELOW_MAP
 					&& manager.isStoreHidden() && !manager.isStoreOrbDisabled())

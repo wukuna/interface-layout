@@ -17,7 +17,6 @@ import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetType;
 
-/** Keep native row artwork below the original buttons/icons as stones move. */
 @Singleton
 public class MenuStoneBackgrounds
 {
@@ -37,7 +36,6 @@ public class MenuStoneBackgrounds
         return row != null && !row.isHidden();
     }
 
-    /** Move the full sprite with its native offset from the click targets intact. */
     public void translateRow(int component, int dx, int dy)
     {
         Widget background = client.getWidget(component);
@@ -48,7 +46,6 @@ public class MenuStoneBackgrounds
         states.position(background, original.x + dx - parent.x, original.y + dy - parent.y);
     }
 
-    /** Classic/Fixed use a complete row sprite, not Modern's repeating stone tile. */
     public void placeFromRow(int component, Point destination, Rectangle source, boolean movable)
     {
         Widget background = prepareRow(component, movable);
@@ -62,8 +59,7 @@ public class MenuStoneBackgrounds
         clip.setNoClickThrough(false);
         clip.revalidate();
         Widget art = clip.createChild(-1, WidgetType.GRAPHIC);
-        // Dynamic descendants may share the static component's sparse child array.
-        // Journal both identities so restoration never leaves orphan artwork.
+
         owned.get(background).add(art);
         art.setSpriteId(background.getSpriteId());
         art.setSpriteTiling(background.getSpriteTiling());
@@ -97,8 +93,7 @@ public class MenuStoneBackgrounds
         tile.setOriginalX(destination.x - parent.x); tile.setOriginalY(destination.y - parent.y);
         tile.revalidate();
     }
-    /** The minimap X draws before the side-row artwork. Repeat only its graphic
-     * above our tile; the original widget retains all native input handling. */
+
     public void placeLogoutIcon(Widget icon, Point destination)
     {
         Widget background = client.getWidget(InterfaceID.ToplevelPreEoc.SIDE_STATIC_BACKGROUND);
@@ -117,7 +112,6 @@ public class MenuStoneBackgrounds
         graphic.revalidate();
     }
 
-    /** Remove the shared row art even when every stone in that row is hidden. */
     public Widget prepareRow(boolean top)
     {
         return prepareRow(top, true);

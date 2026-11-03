@@ -2,7 +2,6 @@ package com.interfacelayout.layout.menu;
 
 import net.runelite.api.gameval.InterfaceID;
 
-/** Native stone and icon pairs: icons are siblings, not children of the click target. */
 public final class MenuStoneRegistry
 {
     private MenuStoneRegistry() {}

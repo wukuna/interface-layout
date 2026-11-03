@@ -10,7 +10,6 @@ import java.awt.image.BufferedImage;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** A continuous graphite rim with a thin silver edge and a transparent center. */
 final class CircularOrbArtwork {
     private final Map<Integer, BufferedImage> frames = new LinkedHashMap<Integer, BufferedImage>(8, .75f, true) {
         @Override protected boolean removeEldestEntry(Map.Entry<Integer, BufferedImage> entry) { return size() > 8; }
@@ -30,8 +29,7 @@ final class CircularOrbArtwork {
     }
 
     private static BufferedImage create(int diameter) {
-        // Draw complete vector circles at four times resolution. No pixels are
-        // borrowed from the tab-shaped native sprite, including its alpha gaps.
+
         BufferedImage large = new BufferedImage(diameter * 4, diameter * 4, BufferedImage.TYPE_INT_ARGB);
         Graphics2D draw = large.createGraphics();
         try {

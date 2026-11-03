@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.widgets.Widget;
 
-/** Keep native minimap navigation while preventing a second click into the scene. */
 @Singleton
 public class MinimapClickProtection
 {
@@ -21,8 +20,7 @@ public class MinimapClickProtection
         Widget minimap = widgets.getMinimapMask();
         if (!config.enableNoClickthrough() || minimap == null || minimap.isHidden()
             || minimap.getContentType() != OrbConstants.Layout.MinimapOverlay.MINIMAP_CONTENT) return;
-        // Protect only the map widget, never its expanded canvas-sized ancestor.
-        // The native content handler still processes the user's minimap click.
+
         original.putIfAbsent(minimap, minimap.getNoClickThrough());
         minimap.setNoClickThrough(true);
     }

@@ -408,31 +408,8 @@ public enum Orbs implements TargetWidget
 			)
 		)
 	),
-	//TODO?
-	/*GRID_MASTER_ORB_CONTAINER(
-		Orb.UNIVERSE,
-		0,
-		-1,
-		Script.GRID_MASTER_ORB_UPDATE,
-		-1,
-		-1,
-		-1,
-		-1,
-		Map.of(
-			X, new SetValue(
-				Original.ACTIVITY_ORB_X,
-				Vertical.ACTIVITY_ORB_X,
-				Horizontal.ACTIVITY_ORB_X,
-				HorizontalWide.ACTIVITY_ORB_X
-			),
-			Y, new SetValue(
-				Original.ACTIVITY_ORB_Y,
-				Vertical.ACTIVITY_ORB_Y,
-				Horizontal.ACTIVITY_ORB_Y,
-				HorizontalWide.ACTIVITY_ORB_Y
-			)
-		)
-	)*/;
+
+;
 
 	private final int componentId;
 	private final int arrayId;

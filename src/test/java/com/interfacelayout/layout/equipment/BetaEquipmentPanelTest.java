@@ -102,9 +102,9 @@ public class BetaEquipmentPanelTest
         f.buttons[1].setPos(67,211,0,0);
         f.panel.onScriptPreFired(mock(ScriptPreFired.class));
         f.panel.onScriptPostFired(new ScriptPostFired(1));
-        assertEquals(40,f.buttons[1].getWidth()); // Nested scripts must finish first.
+        assertEquals(40,f.buttons[1].getWidth());
         f.panel.onScriptPostFired(new ScriptPostFired(1));
-        assertEquals(18,f.buttons[1].getWidth()); // Compact native hit areas restored before input.
+        assertEquals(18,f.buttons[1].getWidth());
         when(f.panel.config.betaEquipmentPanel()).thenReturn(false); f.refresh();
         assertTrue(f.buttons[0].isSelfHidden()); assertTrue(f.icons[0].isSelfHidden());
         assertEquals(67,f.buttons[1].getOriginalX()); assertEquals(211,f.buttons[1].getOriginalY());
@@ -117,7 +117,7 @@ public class BetaEquipmentPanelTest
         f.widget(stale.getId(),new Rectangle(10,210,40,40));
         f.buttons[1].setPos(111,222,0,0);
         when(f.panel.config.betaEquipmentPanel()).thenReturn(false); f.refresh();
-        assertEquals(18,stale.getWidth()); // Never touch a detached old widget.
+        assertEquals(18,stale.getWidth());
         assertEquals(111,f.buttons[1].getOriginalX());
     }
 

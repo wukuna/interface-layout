@@ -41,7 +41,7 @@ public class SettingsPanelTest
         ConfigItem edit = InterfaceLayoutConfig.class.getMethod("editInterface").getAnnotation(ConfigItem.class);
         assertEquals("", edit.section()); assertEquals(0, edit.position());
         assertTrue(edit.description().contains("Shift-drag"));
-        // Void config methods render as clickable buttons, not explanatory labels.
+
         for (java.lang.reflect.Method method : InterfaceLayoutConfig.class.getDeclaredMethods())
             assertNotEquals(method.getName(), void.class, method.getReturnType());
     }

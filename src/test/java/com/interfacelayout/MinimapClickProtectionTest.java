@@ -91,7 +91,7 @@ public class MinimapClickProtectionTest
     @Test public void hiddenOrNonMapWidgetsAreNeverMadeInteractive()
     {
         Fixture f = new Fixture();
-        f.guard.apply(); // No map while logged out or loading.
+        f.guard.apply();
         Widget map = f.map(OrbConstants.Widgets.Modern.MINIMAP_MASK, false);
         when(map.isHidden()).thenReturn(true);
         f.guard.apply(); assertFalse(map.getNoClickThrough());

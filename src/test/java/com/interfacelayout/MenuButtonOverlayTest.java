@@ -54,7 +54,7 @@ public class MenuButtonOverlayTest
                 verify(f.stones[i], never()).setOriginalHeight(anyInt());
                 verify(f.stones[i], never()).setForcedPosition(anyInt(), anyInt());
             }
-            // Disable returns the same widget instances and original visibility.
+
             f.controller.restoreBackgrounds(); f.states.restore();
             when(f.config.menuOverlayButtons()).thenReturn(false);
             f.apply();
@@ -96,7 +96,7 @@ public class MenuButtonOverlayTest
         assertEquals(-1, primary.getParam0());
         assertEquals(f.stones[3].getId(), primary.getParam1());
         verify(f.events, times(2)).post(isA(MenuEntryAdded.class));
-        // A second build must neither duplicate entries nor let world actions win.
+
         f.overlay.onPostMenuSort(new PostMenuSort());
         assertEquals(3, f.entries.size());
         verify(f.client, never()).runScript(anyInt(), any());
@@ -216,7 +216,7 @@ public class MenuButtonOverlayTest
         f.widgetOverrides.put(f.icons[3].getId(), pixels(Color.BLUE));
         assertEquals(23, colouredBounds(f.render(), button, Color.BLUE).width);
         assertEquals(button, f.controller.stones().get(3));
-        // The larger button remains clickable outside the smaller icon.
+
         when(f.client.getMouseCanvasPosition()).thenReturn(new Point(button.x + 1, button.y + 1));
         f.overlay.onPostMenuSort(new PostMenuSort());
         assertEquals("Tab 3", f.entries.get(f.entries.size() - 1).getOption());

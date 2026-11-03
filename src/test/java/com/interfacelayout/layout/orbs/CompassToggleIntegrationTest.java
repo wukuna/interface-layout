@@ -22,7 +22,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-/** Exercise the real circular-mode subscriber, including queued settings changes. */
 public class CompassToggleIntegrationTest {
     private static final int[] COMPASSES={InterfaceID.Toplevel.MAPCONTAINER_GRAPHIC5,
         InterfaceID.ToplevelPreEoc.MAP_MINIMAP_GRAPHIC6,InterfaceID.ToplevelOsrsStretch.MAP_MINIMAP_GRAPHIC6};
@@ -48,7 +47,7 @@ public class CompassToggleIntegrationTest {
             click.setNoClickThrough(true);
             background=CircularOrbInputTest.widget(orbs.client,1,null,x-4,46,43,43);
             background.setOpacity(40);when(background.getSpriteId()).thenReturn(100);
-            // Fixed mode keeps its native frame; compact resizable layouts own a dynamic frame.
+
             if(mode!=0)orbs.manager.compassFrame=background;
             compassBounds=compass.getBounds();clickBounds=click.getBounds();
             clearInvocations(compass,click,background);

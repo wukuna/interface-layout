@@ -50,7 +50,7 @@ import net.runelite.api.widgets.WidgetSizeMode;
 @RequiredArgsConstructor
 public enum Minimap implements TargetWidget
 {
-	//top level container
+
 	CLASSIC_MAP_CONTAINER(
 		Classic.MAP_CONTAINER,
 		Map.of(
@@ -59,18 +59,18 @@ public enum Minimap implements TargetWidget
 				Vertical.MAP_CONTAINER_WIDTH,
 				Horizontal.MAP_CONTAINER_WIDTH,
 				HorizontalWide.MAP_CONTAINER_WIDTH,
-				HorizontalWide.MAP_CONTAINER_WIDTH //custom
+				HorizontalWide.MAP_CONTAINER_WIDTH
 			),
 			HEIGHT, new SetValue(
 				Original.MAP_CONTAINER_HEIGHT,
 				Vertical.MAP_CONTAINER_HEIGHT,
 				Horizontal.MAP_CONTAINER_HEIGHT,
 				HorizontalWide.MAP_CONTAINER_HEIGHT,
-				Original.MAP_CONTAINER_HEIGHT//custom
+				Original.MAP_CONTAINER_HEIGHT
 			)
 		)
 	),
-	//container for the minimap / compass
+
 	CLASSIC_MAP_MINIMAP(
 		Classic.COMPASS_PARENT,
 		Map.of(
@@ -115,19 +115,18 @@ public enum Minimap implements TargetWidget
 				Vertical.MAP_CONTAINER_WIDTH,
 				Horizontal.MAP_CONTAINER_WIDTH,
 				HorizontalWide.MAP_CONTAINER_WIDTH,
-				HorizontalWide.MAP_CONTAINER_WIDTH//custom
+				HorizontalWide.MAP_CONTAINER_WIDTH
 			),
 			HEIGHT, new SetValue(
 				Original.ORBS_CONTAINER_HEIGHT,
 				Vertical.MAP_CONTAINER_HEIGHT,
 				Horizontal.MAP_CONTAINER_HEIGHT,
 				HorizontalWide.MAP_CONTAINER_HEIGHT,
-				Original.MAP_CONTAINER_HEIGHT//custom
+				Original.MAP_CONTAINER_HEIGHT
 			)
 		)
 	),
 
-	//top level container
 	MODERN_MAP_CONTAINER(
 		Modern.MAP_CONTAINER,
 		Map.of(
@@ -136,18 +135,18 @@ public enum Minimap implements TargetWidget
 				Vertical.MAP_CONTAINER_WIDTH,
 				Horizontal.MAP_CONTAINER_WIDTH,
 				HorizontalWide.MAP_CONTAINER_WIDTH,
-				HorizontalWide.MAP_CONTAINER_WIDTH//custom
+				HorizontalWide.MAP_CONTAINER_WIDTH
 			),
 			HEIGHT, new SetValue(
 				Original.MAP_CONTAINER_HEIGHT,
 				Vertical.MAP_CONTAINER_HEIGHT,
 				Horizontal.MAP_CONTAINER_HEIGHT,
 				HorizontalWide.MAP_CONTAINER_HEIGHT,
-				Original.MAP_CONTAINER_HEIGHT//custom
+				Original.MAP_CONTAINER_HEIGHT
 			)
 		)
 	),
-	//container for the minimap / compass
+
 	MODERN_MAP_MINIMAP(
 		Modern.COMPASS_PARENT,
 		Map.of(
@@ -192,14 +191,14 @@ public enum Minimap implements TargetWidget
 				Vertical.MAP_CONTAINER_WIDTH,
 				Horizontal.MAP_CONTAINER_WIDTH,
 				HorizontalWide.MAP_CONTAINER_WIDTH,
-				HorizontalWide.MAP_CONTAINER_WIDTH //custom
+				HorizontalWide.MAP_CONTAINER_WIDTH
 			),
 			HEIGHT, new SetValue(
 				Original.ORBS_CONTAINER_HEIGHT,
 				Vertical.MAP_CONTAINER_HEIGHT,
 				Horizontal.MAP_CONTAINER_HEIGHT,
 				HorizontalWide.MAP_CONTAINER_HEIGHT,
-				Original.MAP_CONTAINER_HEIGHT //custom
+				Original.MAP_CONTAINER_HEIGHT
 			)
 		)
 	),

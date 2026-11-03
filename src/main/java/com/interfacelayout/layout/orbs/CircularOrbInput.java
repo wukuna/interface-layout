@@ -7,21 +7,18 @@ import java.util.Map;
 import net.runelite.api.Client;
 import net.runelite.api.widgets.Widget;
 
-/** Transient native geometry, restored before scripts and never saved as a layout. */
 final class CircularOrbInput {
     private final Map<Widget, Geometry> geometry = new IdentityHashMap<>();
     private final Map<Widget, Boolean> blocking = new IdentityHashMap<>();
 
     void apply(Widget parent, Widget backing, Widget button, Widget number, Rectangle circle) {
-        // A transparent backing still blocks clicks. Shrink it as well as the
-        // native button; the renderer retains its original artwork bounds.
+
         clip(backing, circle);
         clip(button, circle);
         clip(number, circle);
         if (parent.getNoClickThrough()) {
             block(parent, false);
-            // The backing precedes the button in the native widget tree, so it
-            // protects the orb without swallowing its existing menu actions.
+
             block(backing, true);
         }
         Widget[] children = parent.getChildren();
@@ -37,8 +34,7 @@ final class CircularOrbInput {
 
     private void clip(Widget widget, Rectangle circle) {
         if (widget == null || widget.getParent() == null || geometry.containsKey(widget)) return;
-        // getBounds() retains the last draw's position after revalidate(). That
-        // position may already include our previous clip or a previous free-drag.
+
         Rectangle original = WidgetGeometry.bounds(widget), parent = WidgetGeometry.bounds(widget.getParent());
         Rectangle clipped = original.intersection(circle);
         if (clipped.equals(original)) return;
@@ -75,9 +71,7 @@ final class CircularOrbInput {
             w.setOriginalX(nextX);w.setOriginalY(nextY);w.setOriginalWidth(nextWidth);w.setOriginalHeight(nextHeight);w.revalidate();
         }
         void restore(Widget w) {
-            // Position and size have separate owners. A new X position must not
-            // leave our narrowed width behind and squash the restored artwork.
-            // Keep each value paired with its mode so newer native layout wins.
+
             if(w.getOriginalX()==nextX && w.getXPositionMode()==0) {
                 w.setOriginalX(x);w.setXPositionMode(xMode);
             }

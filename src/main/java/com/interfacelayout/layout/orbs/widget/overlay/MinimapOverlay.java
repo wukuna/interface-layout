@@ -89,8 +89,8 @@ public class MinimapOverlay extends Overlay
 		final Rectangle bounds = getBounds();
 		if (getPreferredLocation() != null || getPreferredPosition() != null || (getPosition() != OverlayPosition.DYNAMIC && manager.snapCornerRepositioned))
 		{
-			// If the widget is manually moved or the snapcorner it is in is moved, force the widget to be in the snapcorner bounds
-			widget.setForcedPosition(bounds.x - parent.x, bounds.y - parent.y); // the widget relative pos is relative to its parent
+
+			widget.setForcedPosition(bounds.x - parent.x, bounds.y - parent.y);
 		}
 		else
 		{
@@ -99,11 +99,10 @@ public class MinimapOverlay extends Overlay
 				revalidate = false;
 				log.debug("Revalidating : {}", getName());
 				widget.setForcedPosition(-1, -1);
-				// Revalidate the widget to reposition it back to its normal location after an overlay reset
+
 				widget.revalidate();
 			}
 
-			// Otherwise allow the widget to draw where it wants to, and update the overlay bounds to reflect that.
 			Rectangle widgetBounds = widget.getBounds();
 			bounds.setBounds(widgetBounds.x, widgetBounds.y, widgetBounds.width, widgetBounds.height);
 		}
@@ -139,8 +138,7 @@ public class MinimapOverlay extends Overlay
 	{
 		if (!client.isClientThread())
 		{
-			// During overlay drag this is called on the EDT, so we just
-			// cache and reuse the last known parent bounds.
+
 			return parentBounds;
 		}
 
@@ -151,7 +149,7 @@ public class MinimapOverlay extends Overlay
 	@Override
 	public void revalidate()
 	{
-		// Revalidate must be called on the client thread, so defer til next frame
+
 		revalidate = true;
 	}
 }

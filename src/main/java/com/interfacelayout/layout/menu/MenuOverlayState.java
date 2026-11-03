@@ -6,7 +6,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.client.config.ConfigManager;
 
-/** Two plugin-owned layout slots, scoped automatically by RuneLite profile. */
 @Singleton
 public class MenuOverlayState
 {

@@ -10,7 +10,6 @@ import net.runelite.api.Client;
 import net.runelite.api.SpritePixels;
 import net.runelite.api.widgets.Widget;
 
-/** Read RuneLite's public sprite overrides; never read a resource pack's files. */
 @Singleton
 public class MenuButtonSprites
 {
@@ -28,8 +27,7 @@ public class MenuButtonSprites
         if (replacement != null)
         {
             OverrideImage cached = replacements.get(widget.getId());
-            // Packs replace SpritePixels on reload. Do not retain the previous
-            // pack merely because the sprite ID has not changed.
+
             if (cached == null || cached.source != replacement)
             {
                 cached = new OverrideImage(replacement, replacement.toBufferedImage());
@@ -52,11 +50,10 @@ public class MenuButtonSprites
         return image;
     }
 
-    /** Resolve an additional native sprite without borrowing another widget's override. */
     public BufferedImage getSprite(int spriteId)
     {
         if (spriteId < 0) return null;
-        int key = ~spriteId; // Separate sprite keys from nonnegative packed widget IDs.
+        int key = ~spriteId;
         SpritePixels replacement = client.getSpriteOverrides().get(spriteId);
         if (replacement != null)
         {
@@ -86,8 +83,7 @@ public class MenuButtonSprites
 
     private static BufferedImage paddedImage(SpritePixels sprite)
     {
-        // Native sprites can store a cropped image inside a larger transparent
-        // canvas. Scaling that crop would enlarge and misalign the shield icon.
+
         int width = sprite.getMaxWidth(), height = sprite.getMaxHeight();
         int x = sprite.getOffsetX(), y = sprite.getOffsetY();
         if (width <= 0 || height <= 0 || width > 512 || height > 512

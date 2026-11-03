@@ -8,7 +8,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-/** Keep Swing dialogs off the game thread and collapse repeated reset requests. */
 @Singleton
 public class LayoutResetConfirmation
 {
@@ -17,8 +16,7 @@ public class LayoutResetConfirmation
     public void request(Runnable confirmed)
     {
         if (!pending.compareAndSet(false, true)) return;
-        // ConfigChanged is posted synchronously by the settings checkbox. Retain
-        // only that event's source, without inspecting RuneLite's private UI.
+
         AWTEvent event = SwingUtilities.isEventDispatchThread() ? EventQueue.getCurrentEvent() : null;
         JCheckBox checkbox = event != null && event.getSource() instanceof JCheckBox
             ? (JCheckBox) event.getSource() : null;
@@ -31,7 +29,7 @@ public class LayoutResetConfirmation
             finally
             {
                 pending.set(false);
-                // setSelected updates the view without firing another ActionEvent.
+
                 if (checkbox != null) checkbox.setSelected(false);
             }
         });

@@ -80,7 +80,7 @@ public class LayoutAuditTest
         when(mode.getCurrentLayout()).thenReturn(OrbLayout.FREE_POSITION);
         Field managerField = WidgetManager.class.getDeclaredField("manager");
         managerField.setAccessible(true); managerField.set(widgets, mode);
-        // Without the guard this reaches the compact subsystem's slot manager.
+
         widgets.remapTargets(Orbs.HP_ORB_CONTAINER);
         verify(mode).getCurrentLayout();
     }
@@ -135,7 +135,6 @@ public class LayoutAuditTest
         }
     }
 
-    /** Revalidation models native originals and forced positions; draw cache stays stale. */
     private static Widget layoutWidget(int x, int y, int width, int height)
     {
         Widget widget = mock(Widget.class);

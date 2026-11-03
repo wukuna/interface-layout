@@ -8,15 +8,13 @@ import net.runelite.api.Client;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
 
-/** Frames the native compass; its rotating artwork and click target stay native. */
 final class CircularCompassFrame {
     private Widget compass, replacedFrame;
     private Rectangle circle;
     private int originalOpacity, compassOpacity;
 
     void restore(OrbController manager) {
-        // The compact-layout frame is our own dynamic child. A retired child
-        // must never be confused with the parent returned by Client.getWidget.
+
         if (replacedFrame != null && manager.compassFrame == replacedFrame && replacedFrame.getOpacity() == 255)
             replacedFrame.setOpacity(originalOpacity);
         replacedFrame = null;

@@ -58,12 +58,10 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.tooltip.Tooltip;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 
-/** A separate, native-size view of the equipped shield's existing special action. */
 @Singleton
 public final class ShieldSpecialOrb extends Overlay
 {
-    // Verified from native scripts 10177/10159 and item definitions on 2026-10-28.
-    // This is a specific charge system, not a catch-all for every shield ability.
+
     static final int SHIELD_KIND_PARAM = 2731;
     static final int CHARGES_VARBIT = 16438;
     static final int SHIELD_SPRITE = 8605;
@@ -134,7 +132,7 @@ public final class ShieldSpecialOrb extends Overlay
     static int operation(String[] actions, int primaryIcon)
     {
         if (actions == null) return 0;
-        // These are the game's existing operations. No scripts or packets are invoked.
+
         if (actions.length > 1 && ("Use Offhand".equals(actions[1]) || "Deactivate Offhand".equals(actions[1]))) return 2;
         if (primaryIcon == SHIELD_SPRITE && actions.length > 0
             && ("Use".equals(actions[0]) || "Deactivate".equals(actions[0]))) return 1;
@@ -214,7 +212,7 @@ public final class ShieldSpecialOrb extends Overlay
         if (!sameControl(painted, current) || mouse == null || !hitbox.contains(mouse.getX(), mouse.getY())) return;
         Menu menu = client.getMenu();
         if (menu == null) return;
-        // Keep menus from other interfaces and overlay-editing controls above us.
+
         for (MenuEntry entry : menu.getMenuEntries())
             if (entry.getWidget() != null || entry.getType() == MenuAction.RUNELITE_OVERLAY
                 || entry.getType() == MenuAction.RUNELITE_OVERLAY_CONFIG) return;

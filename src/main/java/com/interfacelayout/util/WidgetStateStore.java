@@ -7,7 +7,6 @@ import javax.inject.Singleton;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.Client;
 
-/** Client-thread-only ownership journal. Never stores widgets in persistent config. */
 @Singleton
 public class WidgetStateStore
 {
@@ -48,7 +47,6 @@ public class WidgetStateStore
         visibility(widget, true);
     }
 
-    /** Undo only our own hiding; never reveal a component hidden by the game. */
     public void visibility(Widget widget, boolean hidden)
     {
         if (widget == null) return;
@@ -64,7 +62,6 @@ public class WidgetStateStore
         widget.setHidden(true);
     }
 
-    /** Release visibility before native scripts, which may change the game's flags. */
     public void restoreVisibility()
     {
         states.forEach((widget, state) -> state.restoreVisibility(widget));
@@ -81,7 +78,7 @@ public class WidgetStateStore
         {
             State state = states.get(widget);
             State second = other == null ? null : other.states.get(widget);
-            // Either journal may own our hiding (compact presets or Free Position).
+
             if (state != null && Boolean.FALSE.equals(state.hidden)
                 || second != null && Boolean.FALSE.equals(second.hidden)) continue;
             boolean hidden = state != null && state.hidden != null ? state.hidden
@@ -100,7 +97,7 @@ public class WidgetStateStore
 
     public void restore()
     {
-        // Restore dimensions first; then clear forced positions and revalidate descendants.
+
         states.forEach((widget, state) -> state.restore(widget));
         states.keySet().forEach(widget -> widget.setForcedPosition(-1, -1));
         states.keySet().stream().sorted(Comparator.comparingInt(WidgetStateStore::depth)).forEach(Widget::revalidate);

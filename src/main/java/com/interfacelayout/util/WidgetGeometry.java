@@ -7,7 +7,6 @@ import java.util.IdentityHashMap;
 import java.util.Set;
 import net.runelite.api.widgets.Widget;
 
-/** Canvas coordinates from current layout values, independent of the last draw pass. */
 public final class WidgetGeometry
 {
     private WidgetGeometry() {}

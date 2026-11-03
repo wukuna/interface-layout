@@ -79,7 +79,7 @@ public class ShieldSpecialOrbTest
         when(config.showShieldSpecialOrb()).thenReturn(true);
         ShieldSpecialOrb.State state = overlay.resolve();
         assertEquals(13, state.charges); assertEquals(2, state.operation);
-        verify(client, never()).getVarpValue(3784); // Never uses Soulreaper stacks.
+        verify(client, never()).getVarpValue(3784);
         when(button.getActions()).thenReturn(new String[]{"Use", "Deactivate Offhand"});
         assertEquals("Deactivate Offhand", overlay.resolve().action);
     }
@@ -88,7 +88,7 @@ public class ShieldSpecialOrbTest
     {
         when(config.showShieldSpecialOrb()).thenReturn(true);
         when(button.getActions()).thenReturn(new String[]{"Use"});
-        assertNull(overlay.resolve()); // A weapon's primary action is not a shield action.
+        assertNull(overlay.resolve());
         when(icon.getSpriteId()).thenReturn(ShieldSpecialOrb.SHIELD_SPRITE);
         assertEquals(1, overlay.resolve().operation);
         when(button.getActions()).thenReturn(new String[]{"Deactivate"});
@@ -126,8 +126,7 @@ public class ShieldSpecialOrbTest
 
     @Test public void pvpFollowsNativeAvailabilityAndRejectsClicksAfterNativeControlDisappears()
     {
-        // The former PVP_SPEC_ORB flag now only identifies a PvP area.
-        // Native orb use in PvP was enabled by Poll 78 on 2023-03-09.
+
         when(client.getVarbitValue(VarbitID.PVP_AREA_CLIENT)).thenReturn(1);
         paint(); when(client.getMouseCanvasPosition()).thenReturn(new Point(150, 115));
         overlay.onPostMenuSort(new PostMenuSort());
@@ -177,7 +176,7 @@ public class ShieldSpecialOrbTest
     {
         paint(); assertEquals(new java.awt.Point(139, 100), overlay.getBounds().getLocation());
         overlay.setPreferredLocation(new java.awt.Point(400, 200));
-        overlay.getBounds().setLocation(400, 200); // OverlayRenderer resolves preferred position.
+        overlay.getBounds().setLocation(400, 200);
         when(orb.getBounds()).thenReturn(new Rectangle(300, 300, 57, 34));
         paint(); assertEquals(new java.awt.Point(400, 200), overlay.getBounds().getLocation());
         overlay.setPreferredLocation(null); paint(); assertEquals(new java.awt.Point(239, 300), overlay.getBounds().getLocation());

@@ -149,7 +149,6 @@ public boolean useSavedPosition(Widget widget, int index)
 		configManager.unsetConfiguration(ConfigGroup.GROUP_NAME, y);
 	}
 
-	//remap should only be false for profile swaps / full config resets
 	public void resetAllSavedPositions(boolean remap)
 	{
 		for (Binding binding : bindingManager.all())
@@ -159,7 +158,7 @@ public boolean useSavedPosition(Widget widget, int index)
 
 		if (!remap)
 		{
-			//may be unnecessary since bindings are cleared on the next edit-mode
+
 			bindingManager.clear();
 		}
 	}
@@ -275,5 +274,4 @@ public boolean useSavedPosition(Widget widget, int index)
 			!manager.isFixedMode() ? ConfigKeys.VANILLA_LAYOUT_PREFIX : ConfigKeys.FIXED_LAYOUT_PREFIX;
 	}
 
-	
 }

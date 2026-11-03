@@ -47,7 +47,7 @@ public class VisibilityComplianceTest
         set(coordinator, "running", true); set(coordinator, "nativeStates", journal); set(coordinator, "manager", manager);
         ScriptPreFired pre = new ScriptPreFired(Script.ORBS_UPDATE_SPECENERGY);
         coordinator.onScriptPreFired(pre); assertFalse(hidden[0]);
-        hidden[0] = true; // The native script removes the special-attack control.
+        hidden[0] = true;
         ScriptPostFired post = new ScriptPostFired(Script.ORBS_UPDATE_SPECENERGY);
         coordinator.onScriptPostFired(post); assertTrue(hidden[0]);
         journal.restore(); assertTrue(hidden[0]);

@@ -21,7 +21,7 @@ public class LayoutResetConfirmationTest
             java.awt.event.ActionListener listener = mock(java.awt.event.ActionListener.class);
             checkbox.addActionListener(listener);
             checkbox.setSelected(true);
-            // Dispatch a real Swing event whose source is the reset checkbox.
+
             java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(
                 new java.awt.event.InvocationEvent(checkbox, () -> confirmation.request(accepted)));
             SwingUtilities.invokeAndWait(() -> {});

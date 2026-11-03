@@ -89,7 +89,7 @@ public class PresentationControllerTest
         enable();
         controller.onScriptPreFired(new ScriptPreFired(OrbConstants.Script.ORBS_UPDATE_SPECENERGY));
         assertFalse(meter.isSelfHidden());
-        meter.setHidden(true); // Native update now hides the meter itself.
+        meter.setHidden(true);
         controller.onScriptPostFired(new ScriptPostFired(OrbConstants.Script.ORBS_UPDATE_SPECENERGY));
         clearInvocations(meter);
         controller.stop();

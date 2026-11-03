@@ -255,7 +255,7 @@ public class DragListener implements MouseListener
 		if (widget != null &&
 			bindingManager.getByHandler(widget) != null)
 		{
-			//distinction between draggedOn (yellow) or proximity/overlap (green)
+
 			int col = widget == client.getDraggedOnWidget()
 				? 0xffff00 : 0x00ff00;
 

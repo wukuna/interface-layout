@@ -1,18 +1,18 @@
 /*
  * BSD 2-Clause License
- * 
+ *
  * Copyright (c) 2025, Richardant
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -23,7 +23,7 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 /* Adapted hiding mappings from Menu Stones Hider.
  * Copyright (c) 2025, Richardant. BSD-2-Clause: see LICENSE.
@@ -113,7 +113,7 @@ public class MenuStoneController
     }
     public Map<Integer, Rectangle> groups() { return copyBounds(groupBounds); }
     public Map<Integer, Rectangle> stones() { return copyBounds(stoneBounds); }
-    /** Identify an existing native action, never infer an action from a saved rectangle alone. */
+
     public boolean isHoveredStoneAction(MenuEntry entry)
     {
         if (entry == null || temporarilyShown || !orbs.isLoggedIn()) return false;
@@ -133,8 +133,7 @@ public class MenuStoneController
             if (!bounds.getValue().contains(mouse.getX(), mouse.getY()) || hidden(index)
                 || (component != registry[index][0] && component != registry[index][1])) continue;
             Widget stone = client.getWidget(registry[index][0]), icon = client.getWidget(registry[index][1]);
-            // Modern's stone graphic is a selection highlight, so use its icon
-            // for native visibility, just as apply() does.
+
             return stone != null && !(icon != null ? icon.isHidden() : stone.isHidden());
         }
         return false;
@@ -178,8 +177,7 @@ public class MenuStoneController
         boolean modern = !orbs.isFixedMode() && !orbs.isClassicResizable();
         buttons.prepare(registry, new int[]{rowBackground(0), rowBackground(1)}, modern);
         initializeFreeRows(registry);
-        // Own both native rows consistently, so visibility does not switch between
-        // built-in and plugin overlay preferences (and lose the dragged origin).
+
         boolean[] compactRow = {!vertical, !vertical};
         for (int i = 0; i < registry.length; i++)
             if (hidden(i) && !(modern && i == 10)) compactRow[i / 7] = true;
@@ -190,8 +188,7 @@ public class MenuStoneController
         Map<Integer, List<Entry>> groups = new TreeMap<>();
         for (int i = 0; i < registry.length; i++)
         {
-            // Native rows leave the bare X at the minimap; custom bars can group it
-            // with or without the optional full-size tab background.
+
             if (modern && i == 10 && !managesModernLogout(config)) continue;
             Widget stone = client.getWidget(registry[i][0]);
             Widget icon = client.getWidget(registry[i][1]);
@@ -201,8 +198,7 @@ public class MenuStoneController
                 nativeOrigins.merge(row, WidgetGeometry.location(stone),
                     (a, b) -> new Point(Math.min(a.x, b.x), Math.min(a.y, b.y)));
             if (hidden(i)) { states.hide(stone, true); states.hide(icon, true); continue; }
-            // Modern's stone graphic is a selection highlight: its own hidden flag
-            // must not remove an otherwise visible tab from the layout.
+
             boolean interactive = !(icon != null ? icon.isHidden() : stone.isHidden());
             boolean decoration = modern ? (i == 10 ? !stone.isHidden() : backgrounds.isNativeRowVisible(i < 7))
                 : backgrounds.isNativeRowVisible(rowBackground(i / 7)) || !stone.isHidden();
@@ -210,7 +206,7 @@ public class MenuStoneController
             Entry entry = new Entry(i, stone, icon);
             if (modern && i == 10)
             {
-                // Reserve ordinary tab artwork, but keep both native widgets' sizes/actions.
+
                 Widget peer = client.getWidget(registry[11][0]);
                 if (peer == null || icon == null || !interactive || !backgrounds.isNativeRowVisible(false)) continue;
                 entry = new Entry(i, stone, icon, config.restoreLogoutTab() ? peer.getWidth() : stone.getWidth(),
@@ -228,7 +224,7 @@ public class MenuStoneController
         }
         Map<Integer, Rectangle> nextGroups = new LinkedHashMap<>(), nextStones = new LinkedHashMap<>();
         List<Rectangle> nextGaps = new ArrayList<>();
-        // Keep the entire native arrangement when any requested group cannot fit.
+
         for (Map.Entry<Integer, List<Entry>> group : groups.entrySet())
         {
             boolean row = !vertical || horizontal(group.getKey());
@@ -259,9 +255,7 @@ public class MenuStoneController
             int sourceRow = intactNativeRow(id, entries);
             if (!buttons.active() && !modern && sourceRow >= 0)
             {
-                // Native click targets have unequal widths/offsets and overlap the
-                // shared row artwork. Packing them edge-to-edge shifts the icons.
-                // Translate native artwork and targets together; split only for occlusion.
+
                 Rectangle nativeRow = new Rectangle(entries.get(0).nativeBounds);
                 for (Entry entry : entries) nativeRow.add(entry.nativeBounds);
                 Point origin = hasSavedOrigin(id) ? loadOrigin(id, nativeRow.width, nativeRow.height, nativeRow.getLocation())
@@ -310,7 +304,7 @@ public class MenuStoneController
             {
                 Point destination = new Point(origin.x + (horizontal ? offset : (width - entry.width) / 2),
                     origin.y + (horizontal ? (height - entry.height) / 2 : offset));
-                // Closing gaps within a native row must not resize its clipping layers.
+
                 boolean movable = vertical || hasSavedOrigin(id) || (modern && entry.index == 10);
                 if (movable && !buttons.active())
                 {
@@ -322,8 +316,7 @@ public class MenuStoneController
                 if (buttons.active())
                 {
                     buttons.place(entry.index, placed, covered);
-                    // Decoration-only native entries must not remain at their old
-                    // position while their row is represented by overlay buttons.
+
                     states.hide(entry.stone, true); states.hide(entry.icon, true);
                 }
                 else
@@ -368,7 +361,6 @@ public class MenuStoneController
             : InterfaceID.ToplevelPreEoc.SIDE_STATIC_BACKGROUND;
     }
 
-    /** Complete horizontal rows retain their native artwork and click-target offsets. */
     private int intactNativeRow(int id, List<Entry> entries)
     {
         if (entries.size() != 7) return -1;
@@ -405,8 +397,7 @@ public class MenuStoneController
         if (config.menuLayout() != Layout.FREE_POSITION) return;
         String mode = layoutMode();
         if (Boolean.TRUE.equals(configs.getConfiguration("interfacelayout", "menuSeparateRows_" + mode, Boolean.class))) return;
-        // Split legacy implicit defaults too, even when their bar was moved.
-        // Explicit memberships/orders are deliberate edits and must survive.
+
         java.util.Set<Integer> used = new java.util.HashSet<>(); used.add(0);
         boolean implicitBottom = false;
         for (int i = 0; i < 14; i++)
@@ -424,7 +415,7 @@ public class MenuStoneController
         int[] widths = new int[2], heights = new int[2];
         for (int i = 0; i < registry.length; i++)
         {
-            // Modern's Logout-X lives beside the minimap, not in the bottom row.
+
             if (!orbs.isFixedMode() && !orbs.isClassicResizable() && i == 10) continue;
             Widget stone = client.getWidget(registry[i][0]);
             if (stone == null) continue;
@@ -455,7 +446,7 @@ public class MenuStoneController
                 configs.setConfiguration("interfacelayout", "menuGroup_" + mode + "_" + i, i < 7 ? 0 : bottomGroup);
         configs.setConfiguration("interfacelayout", "menuSeparateRows_" + mode, true);
         configs.setConfiguration("interfacelayout", "menuBottomGroup_" + mode, bottomGroup);
-        // A reused numeric slot must not inherit an old detached bar's anchor preferences.
+
         configs.setConfiguration("interfacelayout", "menuGeneration_" + mode + "_" + bottomGroup,
             groupGeneration(mode, bottomGroup) + 1);
         for (int row = 0; row < 2; row++)
@@ -471,8 +462,7 @@ public class MenuStoneController
     private List<Rectangle> modalBounds()
     {
         List<Rectangle> result = new ArrayList<>();
-        // Use each window's actual frame, never a full-canvas INFINITY parent
-        // or its resize preview. Bank/PIN retain their existing bounds sources.
+
         for (int id : WINDOW_ROOTS)
         {
             Widget window = client.getWidget(id);
@@ -497,7 +487,7 @@ public class MenuStoneController
         return config.menuLayout() == Layout.HIDDEN || hideIndividualStone(index) || (config.hiddenStones() & (1 << index)) != 0
             || (index < 7 ? config.hideTopMenu() : config.hideBottomMenu());
     }
-    // Config interfaces are RuneLite proxies: only annotated getters belong there.
+
     private boolean hideIndividualStone(int index)
     {
         switch (index)
@@ -579,7 +569,7 @@ public class MenuStoneController
         java.util.Set<Integer> usedGroups = new java.util.HashSet<>();
         for (int member = 0; member < 14; member++) usedGroups.add(group(member));
         while (id < 14 && usedGroups.contains(id)) id++;
-        // A reused numeric slot is a new bar, not the old bar's external anchor assignment.
+
         configs.setConfiguration("interfacelayout", "menuGeneration_" + layoutMode() + "_" + id, groupGeneration(id) + 1);
         configs.setConfiguration("interfacelayout", "menuGroup_" + layoutMode() + "_" + index, id);
         configs.setConfiguration("interfacelayout", "menuHorizontal_" + layoutMode() + "_" + id, false);
@@ -621,8 +611,7 @@ public class MenuStoneController
             int visibleMembers = 0;
             for (int member : stoneBounds.keySet())
                 if (member != index && group(member) == targetGroup) visibleMembers++;
-            // Existing bars keep their axis, including a two-stone bar temporarily
-            // reduced to one member during this drag. Only a new pair chooses an axis.
+
             boolean row = returning && targetGroup == dragSourceGroup ? dragSourceHorizontal
                 : visibleMembers > 1 ? horizontal(targetGroup) : Math.abs(dx) > Math.abs(dy);
             boolean before = row ? dx < 0 : dy < 0;

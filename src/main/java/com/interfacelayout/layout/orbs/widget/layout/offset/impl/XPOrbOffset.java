@@ -77,7 +77,7 @@ public class XPOrbOffset implements OffsetTarget
 
 			if (manager.getCurrentLayout().isHorizontalWide())
 			{
-				//move to logout x position
+
 				if (manager.isClassicResizable() || manager.hideLogoutX)
 				{
 					x += 125;

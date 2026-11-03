@@ -55,8 +55,7 @@ public class FreePositionControllerTest
             WidgetManager widgets = mock(WidgetManager.class);
             when(widgets.getTargetWidget(target)).thenReturn(compass);
             when(widgets.getTargetWidget(click)).thenReturn(options);
-            // Attached minimap controls need not appear in the clipping ancestor's
-            // static child array. They must retain their own canvas origins too.
+
             when(widgets.getTargetWidget(Orbs.WORLD_MAP_CONTAINER)).thenReturn(world);
             when(widgets.getTargetWidget(Orbs.WIKI_ICON_CONTAINER)).thenReturn(wiki);
             when(widgets.getTargetWidget(classic ? Minimap.CLASSIC_MINIMAP : Minimap.MODERN_MINIMAP)).thenReturn(map);
@@ -148,7 +147,7 @@ public class FreePositionControllerTest
             free.move(Orbs.HP_ORB_CONTAINER, new Point(100 + frame, 200));
             assertEquals(new Point(100 + frame, 200), WidgetGeometry.location(hp));
             assertEquals(new Point(790, 0), WidgetGeometry.location(minimap));
-            // RuneLite's drawing cache still contains the old parent position.
+
             assertEquals(new Rectangle(790, 0, 210, 207), map.getBounds());
         }
     }
