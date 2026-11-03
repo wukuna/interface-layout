@@ -17,7 +17,6 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.OverlayPosition;
 
-/** Delegate whole-bar Alt dragging, origins and snapping to RuneLite's overlay renderer. */
 @Singleton
 public class MenuOverlayBridge
 {
@@ -39,24 +38,21 @@ public class MenuOverlayBridge
     public void sync()
     {
         if (!running) return;
-        // Retire old incarnations of numeric group slots. Keeping them registered
-        // would accumulate invisible overlays after repeated detach/join gestures.
+
         String prefix = "INTERFACE_LAYOUT_MENU_" + menu.layoutMode() + "_"
             + (menu.individualDragging() ? "group_" : "row_");
         groups.values().removeIf(overlay -> {
             if (!overlay.name.startsWith(prefix) || overlay.name.equals(name(overlay.id))) return false;
             overlay.getBounds().setSize(0, 0); overlays.remove(overlay); return true;
         });
-        // Modern's two native row wrappers would otherwise force expanded parents
-        // back to their old overlay origins. Retain and restore the exact objects.
+
         nativeOverlays.removeIf(overlay -> {
             if (replacesNativeOverlay(overlay.getName())) return false;
             overlays.add(overlay); return true;
         });
         overlays.removeIf(overlay -> {
             if (!replacesNativeOverlay(overlay.getName())) return false;
-            // External anchor managers must not retain a phantom full-canvas slot
-            // for a wrapper that no longer participates in the render pass.
+
             overlay.getBounds().setSize(0, 0);
             nativeOverlays.add(overlay); return true;
         });
@@ -80,11 +76,7 @@ public class MenuOverlayBridge
     }
     private boolean replacesNativeOverlay(String name)
     {
-        // The native minimap wrappers measure the clipping container. When free
-        // elements need canvas-wide clipping, that is no longer a draggable map
-        // rectangle: rendering it also expands the green snap corner to canvas size.
-        // Keep the exact wrapper and its preferences for restoration once native
-        // clipping returns. Individual free elements have their own movement overlays.
+
         if (name.equals("RESIZABLE_MINIMAP_STONES_WIDGET"))
             return expander.isExpanded(InterfaceID.ToplevelOsrsStretch.MAP_CONTAINER);
         if (name.equals("RESIZABLE_MINIMAP_WIDGET"))
@@ -106,7 +98,7 @@ public class MenuOverlayBridge
     {
         GroupOverlay overlay = groups.get(name(id));
         if (overlay == null) return;
-        if (beginning) clearPreference(id); // Normalize the origin once for this grouping gesture.
+        if (beginning) clearPreference(id);
         overlay.setPreferredPosition(null);
         overlay.setPreferredLocation(new Point(canvas));
     }
@@ -122,7 +114,7 @@ public class MenuOverlayBridge
     }
     public void resetAll()
     {
-        // Clear preferences for modes/groups not instantiated in this session too.
+
         for (String mode : new String[]{"fixed", "classic", "modern", "fixed_overlay", "classic_overlay", "modern_overlay"})
             for (String kind : new String[]{"group_", "row_"})
                 for (int id = 0; id <= 14; id++)
@@ -151,8 +143,7 @@ public class MenuOverlayBridge
         @Override public String getName() { return name; }
         @Override public void revalidate()
         {
-            // RuneLite also revalidates overlays when their size/settings change.
-            // Only an actual cleared preference represents an overlay reset.
+
             reset = getPreferredLocation() == null && getPreferredPosition() == null && lastApplied != null;
         }
         @Override public Dimension render(Graphics2D graphics)
@@ -168,9 +159,7 @@ public class MenuOverlayBridge
             reset = false;
             if (getPreferredLocation() != null || getPreferredPosition() != null)
             {
-                // OverlayRenderer has already resolved origins, snapping and clamping.
-                // Preferred locations are origin-relative, including negative offsets
-                // from the right/bottom edge. Bounds are the resolved canvas position.
+
                 Point position = getBounds().getLocation();
                 if (!position.equals(lastApplied))
                 {

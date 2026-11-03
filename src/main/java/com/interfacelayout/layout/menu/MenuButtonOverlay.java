@@ -58,7 +58,6 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 
-/** Optional replacement tab surfaces. Native widgets keep their dimensions. */
 @Singleton
 public class MenuButtonOverlay extends Overlay
 {
@@ -89,7 +88,6 @@ public class MenuButtonOverlay extends Overlay
         return Math.max(1, (int) Math.round(size * percent / 100.0));
     }
 
-    /** Called after native visibility/geometry restoration, before layout edits. */
     public void prepare(int[][] registry, int[] rows, boolean modern)
     {
         clear();
@@ -101,8 +99,7 @@ public class MenuButtonOverlay extends Overlay
             Widget stone = client.getWidget(registry[index][0]), icon = client.getWidget(registry[index][1]);
             if (stone == null || icon == null || icon.isHidden()) continue;
             String[] actions = stone.getActions();
-            // These controls must still be ordinary, script-operated tab buttons.
-            // Fail back to native layout as a whole on an unfamiliar gameframe.
+
             if (stone.getOnOpListener() == null || actions == null || actions.length == 0
                 || actions[0] == null || actions[0].isBlank()) { clear(); return; }
             if (stone.getWidth() <= 0 || stone.getHeight() <= 0 || sprites.get(icon) == null)
@@ -153,7 +150,7 @@ public class MenuButtonOverlay extends Overlay
         for (Button button : placed)
         {
             if (!current(button)) continue;
-            // An unknown native interface at the pointer wins over this overlay.
+
             if (mouse != null && button.bounds.contains(mouse.getX(), mouse.getY()) && foreignInterfaceMenu()) continue;
             Graphics2D draw = (Graphics2D) graphics.create();
             try
@@ -179,8 +176,7 @@ public class MenuButtonOverlay extends Overlay
             finally { draw.dispose(); }
             if (keepNativeIcons)
             {
-                // Paint outside the background's scale transform, retaining any
-                // parent transform (such as client-wide display scaling).
+
                 Graphics2D iconDraw = (Graphics2D) graphics.create();
                 try
                 {
@@ -245,8 +241,7 @@ public class MenuButtonOverlay extends Overlay
             if (actions == null || button.stone.getOnOpListener() == null) return;
             Menu menu = client.getMenu();
             if (menu == null) return;
-            // An explicit click on a visible tab occupies this surface; remove
-            // world entries underneath it, retaining the existing Cancel entry.
+
             for (MenuEntry entry : menu.getMenuEntries())
                 if (entry.getType() != MenuAction.CANCEL) menu.removeMenuEntry(entry);
             for (int slot = Math.min(10, actions.length) - 1; slot >= 0; slot--)
@@ -255,8 +250,7 @@ public class MenuButtonOverlay extends Overlay
                 MenuEntry entry = menu.createMenuEntry(-1).setOption(actions[slot]).setTarget("")
                     .setType(slot < 5 ? MenuAction.CC_OP : MenuAction.CC_OP_LOW_PRIORITY)
                     .setIdentifier(slot + 1).setParam0(-1).setParam1(button.stone.getId());
-                // Preserve RuneLite's registered widget options (e.g. spellbook).
-                // The game executes its normal widget operation on a user click.
+
                 eventBus.post(new MenuEntryAdded(entry));
             }
             return;

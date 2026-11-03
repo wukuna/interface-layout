@@ -20,9 +20,8 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemStats;
 import net.runelite.client.util.Text;
 
-/** Read-only sidebar explanation. Does not open an interface or run game scripts. */
 final class EquipmentDetails {
-    // Native equipment-effects script 3522 reads this enum with WORN_ITEMS_SET_TEXT.
+
     private static final int SET_DESCRIPTIONS = 3047;
     private EquipmentDetails() {}
 
@@ -61,7 +60,7 @@ final class EquipmentDetails {
             String text = descriptions.getStringValue(set);
             if (text != null && !text.isBlank() && !"null".equals(text)) effects.add(plain(text));
         }
-        // These supplementary effects are outside the enum in the native effects page.
+
         active(client,effects,VarbitID.WORN_ITEMS_CRYSTAL_ARMOUR,"Crystal armour: boosts accuracy and damage with crystal bows; the bonus depends on the pieces worn.");
         active(client,effects,VarbitID.WORN_ITEMS_INQUISITORS_ARMOUR,"Inquisitor's armour: boosts crush accuracy and damage; the bonus depends on the pieces worn.");
         active(client,effects,VarbitID.WORN_ITEMS_VIRTUSSET,"Virtus robes: additional damage when casting Ancient Magicks.");
@@ -108,7 +107,7 @@ final class EquipmentDetails {
             if (name.equals("twinflame staff")) return 6;
             return 5;
         }
-        // An unknown style is not evidence that the weapon uses its base interval.
+
         return style == null ? 0 : base;
     }
 
@@ -116,7 +115,7 @@ final class EquipmentDetails {
         int category = client.getVarbitValue(VarbitID.COMBAT_WEAPON_CATEGORY);
         int selection = client.getVarpValue(VarPlayer.ATTACK_STYLE);
         if (selection < 0) return null;
-        // These categories are the same fallbacks used by RuneLite Attack Styles.
+
         if (category == 22) return selection == 4 ? "Casting" : "Melee";
         if (category == 30) return "Melee";
         EnumComposition categories = client.getEnum(EnumID.WEAPON_STYLES);
@@ -128,7 +127,7 @@ final class EquipmentDetails {
         StructComposition value = client.getStructComposition(styles.getIntVals()[selection]);
         if (value == null) return null;
         String name = value.getStringValue(ParamID.ATTACK_STYLE_NAME);
-        // Defensive autocast shares the casting selection, with a separate casting-mode flag.
+
         return selection == 4 ? "Casting" : name;
     }
 

@@ -62,7 +62,7 @@ public class WidgetStateStoreTest
         Widget widget = mock(Widget.class);
         WidgetStateStore journal = new WidgetStateStore();
         journal.visibility(widget, true); journal.restoreVisibility();
-        // A native script now hides the component; showing our setting cannot undo it.
+
         when(widget.isSelfHidden()).thenReturn(true);
         clearInvocations(widget);
         journal.visibility(widget, false); journal.position(widget, 10, 20); journal.restore();

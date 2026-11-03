@@ -149,7 +149,6 @@ public class OrbController
     private final java.util.List<Widget> overlayNoClickChildren = new java.util.ArrayList<>();
     private final Map<TargetWidget, Widget> noClickThroughChildren = new HashMap<>();
 
-	//update on startup, onWidgetLoaded, and onScriptPostFired
 	public void update(int scriptId)
 	{
 		createCustomChildren();
@@ -164,7 +163,6 @@ public class OrbController
 		updateNoClickThrough();
 	}
 
-	//rebuild the layout from state/config
 	public void rebuildLayout()
 	{
 		boolean swapping = getCurrentLayout() != OrbLayout.FREE_POSITION && config.enableOrbSwapping();
@@ -211,12 +209,11 @@ public class OrbController
 		gameframe.refresh();
 	}
 
-	//only called on plugin shutdown
 	public void reset()
 	{
 		if (isEditingLayout)
 		{
-			//save configs on shutdown
+
 			isUpdatingProfile = false;
 			editManager.toggleEditMode(false);
 		}
@@ -237,17 +234,15 @@ public class OrbController
 		resetPositioning();
 		resetNoClickThrough();
 
-		//save for last to prevent potential NPE with offsets
 		slotManager.clear();
         nativeStates.restore();
 	}
 
-	//used for profile swap/full config reset
 	public void rebuild(boolean reset)
 	{
 		if (isEditingLayout)
 		{
-			//do not save configs
+
 			editManager.toggleEditMode(false);
 		}
 
@@ -258,7 +253,6 @@ public class OrbController
 		enableOrbSwapping = getCurrentLayout() != OrbLayout.FREE_POSITION && config.enableOrbSwapping();
 		isUpdatingProfile = false;
 
-		//update based on config
 		hideAllOrbsByConfig();
 		slotManager.update();
 
@@ -301,7 +295,6 @@ public class OrbController
 		}
 	}
 
-	//toggle the minimap visibility, and update related widgets when using the custom toggle button
 	public void onMinimapToggle()
 	{
 		saveConfig(ConfigKeys.MINIMAP, !isMinimapHidden());
@@ -316,10 +309,6 @@ public class OrbController
 		widgetManager.remapTargets(toDefault, Script.FORCE_UPDATE, Minimap.CONTAINERS);
 		widgetManager.revalidate(Minimap.COMPONENTS);
 
-		//TODO - seems like revalidation causes the width/height issue (on the orbsContainer)
-		//Orb.UNIVERSE parent width/height mode seems to cause an issue when setting dimensions
-		//causing the Orbs.UNIVERSE container be set to the dimensions of the tli (GAMEFRAME)
-		//this should alleviate that by setting the size temporarily until restored by a clientscript (clicking a side panel tab, etc)
 		if (!isFixedMode() && !isMinimapMinimized())
 		{
 			Widget orbsContainer = client.getWidget(Minimap.ORBS_UNIVERSE.getComponentId());
@@ -334,8 +323,7 @@ public class OrbController
 
 	public void hideMinimapOnTabClose(boolean hide)
 	{
-		// Native tab keys and a hotkey plugin can both change the tab in one tick.
-		// Read the final state only after both have finished processing input.
+
 		sidePanelVisibilityPending = hide;
 		if (!hide) applySidePanelVisibility(false);
 	}
@@ -349,8 +337,7 @@ public class OrbController
 
 	private void applySidePanelVisibility(boolean hide)
 	{
-		// Release our previous parent flags even when a guard below prevents hiding.
-		// The ownership journal preserves flags set by the game and hidden children.
+
 		widgetManager.setHidden(Minimap.MODERN_MAP_MINIMAP.getComponentId(), false);
 		widgetManager.setHidden(Minimap.MODERN_ORBS_CONTAINER.getComponentId(), false);
 		if (!isFixedMode() && !isClassicResizable())
@@ -361,9 +348,6 @@ public class OrbController
 				return;
 			}
 
-			//wait for the wiki plugin to create its banner
-			// - side panel appears to be flagged as 'closed' on world-hop(other?), which will hide the minimap container
-			//   and cause the wiki plugin to return early when it tries to create its widget
 			if (isWikiPluginConfigEnabled() && !wikiPluginBannerExists)
 			{
 				Widget container = widgetManager.getTargetWidget(Orbs.WIKI_ICON_CONTAINER);
@@ -385,7 +369,6 @@ public class OrbController
 				return;
 			}
 
-			//only hide the parent not the children (do not use setTargetsHidden/setHidden(target...))
 			widgetManager.setHidden(Minimap.MODERN_MAP_MINIMAP.getComponentId(), true);
 			widgetManager.setHidden(Minimap.MODERN_ORBS_CONTAINER.getComponentId(), true);
 		}
@@ -422,10 +405,6 @@ public class OrbController
 		}
 	}
 
-	//TODO
-	//in non-compact layouts, delegate the noClickThrough flag to the button widget instead of the layer/backing,
-	//since under certain configurations when orb swapping, it may prevent a click where they overlap
-	//if noClickThrough is enabled, and the button is hidden - create a noClick child in its place
 	private void handleVanillaNoClickThrough(TargetWidget target, boolean noClickThrough)
 	{
 		Widget layer = client.getWidget(target.getComponentId());
@@ -462,14 +441,6 @@ public class OrbController
 		}
 	}
 
-	//TODO - test if stale state can happen to the XP orb when hovering into the HP orb in safe mode (poisoned)
-	//orb swapping seems to have introduced a possible de-sync under certain configurations, where an orbs backing frame
-	//will remain in a hovered state when moving into another orbs bounds (overlapped) while triggering the graphic swapper script (44)
-	//before it applied the correct state to the previous orb - to resolve this, ignore non-orb related swaps and reset the stale
-	//backing sprite if it exists
-	// - test example: swap order [HP, SPEC, RUN, PRAY], default view
-	// - hovering RUN -> PRAY = never becomes stale
-	// - hovering PRAY -> RUN = can become stale
 	public void resolveOrbFrameMismatch()
 	{
 		if (isCompactLayout() || !enableOrbSwapping)
@@ -506,8 +477,6 @@ public class OrbController
 		}
 	}
 
-	//create the compass frame and toggle buttons, clearing them if the parent id changed,
-	//and only creating widgets if missing from the current parent
 	public void createCustomChildren()
 	{
 		Widget parent = widgetManager.getOrbsParent();
@@ -558,7 +527,7 @@ public class OrbController
 		}
 
 		updateMinimapToggleButton();
-		//compass frame moved to the compass container
+
 		parent = client.getWidget(isClassicResizable() ? Classic.COMPASS_PARENT : Modern.COMPASS_PARENT);
 		if (parent == null)
 		{
@@ -636,7 +605,6 @@ public class OrbController
 		);
 	}
 
-	//clear any created children and reset previous parent id
 	public void clearCustomChildren()
 	{
         noClickThroughChildren.values().forEach(widgetManager::clearChild);
@@ -646,14 +614,13 @@ public class OrbController
 		widgetManager.clearChild(overlayLogoutXIcon);
 		widgetManager.clearChild(overlayLogoutXStone);
 
-		//reset & clear the minimap overlay
 		configureMinimapOverlayContainer(false);
         overlayNoClickChildren.forEach(widgetManager::clearChild);
         overlayNoClickChildren.clear();
 		final Widget parent = client.getWidget(MinimapOverlay.UNIVERSE);
 		if (parent != null)
 		{
-			// Remove only our children; preserve children owned by other plugins.
+
             widgetManager.clearChild(overlayCompass);
             widgetManager.clearChild(overlayCompassLayer);
             widgetManager.clearChild(overlayCompassNoClick);
@@ -677,8 +644,6 @@ public class OrbController
             compassFrame = null;
 	}
 
-	//initial setup for the minimap overlay
-	//@enabled - for startup/shutdown behaviour
 	private void configureMinimapOverlayContainer(boolean enabled)
 	{
 		Widget parent = client.getWidget(MinimapOverlay.UNIVERSE);
@@ -710,7 +675,6 @@ public class OrbController
 		detachedMinimapParentIsReady = true;
 	}
 
-	//create necessary widgets for the minimap overlay
 	private void createMinimapOverlayChildren()
 	{
 		final Widget parent = client.getWidget(MinimapOverlay.UNIVERSE);
@@ -774,7 +738,6 @@ public class OrbController
 			return;
 		}
 
-		//vanilla banner should be hidden if the in-game setting is disabled
 		if (isWikiBannerDisabled() && !widgetManager.hasChildren(container) && !isEditingLayout)
 		{
 			hidden = true;
@@ -872,7 +835,6 @@ public class OrbController
 		return config.layout();
 	}
 
-	//invert for readability
 	public boolean isFixedMode()
 	{
 		return !client.isResized();
@@ -990,7 +952,6 @@ public class OrbController
 		return config.showMinimapInCompactView();
 	}
 
-	//prevent unintended state changes for the logout-x since it is treated as a side icon/stone, i.e. don't unhide when it should be hidden
 	public void hideLogout()
 	{
 		if (isFixedMode() || isMinimapMinimized())
@@ -1003,8 +964,6 @@ public class OrbController
 		widgetManager.setTargetsHidden(hidden, Orbs.LOGOUT_X_STONE, Orbs.LOGOUT_X_ICON);
 	}
 
-	//offset the logout-x instead of using the hidden-flag (similarly to the world map) when the overlays
-	//logout-x is visible (retaining the FPS/Ping status offset so it doesn't block the overlays logout-x)
 	public void updateLogoutXPosition()
 	{
 		if (isFixedMode() || isMinimapMinimized())
@@ -1027,7 +986,6 @@ public class OrbController
 		overlayLogoutXIcon.setHidden(hideOverlayLogoutX());
 	}
 
-	//restrict the overlays logout-x visibility to the same conditions as the original
 	private boolean hideOverlayLogoutX()
 	{
 		if (widgetManager.getOrbsParent() == null)
@@ -1038,7 +996,6 @@ public class OrbController
 		return !config.showOverlayLogoutX() || com.interfacelayout.layout.menu.MenuStoneController.managesModernLogout(config) || isClassicResizable() || hideStonesAndIcons();
 	}
 
-	//similar to how the cs2 script hides/shows the logout-x by referencing the containers hidden state
 	private boolean hideStonesAndIcons()
 	{
 		Widget w = client.getWidget(isClassicResizable() ? Classic.SIDE_TOP : Modern.SIDE_MOVABLE);
@@ -1050,7 +1007,6 @@ public class OrbController
 		return w.isHidden();
 	}
 
-	//use offset-hiding instead of using the hidden-flag for the logout-x
 	public boolean offsetLogoutX()
 	{
 		return isOverlayLogoutVisible() && !isMinimapMinimized();
@@ -1082,7 +1038,7 @@ public class OrbController
 
 	public boolean isMinimapMinimized()
 	{
-		//login screen NPE when 'loading interfaces %' occurs post update for the MINIMAP_TOGGLE varbit?
+
 		if (!isLoggedIn())
 		{
 			return false;

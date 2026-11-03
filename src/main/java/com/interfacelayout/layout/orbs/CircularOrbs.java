@@ -30,7 +30,6 @@ import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.*;
 import net.runelite.client.util.Text;
 
-/** Orb artwork and native button clipping; actions and game availability stay native. */
 @Singleton
 public final class CircularOrbs extends Overlay {
     private static final Orbs[] ORBS={Orbs.HP_ORB_CONTAINER,Orbs.PRAYER_ORB_CONTAINER,Orbs.RUN_ORB_CONTAINER,Orbs.SPEC_ORB_CONTAINER};
@@ -79,15 +78,14 @@ public final class CircularOrbs extends Overlay {
         if(event.getGameState()!=GameState.LOGGED_IN){scriptDepth=0;restore();}
     }
     @Subscribe(priority=-4) public void onBeforeRender(BeforeRender event) {
-        // A script that aborts need not deliver its matching return event.
+
         scriptDepth=0;refresh();
     }
     @Subscribe(priority=-4) public void onClientTick(ClientTick event) {refresh();}
     @Subscribe(priority=-4) public void onScriptPostFired(ScriptPostFired event) {
         if(!running)return;
         if(scriptDepth>0)--scriptDepth;
-        // A nested helper's caller can still read or change native dimensions.
-        // Keep temporary artwork and hitboxes out until the root script returns.
+
         if(scriptDepth==0)refresh();
     }
     private void releaseBeforeLayout() {
@@ -109,7 +107,7 @@ public final class CircularOrbs extends Overlay {
             Widget indicator=client.getWidget(orb.getIndicatorId()),icon=client.getWidget(orb.getIconId()),number=client.getWidget(NUMBERS[i]);
             if(!visible(parent)||!visible(backing)||!visible(indicator)||!visible(icon)||!visible(number))continue;
             BufferedImage picture=sprites.get(icon);
-            if(picture==null)continue; // Never hide before artwork is ready.
+            if(picture==null)continue;
             Rectangle fill=WidgetGeometry.bounds(indicator),bounds=WidgetGeometry.bounds(backing);
             if(fill==null || bounds==null || fill.width<=0 || fill.height<=0 || bounds.width<=0 || bounds.height<=0)continue;
             Rectangle circle=CircularOrbArtwork.around(fill);
@@ -121,8 +119,7 @@ public final class CircularOrbs extends Overlay {
     @Subscribe(priority=-30) public void onPostMenuSort(PostMenuSort event) {
         if(!running || !config.hideOrbTabs() || config.editInterface() || client.isMenuOpen() || client.getMenu()==null)return;
         net.runelite.api.Point mouse=client.getMouseCanvasPosition();if(mouse==null)return;
-        // Covers the transition tick if a menu was built before the setting or
-        // native script changed. Keep opened menus and unrelated entries intact.
+
         net.runelite.api.MenuEntry[] entries=client.getMenu().getMenuEntries();
         net.runelite.api.MenuEntry[] kept=java.util.Arrays.stream(entries).filter(e->{
             for(View view:views)if(!view.circle.contains(mouse.getX(),mouse.getY()))

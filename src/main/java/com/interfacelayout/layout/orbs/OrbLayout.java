@@ -63,19 +63,14 @@ public enum OrbLayout
 	CUSTOM("Custom preset", Layout.Custom.LAYOUT_ID, 0, 0, List.of(), List.of()),
     FREE_POSITION("Free Position", Layout.Custom.LAYOUT_ID, 0, 0, List.of(), List.of());
 
-	//config drop down name
 	private final String name;
 
-	//layout index used to determine which modified values should be used
 	private final int index;
 
-	//list of orbs in relation to TOP row or LEFT column
 	private final List<Slot> a;
 
-	//list of orbs in relation to BOTTOM row or RIGHT column
 	private final List<Slot> b;
 
-	//offsets used to shift container positions to the relative anchor
 	private final int rightOffset;
 	private final int bottomOffset;
 

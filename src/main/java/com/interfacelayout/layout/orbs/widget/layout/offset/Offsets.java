@@ -82,17 +82,17 @@ public enum Offsets
 	WORLD_MAP(new WorldMapOffset(),
 		Orbs.WORLD_MAP_CONTAINER
 	),
-	//top level container
+
 	MAP_CONTAINER(new MapContainerOffset(),
 		Minimap.CLASSIC_MAP_CONTAINER,
 		Minimap.MODERN_MAP_CONTAINER
 	),
-	//minimap / compass container
+
 	MAP_MINIMAP(new CompassOffset(),
 		Minimap.CLASSIC_MAP_MINIMAP,
 		Minimap.MODERN_MAP_MINIMAP
 	),
-	//orb parent container
+
 	ORB_CONTAINER(new OrbContainerOffset(),
 		Minimap.CLASSIC_ORBS_CONTAINER,
 		Minimap.MODERN_ORBS_CONTAINER

@@ -32,7 +32,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-/** Regression coverage for reporter feedback: native coordinates and atomic grouping. */
 public class MenuFeedbackDiagnosticsTest {
     @Test public void nativeCoordinatePipelineWorksAcrossDisplayModesAndScaleChanges() {
         int probes = 0;
@@ -44,7 +43,7 @@ public class MenuFeedbackDiagnosticsTest {
             TranslateMouseListener translate = new TranslateMouseListener(f.client);
             mouse.registerMouseListener(0, f.editor);
             mouse.registerMouseListener(0, translate);
-            // Native dimensions remain authoritative; integer/fractional and unequal X/Y scales.
+
             for (Dimension screen : new Dimension[]{new Dimension(1500, 1050), new Dimension(2000, 1400),
                     new Dimension(3000, 2100), new Dimension(1700, 1610)}) {
                 when(f.client.getStretchedDimensions()).thenReturn(screen);
@@ -72,7 +71,7 @@ public class MenuFeedbackDiagnosticsTest {
         assertTrue(result.isConsumed());
         f.editor.cancel(); f.refresh();
         mouse.unregisterMouseListener(translate);
-        mouse.registerMouseListener(0, translate); // Stretched Mode disable/re-enable workaround.
+        mouse.registerMouseListener(0, translate);
         assertTrue(mouse.processMousePressed(f.event(MouseEvent.MOUSE_PRESSED, 220, 220, MouseEvent.BUTTON1)).isConsumed());
     }
 
@@ -92,7 +91,7 @@ public class MenuFeedbackDiagnosticsTest {
         interrupted.editor.mousePressed(interrupted.event(MouseEvent.MOUSE_PRESSED, last.x + 10, last.y + 10, MouseEvent.BUTTON1));
         interrupted.editor.mouseDragged(interrupted.event(MouseEvent.MOUSE_DRAGGED, 700, 400, MouseEvent.NOBUTTON));
         assertEquals(before, interrupted.values);
-        interrupted.editor.cancel(); // Same cancellation called on native subchange/focus/config transitions.
+        interrupted.editor.cancel();
         interrupted.refresh();
         assertEquals(before, interrupted.values);
         assertEquals(0, interrupted.menu.groupForStone(5));

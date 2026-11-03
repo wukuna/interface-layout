@@ -89,7 +89,6 @@ public class WidgetManager
 		remapTargets(false, scriptId, targets);
 	}
 
-	//should only be called on shutdown with toDefault being true
 	public void remapTargets(boolean toDefault, int scriptId, TargetWidget... targets)
 	{
 		boolean freePosition = !toDefault && manager.getCurrentLayout() == OrbLayout.FREE_POSITION;
@@ -193,7 +192,6 @@ public class WidgetManager
 			return saved;
 		}
 
-		//offsets return fixed mode positions early (not stored in the Orbs enum)
 		if (!toDefault || manager.isFixedMode())
 		{
 			v = OffsetManager.getTargetOffset(widget, index, key, v, manager, slotManager);
@@ -202,7 +200,6 @@ public class WidgetManager
 		return v;
 	}
 
-	//the wiki banners container is too big (that's what she said) when the minimap is visible
 	private int adjustValue(Widget widget, int index, ValueKey key, int value, boolean toDefault)
 	{
 		if (!manager.isVanillaCustom() || toDefault)
@@ -359,7 +356,6 @@ public class WidgetManager
 		}
 	}
 
-	//set the opacity for the target and any related widgets
 	public void setTargetOpacity(TargetWidget target, int opacity)
 	{
 		setOpacity(target.getComponentId(), opacity);
@@ -415,7 +411,6 @@ public class WidgetManager
 		}
 	}
 
-	//get the widget for the given TargetWidget
 	public Widget getTargetWidget(TargetWidget target)
 	{
 		Widget widget = client.getWidget(target.getComponentId());
@@ -783,7 +778,6 @@ public class WidgetManager
 				widget.getIndex() == Orbs.WIKI_VANILLA_ICON.getArrayId());
 	}
 
-	//check if a target widget should be updated based on script id (or FORCE_UPDATE)
 	private boolean shouldUpdateTarget(TargetWidget target, int scriptId)
 	{
 		return (scriptId == Script.FORCE_UPDATE) || target.getScriptId() == scriptId;

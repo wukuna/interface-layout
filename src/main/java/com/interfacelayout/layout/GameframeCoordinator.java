@@ -24,7 +24,6 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.ProfileChanged;
 
-/** Coordinates new native layout mutations around RuneScape's own layout scripts. */
 @Singleton
 public class GameframeCoordinator
 {
@@ -62,9 +61,7 @@ public class GameframeCoordinator
     public void toggleShown() { if (running) { menu.toggleShown(); refresh(); } }
     @Subscribe(priority = -2) public void onBeforeRender(BeforeRender event)
     {
-        // Native window dragging/resizing need not load a new interface or run
-        // one of our gameframe scripts. Sample current geometry each frame;
-        // rebuild only on changes, without modifying any window itself.
+
         if (running && layoutDepth == 0 && visibilityDepth == 0
             && client.getGameState() == GameState.LOGGED_IN && menu.windowBoundsChanged()) refresh();
     }
@@ -118,7 +115,7 @@ public class GameframeCoordinator
     }
     @Subscribe(priority = -2) public void onWidgetLoaded(WidgetLoaded event)
     {
-        // Native instances may have been replaced: cancel any handle drag before remapping.
+
         editor.cancel();
         states.discardRetired(client);
         nativeStates.discardRetired(client);
@@ -152,8 +149,7 @@ public class GameframeCoordinator
     }
     @Subscribe public void onFocusChanged(FocusChanged event)
     {
-        // The mouse release may occur outside the client. Invalidate queued moves
-        // rather than allowing a stale drag to resume when focus returns.
+
         if (running && !event.isFocused()) editor.cancel();
     }
     @Subscribe(priority = -2) public void onProfileChanged(ProfileChanged event)

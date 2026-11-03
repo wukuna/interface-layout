@@ -159,8 +159,7 @@ public class OrbEventHandler implements KeyListener
         stoneClickPriority.clear();
         eventBus.register(stoneClickPriority.nativeListener());
         eventBus.register(stoneClickPriority);
-        // Native Stretched Mode translation stays ahead of custom hit testing,
-        // regardless of which plugin is enabled first.
+
         mouseManager.registerMouseListener(interfaceEditor);
 		keyManager.registerKeyListener(this);
 		mouseManager.registerMouseListener(dragListener);
@@ -218,20 +217,14 @@ public class OrbEventHandler implements KeyListener
 	@Subscribe
 	public void onClientTick(ClientTick event)
 	{
-		//don't check for drag events unless layout editing is enabled
+
 		if (!manager.isEditingLayout)
 		{
 			return;
 		}
 
-		//gated by client.getDraggedWidget(), with actual changes only if the dragged widget is expected
 		dragListener.updateDrag();
 
-		//onWidgetDrag works, but is finicky
-		//ex: moving a widget to 0,0 in bounds, then release the mouse to stop the drag (position updated)
-		//grab and drag the same widget, with it's ending position the same as it was before (no change)
-		//onWidgetDrag event will not fire -> which would potentially leave things stale (indicators/position)
-		//TODO - still unsure if it's just the implementation...
 		if (client.getMouseCurrentButton() == 0 && dragState.wasDragging)
 		{
 			dragListener.finalizeDrag();
@@ -271,7 +264,6 @@ public class OrbEventHandler implements KeyListener
 	{
 		int scriptId = event.getScriptId();
 
-		//prevent unwanted changes while in edit-mode
 		if (config.layout() != OrbLayout.FREE_POSITION && manager.isEditingLayout &&
 			(scriptId == Script.TOPLEVEL_REDRAW ||
 				scriptId == Script.PROC_TOPLEVEL_SUBCHANGE ||
@@ -305,7 +297,7 @@ public class OrbEventHandler implements KeyListener
 				break;
 
 			case Script.TOPLEVEL_SUBCHANGE:
-				//ideally for display mode change
+
 				if (manager.isEditingLayout)
 				{
 					editManager.toggleEditMode(false);
@@ -324,7 +316,7 @@ public class OrbEventHandler implements KeyListener
 			case Script.ORBS_UPDATE_SPECENERGY:
 				if (config.layout() != OrbLayout.FREE_POSITION && manager.isEditingLayout && config.hideSpec())
 				{
-					//prevent the script from setting the opacity back to 25
+
 					widgetManager.setTargetOpacity(Orbs.SPEC_ORB_CONTAINER, EDIT_MODE_HIDDEN_OPACITY);
 				}
 			case Script.ORBS_UPDATE_HEALTH:
@@ -344,7 +336,7 @@ public class OrbEventHandler implements KeyListener
 			case Script.ORBS_UPDATE_ACTIVITY:
 			case Script.WIKI_ICON_INIT:
 			case Script.WIKI_ICON_UPDATE:
-				//case Script.GRID_MASTER_ORB_UPDATE:
+
 				if (!manager.isMinimapMinimized())
 				{
 					manager.update(scriptId);
@@ -392,7 +384,7 @@ public class OrbEventHandler implements KeyListener
 
 			case Varbit.STORE_ORB_TOGGLE:
 			case Varbit.ACTIVITY_ORB_TOGGLE:
-				//might need to add other varbit triggers (toggle wiki, toggle data orbs?)
+
 				if (manager.isEditingLayout)
 				{
 					editManager.toggleEditMode(false);
@@ -421,7 +413,7 @@ public class OrbEventHandler implements KeyListener
 			{
 				editManager.toggleEditMode(false);
 			}
-			// Coalesce varc-only toggles with script updates at the end of the tick.
+
 			if (manager.active) manager.hideMinimapOnTabClose(config.hideMinimapWithSidePanel());
 		}
 	}
@@ -680,7 +672,7 @@ if (!group.equals(GROUP_NAME))
 				break;
 
 			case ConfigGroup.Core.MINIMAP:
-				//keep minimap hidden when the core minimap plugin is toggled (somewhat edge case)
+
 				later(() -> manager.hideMinimapOnTabClose(config.hideMinimapWithSidePanel()));
 				break;
 		}
@@ -724,13 +716,11 @@ if (!group.equals(GROUP_NAME))
 			return;
 		}
 
-		//during or after a cutscene, wait until the layout has settled before allowing toggles
 		if (manager.isCutsceneActive)
 		{
 			return;
 		}
 
-		//let the hotkey toggle the minimap button in fixed mode if EDIT_MODE is not the selected option
 		if (config.toggleOption() == HotkeyOptions.MINIMAP_BUTTON
 			|| manager.isFixedMode() && config.toggleOption() != HotkeyOptions.EDIT_MODE)
 		{

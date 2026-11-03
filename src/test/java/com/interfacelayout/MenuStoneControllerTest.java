@@ -46,7 +46,7 @@ public class MenuStoneControllerTest
                 icons[i] = WidgetGeometryTest.widget(x + 4, 2, 25, 32);
                 final int nativeX = x;
                 final Widget nativeStone = stones[i], nativeIcon = icons[i];
-                // The game restores native relative coordinates when forced position is cleared.
+
                 doAnswer(call -> {
                     int px = call.getArgument(0), py = call.getArgument(1);
                     when(nativeStone.getRelativeX()).thenReturn(px == -1 ? nativeX : px);
@@ -82,7 +82,7 @@ public class MenuStoneControllerTest
             }
             verify(stones[10], never()).setHidden(true); verify(icons[10], never()).setHidden(true);
             if (display == 2) verify(stones[10], never()).setForcedPosition(anyInt(),anyInt());
-            else assertTrue(menu.stones().containsKey(10)); // Fixed/Classic Logout remains in the row.
+            else assertTrue(menu.stones().containsKey(10));
             states.restore();
             when(config.hideCombatStone()).thenReturn(false); when(config.hideClanStone()).thenReturn(false);
             menu.apply();

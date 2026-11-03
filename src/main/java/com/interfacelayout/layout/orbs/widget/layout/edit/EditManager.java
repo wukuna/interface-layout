@@ -91,10 +91,9 @@ public class EditManager
 	private boolean presetSession;
 	private final Map<TargetWidget, Widget> handlers = new HashMap<>();
 
-	//format: {modern, classic, fixed}
 	public static final TargetWidget[][] EDIT_TARGETS =
 		{
-			//same for all display modes
+
 			{Orbs.HP_ORB_CONTAINER},
 			{Orbs.PRAYER_ORB_CONTAINER},
 			{Orbs.RUN_ORB_CONTAINER},
@@ -105,13 +104,10 @@ public class EditManager
 			{Orbs.WIKI_ICON_CONTAINER},
 			{Orbs.XP_DROPS_CONTAINER},
 
-			//not visible in classic
 			{Orbs.LOGOUT_X_ICON},
 
-			//each button is different in the respective modes
 			{Button.MINIMAP_BUTTON_MODERN, Button.MINIMAP_BUTTON_CLASSIC, Button.MINIMAP_BUTTON_FIXED},
 
-			//compass when in compact-view
 			{Minimap.MODERN_MAP_MINIMAP, Minimap.CLASSIC_MAP_MINIMAP}
 		};
 
@@ -139,7 +135,6 @@ public class EditManager
         }
     }
 
-    /** Rebuild handlers after ownership changes without turning off interface editing. */
     public void refreshEditMode()
     {
         if (!manager.isEditingLayout) return;
@@ -260,7 +255,7 @@ public class EditManager
 						|| (swapping && Orbs.isSwappableOrb(bound.getId()))
 						|| (!swapping && !manager.isCompactLayout() && !target.isLogoutX()))
 					{
-						//set draggable
+
 						handler.setClickMask(DRAG | DRAG_ON);
 					}
 				}
@@ -328,8 +323,6 @@ public class EditManager
 			}
 		}
 
-		//handle the menu actions: each handler can hide/show, or reset its bound widget
-		//the minimap button can also reset all bound widget positions, and disable edit mode respectively
 		handler.setOnOpListener((JavaScriptCallback) e ->
 		{
 			final Binding binding = bindingManager.getByHandler(handler);
@@ -362,7 +355,6 @@ public class EditManager
 		});
 	}
 
-	//handle whether edit-mode was triggered (save changes) or cancelled (config event, display mode changed, etc)
 	private void closeEditMode()
 	{
 		manager.isEditingLayout = false;
@@ -373,7 +365,6 @@ public class EditManager
 		cleanupEditMode();
 	}
 
-	//restore the minimap to a clean state post-edit
 	private void cleanupEditMode()
 	{
 		if (presetSession)
@@ -391,7 +382,6 @@ public class EditManager
 		manager.rebuildLayout();
 	}
 
-	//should probably not do this, but i cba with minimap clicks
 	private void disableMinimap()
 	{
 		editingMask = widgetManager.getMinimapMask();
@@ -408,7 +398,6 @@ public class EditManager
 			return;
 		}
 
-		//prevent visual artifacts while dragging over the empty space
 		blackoutMinimapRight = parent.createChild(-1, WidgetType.RECTANGLE)
 			.setOriginalX(10).setOriginalY(0)
 			.setOriginalWidth(142).setOriginalHeight(152)
@@ -425,7 +414,6 @@ public class EditManager
 
 	}
 
-	//remove handlers, indicators, and background
 	public void clearEditChildren()
 	{
 		for (Widget handler : handlers.values())

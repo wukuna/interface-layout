@@ -2,7 +2,7 @@
 
 Arrange RuneLite around the way you play. Move orbs and the compass, detach menu tabs and reconnect them into custom rows or columns, or choose a compact preset. Resize overlay menu buttons together from **25–200%**, keeping your active game or resource-pack artwork in **Fixed, Resizable Classic and Resizable Modern**. Control which elements remain visible, restore the Modern logout stone, and protect orb and minimap clicks from reaching the game behind them. Overlay buttons are optional and start off. An optional Beta equipment sidebar adds compact gear bonuses, weight and spellbook information with a reduced-tooltip setting.
 
-[Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Inspiration and recipe](#inspiration-and-recipe) · [Development](#development) · [Support](#support) · [License and attribution](#license-and-attribution)
+[Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Inspiration and recipe](#inspiration-and-recipe) · [Support](#support) · [License and attribution](#license-and-attribution)
 
 ## Features
 
@@ -19,8 +19,6 @@ Arrange RuneLite around the way you play. Move orbs and the compass, detach menu
 - **Shield special orb** — optionally show a separate, movable shield-charge orb under Presentation, using the game's existing off-hand special-attack action. Off by default.
 - **Beta equipment sidebar** — compact stats and spellbook information beneath your gear, small utility buttons, and optional reduced tooltips. The expanded equipment window and bank equipment view keep their native layouts.
 - **Shortcuts and protection** — toggle editing or minimap visibility, restore the native menu temporarily, and choose whether clicks pass through gaps between stones.
-
-**Availability:** Install **Interface Layout** from RuneLite's Plugin Hub. [Update #19761](https://github.com/runelite/plugin-hub/pull/19761) merged on 30 October 2026. Enable the equipment sidebar under **Beta features**; it starts off.
 
 **More plugins:** [Banking, Looting, Right-Clicks, Interface Layout and Chat](https://github.com/wukuna#runelite-plugins).
 
@@ -149,7 +147,7 @@ The shield orb starts beside the regular special-attack orb. Move it with RuneLi
 
 The shield orb follows the native control's availability, including in PvP areas. It does not expose hidden controls or activate an action the game has removed.
 
-After an update, the chatbox lists up to five recent changes, newest first. Each update notice appears once per RuneLite profile when you are logged in, rather than every login.
+After an update, the chatbox lists the current changes once per RuneLite profile.
 
 ### Map and orb visibility
 
@@ -249,10 +247,6 @@ Interface Layout builds on Compact Orbs by cue and Menu Stones Hider by Richarda
 | [Stretched Mode (built in)](https://github.com/runelite/runelite/tree/master/runelite-client/src/main/java/net/runelite/client/plugins/stretchedmode) | Optional display tool | Scales the game view. Interface Layout arranges controls within that view; it does not replace whole-client scaling. |
 
 The separate minimap does not reproduce other plugins' minimap overlays. Keep the native minimap for those drawings. Adapted code, original authors and license terms remain documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the packaged notices.
-
-## Development
-
-Use Java 11 and the repository's Gradle wrapper. Run `./gradlew test build` (Windows: `gradlew.bat test build`). Release commits are selected explicitly in the Plugin Hub manifest; the default branch and the Hub build can differ.
 
 ## Support
 

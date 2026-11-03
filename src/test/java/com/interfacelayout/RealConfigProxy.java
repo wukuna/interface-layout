@@ -9,7 +9,6 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigManager;
 import static org.mockito.Mockito.*;
 
-/** Use the actual handler without adding classes to RuneLite's signed package. */
 final class RealConfigProxy
 {
     private RealConfigProxy() {}
@@ -17,7 +16,7 @@ final class RealConfigProxy
     {
         try
         {
-            // Only persistence is mocked; use RuneLite's actual value conversion too.
+
             Method parser = ConfigManager.class.getDeclaredMethod("stringToObject", String.class, Type.class);
             parser.setAccessible(true);
             when(parser.invoke(manager, anyString(), any(Type.class))).thenCallRealMethod();

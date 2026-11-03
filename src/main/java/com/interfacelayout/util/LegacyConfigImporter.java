@@ -4,7 +4,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.client.config.ConfigManager;
 
-/** Copies existing values once per profile; never changes the source plugin configurations. */
 @Singleton
 public class LegacyConfigImporter
 {

@@ -10,7 +10,6 @@ import net.runelite.client.game.ItemEquipmentStats;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemStats;
 
-/** Base equipment bonuses for the sidebar; conditional effects remain in native stats. */
 public final class EquipmentReadout
 {
     public final double[] bonuses;

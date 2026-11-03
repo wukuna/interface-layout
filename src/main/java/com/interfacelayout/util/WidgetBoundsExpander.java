@@ -13,7 +13,6 @@ import net.runelite.api.Client;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetSizeMode;
 
-/** Expands clipping ancestors, preserving the canvas positions of their native children. */
 @Singleton
 public class WidgetBoundsExpander
 {
@@ -23,7 +22,6 @@ public class WidgetBoundsExpander
 
     public void clear() { expanded.clear(); }
 
-    /** Only layers whose clipping bounds were actually enlarged in this layout. */
     public boolean isExpanded(int componentId)
     {
         return expanded.keySet().stream().anyMatch(widget -> widget.getId() == componentId);
@@ -60,8 +58,7 @@ public class WidgetBoundsExpander
         collect(parent.getStaticChildren(), positions);
         collect(parent.getDynamicChildren(), positions);
         collect(parent.getNestedChildren(), positions);
-        // Freeze sibling sizes before changing their parent; MINUS-sized minimap layers
-        // would otherwise grow to canvas size together with the clipping ancestor.
+
         positions.keySet().forEach(child -> {
             states.capture(child);
             int width = child.getWidth(), height = child.getHeight();
@@ -74,7 +71,7 @@ public class WidgetBoundsExpander
         states.position(parent, -outer.x, -outer.y);
         parent.setOriginalWidth(client.getCanvasWidth()); parent.setOriginalHeight(client.getCanvasHeight());
         parent.setWidthMode(WidgetSizeMode.ABSOLUTE); parent.setHeightMode(WidgetSizeMode.ABSOLUTE);
-        // Expanding a layer must not create an invisible canvas-sized input blocker.
+
         parent.setNoClickThrough(false);
         parent.revalidate();
         Rectangle now = WidgetGeometry.bounds(parent);

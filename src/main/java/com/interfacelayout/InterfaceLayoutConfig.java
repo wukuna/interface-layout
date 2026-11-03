@@ -154,7 +154,6 @@ public interface InterfaceLayoutConfig extends Config
 		EDIT_MODE
 	}
 
-	//visible on the config panel
 	@ConfigItem(
 		keyName = ConfigKeys.ORB_LAYOUT,
 		name = "Orb arrangement",
@@ -389,7 +388,7 @@ public interface InterfaceLayoutConfig extends Config
 		position = 6
 	)
 	String hideAndSwapUpdate = "hideAndSwapUpdate";
-	// Keep the original key so the eye button, hotkey and imported settings agree.
+
 	@ConfigItem(
 		keyName = ConfigKeys.MINIMAP,
 		name = "Hide minimap",
@@ -414,7 +413,6 @@ public interface InterfaceLayoutConfig extends Config
 		return false;
 	}
 
-	//orb swapping
 	@ConfigItem(
 		keyName = ConfigKeys.HP_ORB_SLOT,
 		name = "Compact HP slot",
@@ -503,7 +501,6 @@ public interface InterfaceLayoutConfig extends Config
 		return Orbs.SPEC_ORB_CONTAINER;
 	}
 
-	//orb hiding
 	@ConfigItem(
 		keyName = ConfigKeys.HIDE_HP,
 		name = "Hide HP",

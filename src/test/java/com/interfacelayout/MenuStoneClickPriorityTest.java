@@ -41,15 +41,15 @@ public class MenuStoneClickPriorityTest
             f.entries.set(new MenuEntry[]{f.cancel, f.exit, f.action});
             EventBus bus = new EventBus();
             bus.register(swapper); bus.register(f.guard); bus.register(f.guard.nativeListener());
-            // Registration order must not determine which action wins.
+
             bus.post(new PostMenuSort());
             assertArrayEquals(new MenuEntry[]{f.cancel, f.exit, f.action}, f.entries.get());
-            verify(f.menu, times(2)).setMenuEntries(any(MenuEntry[].class)); // swapper, then guard
+            verify(f.menu, times(2)).setMenuEntries(any(MenuEntry[].class));
             bus.unregister(f.guard);
             bus.unregister(f.guard.nativeListener());
             f.entries.set(new MenuEntry[]{f.cancel, f.exit, f.action});
             bus.post(new PostMenuSort());
-            assertSame(f.exit, f.entries.get()[2]); // proves the real conflicting swap occurred
+            assertSame(f.exit, f.entries.get()[2]);
         }
     }
 
@@ -124,7 +124,7 @@ public class MenuStoneClickPriorityTest
             f.guard.afterSwaps(new PostMenuSort());
             verify(f.menu, never()).setMenuEntries(any(MenuEntry[].class));
             when(f.client.isMenuOpen()).thenReturn(false);
-            // A second callback cannot reuse the captured action.
+
             f.guard.afterSwaps(new PostMenuSort());
             verify(f.menu, never()).setMenuEntries(any(MenuEntry[].class));
         }

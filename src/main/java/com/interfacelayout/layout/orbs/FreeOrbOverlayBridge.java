@@ -16,7 +16,6 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.OverlayPosition;
 
-/** Expose native free elements to RuneLite movement and external anchor managers. */
 @Singleton
 public class FreeOrbOverlayBridge
 {
@@ -58,7 +57,7 @@ public class FreeOrbOverlayBridge
             if (overlay.getPreferredLocation() == null && overlay.getPreferredPosition() == null)
                 overlay.getBounds().setLocation(bounds.getLocation());
         });
-        // Keep identities and anchor assignments across hide/show and mode changes.
+
         elements.values().forEach(overlay -> {
             if (!overlay.name.equals(name(overlay.target)) || !current.containsKey(overlay.target))
                 overlay.getBounds().setSize(0, 0);

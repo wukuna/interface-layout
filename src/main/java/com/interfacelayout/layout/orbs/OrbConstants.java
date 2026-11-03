@@ -91,7 +91,6 @@ public class OrbConstants
 		public static final String ENABLE_OVERLAY_TOGGLE_OPTION = "enableOverlayToggleOption";
 		public static final String ENABLE_LOGOUT_X_OVERLAY = "enableLogoutXOverlay";
 
-		//edit-modes custom positioning
 		public static final String CUSTOM_LAYOUT_PREFIX = "custom_layout_";
 		public static final String VANILLA_LAYOUT_PREFIX = "vanilla_layout_";
 		public static final String FIXED_LAYOUT_PREFIX = "fixed_layout_";
@@ -111,7 +110,7 @@ public class OrbConstants
 
 	public static final class Enum
 	{
-		//contains the toplevel component ids (key: widget, value: widget)
+
 		public static final int TOPLEVEL_COMPONENTS = 1131;
 	}
 
@@ -120,10 +119,8 @@ public class OrbConstants
 		public static final int CUTSCENE_STATUS = VarbitID.CUTSCENE_STATUS;
 		public static final int MINIMAP_TOGGLE = VarbitID.MINIMAP_TOGGLE;
 
-		//used to determine classic-resizable display mode
 		public static final int RESIZABLE_STONE_ARRANGEMENT = VarbitID.RESIZABLE_STONE_ARRANGEMENT;
 
-		//orb in-game settings
 		public static final int ACTIVITY_ORB_TOGGLE = VarbitID.OPTION_CONTENT_RECOMMENDER_HIDE;
 		public static final int STORE_ORB_TOGGLE = VarbitID.TLI_STOREBUTTON_TOGGLE_DESKTOP;
 		public static final int WIKI_ICON_TOGGLE = VarbitID.WIKI_ICON_DISABLED;
@@ -131,62 +128,49 @@ public class OrbConstants
 
 	public static final class VarClient
 	{
-		//which side panel tab is currently active (-1 is hidden)
+
 		public static final int SIDE_PANEL_ID = VarClientID.TOPLEVEL_PANEL;
 	}
 
 	public static final class VarPlayer
 	{
-		//var trigger for the compass menu options
+
 		public static final int MAP_FLAGS_CACHED = VarPlayerID.MAP_FLAGS_CACHED;
 	}
 
 	public static final class Script
 	{
-		//trigger remapping without the need for a valid scriptId
+
 		public static final int FORCE_UPDATE = -1;
 
-		//script that swaps a graphic with another, ex: for orb frame hovering
 		public static final int GRAPHIC_SWAPPER = 44;
 
-		//scripts related to noclickthrough updating
 		public static final int ORBS_UPDATE_HEALTH = 446;
 		public static final int ORBS_UPDATE_SPECENERGY = 2069;
 
-		//orb specific updating
 		public static final int ORBS_UPDATE_STORE = 2396;
 		public static final int ORBS_UPDATE_ACTIVITY = 2480;
 		public static final int WIKI_ICON_INIT = 3304;
 		public static final int WIKI_ICON_UPDATE = ScriptID.WIKI_ICON_UPDATE;
 		public static final int WORLD_MAP_UPDATE = 1700;
-		//public static final int GRID_MASTER_ORB_UPDATE = 8222;
 
-		//world map tooltip
 		public static final int TOOLTIP_MOUSE_RELEASE = 837;
 
-		//display mode change? used to cancel edit-mode when display mode change has fired (drop down)
 		public static final int TOPLEVEL_SUBCHANGE = 903;
 
-		//configure the current displays chat/side panel (init?)
 		public static final int PROC_TOPLEVEL_SUBCHANGE = 908;
 
-		//does a lot of top level widget state management
 		public static final int TOPLEVEL_REDRAW = ScriptID.TOPLEVEL_REDRAW;
 
-		//handles the menu op for the side panel tabs
 		public static final int TOPLEVEL_SIDEBUTTON_OP = 914;
 
-		//update the side panel tab icon/stones state
 		public static final int TOPLEVEL_SIDE_CUSTOMIZE = 919;
 
-		//on window resize, updates clickmasks/positions for the store/wiki and hides/shows the minimap (varbit checks)
 		public static final int TOPLEVEL_RESIZE_CUSTOMIZE = ScriptID.TOPLEVEL_RESIZE_CUSTOMISE;
 
-		//detached minimap scripts for the compass menu op
 		public static final int TOPLEVEL_COMPASS_OP = 1050;
 		public static final int TOPLEVEL_COMPASS_SETOPS = 7044;
 
-		//cs2
 		public static final int COMSUBID1 = -2147483643;
 		public static final int OPINDEX0 = -2147483644;
 		public static final int COMPONENT0 = -2147483645;
@@ -386,7 +370,6 @@ public class OrbConstants
 			public static final int COMPASS_CONTENT = 1339;
 		}
 
-		//minimap toggle button locations @ToggleLocation
 		public static final int DEFAULT_MINIMAP_BUTTON_X = 190;
 		public static final int DEFAULT_MINIMAP_BUTTON_Y = 176;
 
@@ -399,18 +382,14 @@ public class OrbConstants
 		public static final int BELOW_X_MINIMAP_BUTTON_X = DEFAULT_MINIMAP_BUTTON_X;
 		public static final int BELOW_X_MINIMAP_BUTTON_Y = 15;
 
-		//toggle button dimensions
 		public static final int TOGGLE_BUTTON_SIZE = 17;
 
-		//compass frame dimensions
 		public static final int COMPASS_FRAME_SIZE = 43;
 
-		//misc widget dimensions
 		public static final int COMPASS_SIZE = 36;
 		public static final int LOGOUT_X_WIDTH = 26;
 		public static final int LOGOUT_X_HEIGHT = 23;
 
-		//toggle button opacity when onMouseOver || onMouseLeave
 		public static final int OPACITY = 0;
 		public static final int OPACITY_HOVER = 130;
 
@@ -453,21 +432,18 @@ public class OrbConstants
 
 	public static final class Sprite
 	{
-		//orb related sprites
+
 		public static final int FRAME = SpriteID.OrbFrame.FRAME;
 		public static final int FRAME_HOVERED = SpriteID.OrbFrame.FRAME_HOVERED;
 
-		//for edit-mode
 		public static final int FIXED_MINIMAP_MASK = SpriteID.FIXED_MAP_MASK;
 
-		//minimap overlay sprites
 		public static final int COMPASS_MASK = SpriteID.RESIZE_COMPASS_MASK;
 		public static final int MINIMAP_MASK = SpriteID.RESIZE_MAP_MASK;
 		public static final int MINIMAP_FRAME = SpriteID.OSRS_STRETCH_MAPSURROUND;
 		public static final int LOGOUT_X_BUTTON = SpriteID.CloseButtons._7;
 		public static final int COMPASS_FRAME = SpriteID.COMPASS_OUTLINE;
 
-		//toggle button sprites
 		public static final int HIDDEN = SpriteID.GroundItemsVisibility._1;
 		public static final int VISIBLE = SpriteID.GroundItemsVisibility._0;
 	}
@@ -476,13 +452,10 @@ public class OrbConstants
 	{
 		public static final class MinimapOverlay
 		{
-			//seems BuffBar could be used for the leagues relic display?
-			//can instead use StatBoostsHud (seems to be mobile/steam only)
-			//script can stay the same as entry since it fires frequently
-			public static final int UNIVERSE = InterfaceID.StatBoostsHud.UNIVERSE;//InterfaceID.BuffBar.UNIVERSE;
+
+			public static final int UNIVERSE = InterfaceID.StatBoostsHud.UNIVERSE;
 		}
 
-		//orb widget ids
 		public static final class Orb
 		{
 			public static final int UNIVERSE = InterfaceID.Orbs.UNIVERSE;
@@ -537,7 +510,6 @@ public class OrbConstants
 			public static final int WORLD_MAP_TOOLTIP = InterfaceID.Orbs.TOOLTIP;
 		}
 
-		//fixed mode widget ids
 		public static final class Fixed
 		{
 			public static final int MAP_CONTAINER = InterfaceID.Toplevel.MAPCONTAINER;
@@ -545,7 +517,6 @@ public class OrbConstants
 			public static final int ORBS = InterfaceID.Toplevel.ORBS;
 		}
 
-		//classic-resizable widget ids
 		public static final class Classic
 		{
 			public static final int MAP_CONTAINER = InterfaceID.ToplevelOsrsStretch.MAP_CONTAINER;
@@ -564,7 +535,6 @@ public class OrbConstants
 			public static final int SIDE_TOP = InterfaceID.ToplevelOsrsStretch.SIDE_TOP;
 		}
 
-		//modern-resizable widget ids
 		public static final class Modern
 		{
 			public static final int MAP_CONTAINER = InterfaceID.ToplevelPreEoc.MAP_CONTAINER;

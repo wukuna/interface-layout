@@ -84,24 +84,22 @@ public class MenuOverlayBridgeTest
         Overlay group = registered.stream().filter(o -> o instanceof MenuOverlayBridge.GroupOverlay).findFirst().get();
         assertTrue(group.isMovable()); assertTrue(group.isSnappable());
         group.setPreferredLocation(new Point(500, 300));
-        // OverlayRenderer sets this after resolving origins, snapping and clamping.
+
         group.getBounds().setLocation(500, 300); group.render(null);
         verify(menu).saveGroup(0, new Point(500, 300)); verify(refresh).run();
         group.render(null); verify(refresh, times(1)).run();
         actual.setSize(33, 112); group.revalidate();
-        group.getBounds().setLocation(500, 264); // Renderer may clamp after a size change.
+        group.getBounds().setLocation(500, 264);
         group.render(null);
         verify(menu, never()).resetGroup(anyInt());
         verify(menu).saveGroup(0, new Point(500, 264));
-        // Custom UI Anchors normalizes origins by resetting the overlay before
-        // assigning a new preferred location. This is not a user layout reset.
+
         group.setPreferredLocation(null); group.revalidate();
-        // Crossing the canvas midpoint changes RuneLite's origin and makes the
-        // stored offset negative. The stones must follow the resolved outline.
+
         group.setPreferredLocation(new Point(-180, -160));
         group.getBounds().setLocation(800, 600); group.render(null);
         verify(menu).saveGroup(0, new Point(800, 600));
-        // The anchor/window can move without changing the relative offset.
+
         group.getBounds().setLocation(1000, 700); group.render(null);
         verify(menu).saveGroup(0, new Point(1000, 700));
         verify(menu, never()).resetGroup(anyInt());

@@ -21,7 +21,6 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.ProfileChanged;
 
-/** Owns only the visibility of the native special orb's optional secondary meter. */
 @Singleton
 public class PresentationController
 {
@@ -29,9 +28,6 @@ public class PresentationController
     @Inject private ClientThread clientThread;
     @Inject private InterfaceLayoutConfig config;
 
-    // The native orb update creates this dynamic layer and its rectangle children.
-    // Match the layer's shape as well as its parent; never hide the static orb,
-    // normal energy indicator, regeneration ring, number, or action widget.
     private static final int METER_WIDTH = 33;
     private static final int METER_HEIGHT = 4;
     private final Map<Widget, Boolean> originalVisibility = new IdentityHashMap<>();
@@ -109,7 +105,7 @@ public class PresentationController
     @Subscribe(priority = 3)
     public void onScriptPreFired(ScriptPreFired event)
     {
-        // Release our flag before the game deletes/rebuilds the meter or hides it.
+
         if (running && event.getScriptId() == OrbConstants.Script.ORBS_UPDATE_SPECENERGY) restore();
     }
 

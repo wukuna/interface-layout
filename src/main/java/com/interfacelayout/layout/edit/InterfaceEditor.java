@@ -23,7 +23,6 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 
-/** Editing indicators and grouping gestures for native or replacement menu buttons. */
 @Singleton
 public class InterfaceEditor extends Overlay implements MouseListener
 {
@@ -84,8 +83,7 @@ public class InterfaceEditor extends Overlay implements MouseListener
     @Override public MouseEvent mousePressed(MouseEvent event)
     {
         blockedGapClick = false;
-        // Whole bars and free orbs always use RuneLite's configured drag hotkey.
-        // This listener owns only the Shift gesture for changing stone membership.
+
         if (inBlockedGap(event.getPoint()) && (event.getButton() == MouseEvent.BUTTON1 || event.getButton() == MouseEvent.BUTTON3)) {
             blockedGapClick = true; event.consume(); return event;
         }
@@ -128,7 +126,7 @@ public class InterfaceEditor extends Overlay implements MouseListener
         if (geometryChanged()) { cancel(); event.consume(); return event; }
         if (press.distanceSq(event.getPoint()) < 25 && preview == null) { event.consume(); return event; }
         Point point = LayoutGeometry.snap(new Point(event.getX() - grab.x, event.getY() - grab.y), config.editGrid());
-        // Do not persist membership or move the source bar while a gesture is incomplete.
+
         preview = point;
         event.consume(); return event;
     }

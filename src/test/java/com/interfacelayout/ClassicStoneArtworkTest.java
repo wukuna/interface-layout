@@ -23,7 +23,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-/** Issue #7: selection-highlight widgets do not contain the shared stone artwork. */
 public class ClassicStoneArtworkTest
 {
     @Test public void freshClassicFreePositionKeepsRowsSeparateAndCustomGroupsSurvive()
@@ -67,7 +66,7 @@ public class ClassicStoneArtworkTest
             f.settings.put("menuPosition_" + mode, new java.awt.Point(100, 100));
             f.settings.put("menuGroup_" + mode + "_3", 1);
             f.settings.put("menuGroupPosition_" + mode + "_1", new java.awt.Point(50, 50));
-            f.settings.put("menuGroup_" + mode + "_8", 0); // Explicit user join remains in top group.
+            f.settings.put("menuGroup_" + mode + "_8", 0);
             f.settings.put("menuGeneration_" + mode + "_2", 3);
             f.menu.apply();
             assertEquals(0, f.menu.groupForStone(0)); assertEquals(1, f.menu.groupForStone(3));
@@ -123,7 +122,7 @@ public class ClassicStoneArtworkTest
         f.restore();
         f.settings.put("menuOrder_classic_1", -1);
         f.menu.apply();
-        assertEquals(7, f.artCount()); // Reordered row still uses individual stone artwork.
+        assertEquals(7, f.artCount());
         assertTrue(f.menu.stones().get(1).x < f.menu.stones().get(0).x);
     }
 
@@ -137,7 +136,7 @@ public class ClassicStoneArtworkTest
         assertEquals(new Rectangle(100, 150, 33, 36), f.menu.stones().get(0));
         assertEquals(new Rectangle(131, 150, 33, 36), f.menu.stones().get(1));
         verify(f.icons[1]).setForcedPosition(138, 155);
-        assertEquals(0, f.artCount()); // Both native row graphics remain intact.
+        assertEquals(0, f.artCount());
         f.restore();
         for (Widget stone : f.stones) stone.setHidden(true);
         for (Widget icon : f.icons) icon.setHidden(true);
@@ -157,7 +156,7 @@ public class ClassicStoneArtworkTest
         assertEquals(14, f.artCount());
         verify(f.rows[0], never()).setHidden(true);
         verify(f.rows[1], never()).setHidden(true);
-        // Slot 2 crops its own part of the row, rather than shrinking a row into one tile.
+
         Widget clip = f.children.get(0).get(4), art = f.children.get(0).get(5);
         verify(clip).setOriginalX(68); verify(clip).setOriginalY(0);
         verify(clip).setOriginalWidth(33); verify(clip).setOriginalHeight(36);
@@ -191,7 +190,7 @@ public class ClassicStoneArtworkTest
                 verify(f.icons[n], never()).setForcedPosition(anyInt(), anyInt());
             }
             for (Widget row : f.rows) verify(row, never()).setType(anyInt());
-            // Bank scripts may hide both icon and selection graphic while leaving row art.
+
             f.restore();
             for (Widget stone : f.stones) stone.setHidden(true);
             for (Widget icon : f.icons) icon.setHidden(true);
@@ -302,7 +301,7 @@ public class ClassicStoneArtworkTest
     private static Widget visible(int x, int y, int width, int height)
     {
         Widget w = WidgetGeometryTest.widget(x, y, width, height);
-        // Native revalidation returns a cleared forced position to its original coordinates.
+
         doAnswer(i -> {
             int px = i.getArgument(0), py = i.getArgument(1);
             when(w.getRelativeX()).thenReturn(px == -1 ? x : px);

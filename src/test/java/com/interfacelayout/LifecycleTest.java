@@ -32,9 +32,9 @@ public class LifecycleTest
         org.mockito.ArgumentCaptor<Runnable> answer = org.mockito.ArgumentCaptor.forClass(Runnable.class);
         verify(f.confirmation).request(answer.capture());
         verify(f.frame, never()).resetPositions();
-        assertTrue(f.queue.isEmpty()); // Cancel/close simply never invokes the accepted callback.
+        assertTrue(f.queue.isEmpty());
         answer.getValue().run();
-        verify(f.frame, never()).resetPositions(); // Confirmation does not mutate game state on the EDT.
+        verify(f.frame, never()).resetPositions();
         f.queue.forEach(Runnable::run);
         verify(f.frame).resetPositions();
     }

@@ -4,7 +4,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Compact readout for the equipment sidebar card. */
 public final class EquipmentReadoutRenderer
 {
     public static final int HEIGHT=63;

@@ -146,9 +146,9 @@ public class SidePanelVisibilityTest
         f.apply(true);
         f.states.restoreVisibility();
         assertFalse(f.map.isSelfHidden());
-        f.map.setHidden(true); // A native script now owns this flag.
+        f.map.setHidden(true);
         f.apply(true);
-        f.states.restore(); // The same final restoration used by reset().
+        f.states.restore();
         assertTrue(f.map.isSelfHidden());
         assertFalse(f.orbs.isSelfHidden());
     }

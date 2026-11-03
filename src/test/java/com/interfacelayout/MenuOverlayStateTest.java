@@ -25,7 +25,7 @@ public class MenuOverlayStateTest
         f.state.sync(true);
         assertEquals("VERTICAL_LEFT", f.values.get("menuLayout")); assertEquals("8", f.values.get("menuSpacing"));
         assertNull(f.values.get("hideStone5"));
-        // Restart with overlays already enabled must not replace the native backup.
+
         f.state.sync(true); f.state.sync(false);
         assertEquals("FREE_POSITION", f.values.get("menuLayout"));
     }

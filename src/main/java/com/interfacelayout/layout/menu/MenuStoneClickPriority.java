@@ -14,7 +14,6 @@ import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.PostMenuSort;
 import net.runelite.client.eventbus.Subscribe;
 
-/** Preserve the game's visible stone action when object swaps change menu order. */
 @Singleton
 public class MenuStoneClickPriority
 {
@@ -50,8 +49,7 @@ public class MenuStoneClickPriority
         MenuEntry[] entries = menu.getMenuEntries();
         if (entries.length == 0) return;
         MenuEntry top = entries[entries.length - 1];
-        // An overlapping game window must already win here. Never manufacture
-        // an action for a stone that the native menu builder did not select.
+
         if (!stones.isHoveredStoneAction(top)) return;
         capturedMenu = menu; nativeTop = top; mouse = client.getMouseCanvasPosition();
         type = top.getType(); identifier = top.getIdentifier();
@@ -69,8 +67,7 @@ public class MenuStoneClickPriority
         Menu menu = client.getMenu();
         if (menu == null) return;
         MenuEntry[] entries = menu.getMenuEntries();
-        // A game window or other UI entry takes precedence over gap protection.
-        // Only a native Cancel-only menu is safe; never create synthetic actions.
+
         MenuEntry cancel = null;
         for (MenuEntry entry : entries)
         {
@@ -96,7 +93,7 @@ public class MenuStoneClickPriority
         Menu menu = capturedMenu;
         MenuEntry action = nativeTop;
         Point position = mouse;
-        clear(); // No menu entry can leak into another frame or open right-click menu.
+        clear();
         if (action == null || client.isMenuOpen() || client.getGameState() != GameState.LOGGED_IN
             || client.getMenu() != menu || !position.equals(client.getMouseCanvasPosition())
             || action.getType() != type || action.getIdentifier() != identifier
@@ -107,8 +104,7 @@ public class MenuStoneClickPriority
         for (int i = 0; i < entries.length - 1; i++)
         {
             if (entries[i] != action) continue;
-            // Move the same native entry. Preserve callbacks, parameters, and
-            // the relative order of every other entry; no action is replayed.
+
             System.arraycopy(entries, i + 1, entries, i, entries.length - i - 1);
             entries[entries.length - 1] = action;
             menu.setMenuEntries(entries);

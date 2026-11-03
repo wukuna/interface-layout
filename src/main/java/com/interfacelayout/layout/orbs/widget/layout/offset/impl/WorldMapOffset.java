@@ -37,8 +37,7 @@ public class WorldMapOffset implements OffsetTarget
 {
 	private int getHiddenOffset()
 	{
-		//this will keep 1 pixel inside the container -
-		//enough to keep valid for hotkey use
+
 		return -29;
 	}
 

@@ -62,7 +62,7 @@ public class CircularOrbInputTest {
         input.apply(parent,backing,button,null,new Rectangle(33,10,34,34));button.setOriginalX(99);
         Widget replacement=mock(Widget.class);when(client.getWidget(2)).thenReturn(replacement);
         input.restore(client);assertEquals(99,button.getOriginalX());verifyNoInteractions(replacement);
-        // A new position does not transfer ownership of our temporary width.
+
         assertEquals(57,button.getOriginalWidth());
         assertEquals(34,button.getOriginalHeight());
     }
@@ -80,7 +80,7 @@ public class CircularOrbInputTest {
         Client client=mock(Client.class);CircularOrbInput input=new CircularOrbInput();
         Widget parent=widget(client,1,null,300,70,57,34),backing=widget(client,2,parent,0,0,57,34);
         Widget prayer=widget(client,3,parent,0,0,57,34),number=widget(client,4,parent,0,0,25,34);
-        // Native getBounds keeps the last rendered position despite revalidate.
+
         when(parent.getBounds()).thenReturn(new Rectangle(100,70,57,34));
         when(backing.getBounds()).thenReturn(new Rectangle(123,70,34,34));
         when(prayer.getBounds()).thenReturn(new Rectangle(100,70,57,34));

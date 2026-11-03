@@ -52,7 +52,7 @@ public class CircularOrbRestoreRegressionTest {
         Fixture f=new Fixture();assertEquals(34,f.backing.getOriginalWidth());
         f.bus.post(new ScriptPreFired(1000));f.bus.post(new ScriptPreFired(2000));
         f.bus.post(new ScriptPostFired(2000));f.nativeAppearance();
-        // The outer script continues positioning the orb after its helper returns.
+
         f.backing.setOriginalX(1);f.button.setOriginalX(1);
         f.bus.post(new ScriptPostFired(1000));assertEquals(34,f.backing.getOriginalWidth());
         when(f.orbs.config.hideOrbTabs()).thenReturn(false);f.bus.post(new ClientTick());
@@ -63,8 +63,7 @@ public class CircularOrbRestoreRegressionTest {
         Fixture f=new Fixture();when(f.orbs.config.hideOrbTabs()).thenReturn(false);
         ConfigChanged changed=new ConfigChanged();changed.setGroup("interfacelayout");changed.setKey("hideOrbTabs");
         f.bus.post(changed);
-        // Config events can arrive on Swing; the queued client-thread restore must
-        // precede layout work scheduled by the lower-priority config subscribers.
+
         assertEquals(255,f.backing.getOpacity());assertEquals(1,f.queued.size());
         f.queued.remove(0).run();f.nativeAppearance();
         for(int frame=0;frame<5;frame++){f.bus.post(new BeforeRender());f.nativeAppearance();}

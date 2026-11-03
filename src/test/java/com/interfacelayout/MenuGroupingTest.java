@@ -130,7 +130,7 @@ public class MenuGroupingTest
     {
         MenuStoneController menu = controller(); menu.apply();
         menu.detach(0, new Point(300, 200)); menu.apply();
-        menu.dropStone(0, new Point(900, 500)); // Finish detaching before creating a new pair.
+        menu.dropStone(0, new Point(900, 500));
         menu.detach(0, new Point(300, 200)); menu.apply();
         menu.dropStone(0, new Point(40, 18)); menu.apply();
         assertEquals(new Rectangle(0, 0, 70, 36), menu.bounds());
@@ -164,7 +164,7 @@ public class MenuGroupingTest
                 {
                     menu.detach(0, new Point(500, 300)); menu.apply();
                     Rectangle neighbor = menu.stones().get(1);
-                    // Deliberately approach from the opposite axis.
+
                     menu.dropStone(0, new Point(neighbor.x + (row ? 16 : 40), neighbor.y + (row ? 43 : 18)));
                     menu.apply();
                     assertEquals(row, settings.get("menuHorizontal_modern_" + group));
