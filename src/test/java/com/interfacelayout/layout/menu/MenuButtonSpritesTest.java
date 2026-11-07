@@ -60,6 +60,24 @@ public class MenuButtonSpritesTest
         assertEquals(16, images.get(widget).getWidth());
     }
 
+    @Test public void widgetOverridesKeepPaddingWithoutSharingTheCroppedCache()
+    {
+        Widget widget = mock(Widget.class); when(widget.getId()).thenReturn(123); when(widget.getSpriteId()).thenReturn(8605);
+        SpritePixels source = sprite(16, 18, 26, 26, 5, 5, Color.CYAN);
+        client.getWidgetSpriteOverrides().put(123, source);
+        assertEquals(16, images.get(widget).getWidth());
+        BufferedImage padded = images.getPadded(widget);
+        assertEquals(26, padded.getWidth()); assertEquals(0, padded.getRGB(4, 5));
+        assertEquals(Color.CYAN.getRGB(), padded.getRGB(5, 5));
+        assertSame(padded, images.getPadded(widget));
+        assertEquals(16, images.get(widget).getWidth());
+        client.getWidgetSpriteOverrides().put(123, sprite(16, 18, 26, 26, 5, 5, Color.GREEN));
+        assertEquals(Color.GREEN.getRGB(), images.getPadded(widget).getRGB(5, 5));
+        client.getWidgetSpriteOverrides().clear();
+        overrides.put(8605, sprite(26, 26, 26, 26, 0, 0, Color.BLUE));
+        assertEquals(Color.BLUE.getRGB(), images.getPadded(widget).getRGB(5, 5));
+    }
+
     @Test public void unavailableSpritesRetryAndInvalidPackDimensionsFailClosed()
     {
         when(client.getSprites(null, 8605, 0)).thenReturn(null);

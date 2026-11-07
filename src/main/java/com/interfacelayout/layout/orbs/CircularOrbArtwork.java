@@ -23,6 +23,22 @@ final class CircularOrbArtwork {
             content.y + (content.height - diameter) / 2, diameter, diameter);
     }
 
+    static boolean contains(Rectangle circle, int x, int y) {
+        if (circle.width <= 0 || circle.height <= 0) return false;
+        double dx = (x + .5 - circle.getCenterX()) / (circle.width / 2.0);
+        double dy = (y + .5 - circle.getCenterY()) / (circle.height / 2.0);
+        return dx * dx + dy * dy <= 1;
+    }
+
+    void paintBackground(Graphics2D graphics, Rectangle circle) {
+        Graphics2D draw = (Graphics2D) graphics.create();
+        try {
+            draw.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            draw.setColor(new Color(14, 20, 24));
+            draw.fill(new Ellipse2D.Double(circle.x + 2, circle.y + 2, circle.width - 4, circle.height - 4));
+        } finally { draw.dispose(); }
+    }
+
     void paint(Graphics2D g, Rectangle circle) {
         if (circle.width < 10 || circle.width != circle.height) return;
         g.drawImage(frames.computeIfAbsent(circle.width, CircularOrbArtwork::create), circle.x, circle.y, null);

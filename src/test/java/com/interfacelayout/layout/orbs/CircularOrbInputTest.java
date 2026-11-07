@@ -43,7 +43,7 @@ public class CircularOrbInputTest {
             Widget number=widget(client,4,parent,3,2,width-32,34),blocker=widget(client,5,parent,3,2,width,34);
             parent.setNoClickThrough(true);blocker.setNoClickThrough(true);when(parent.getChildren()).thenReturn(new Widget[]{blocker});
             Rectangle old=button.getBounds(),circle=new Rectangle(old.x+width-34,old.y,34,34);
-            assertTrue(old.contains(offset+2,80));input.apply(parent,backing,button,number,circle);
+            assertTrue(old.contains(offset+2,80));input.apply(parent,backing,button,number,circle,true);
             assertEquals(circle,button.getBounds());assertEquals(circle,backing.getBounds());assertEquals(circle,blocker.getBounds());
             assertFalse(button.getBounds().contains(offset+2,80));assertFalse(parent.getNoClickThrough());assertTrue(backing.getNoClickThrough());
             assertTrue(button.getBounds().contains(circle.getCenterX(),circle.getCenterY()));
@@ -57,9 +57,9 @@ public class CircularOrbInputTest {
         Client client=mock(Client.class);CircularOrbInput input=new CircularOrbInput();
         Widget parent=widget(client,1,null,10,10,57,34),backing=widget(client,2,parent,0,0,57,34),button=widget(client,3,parent,0,0,57,34);
         backing.setXPositionMode(1);backing.setYPositionMode(2);backing.setWidthMode(1);backing.setHeightMode(1);
-        input.apply(parent,backing,button,null,new Rectangle(33,10,34,34));input.restore(client);
+        input.apply(parent,backing,button,null,new Rectangle(33,10,34,34),true);input.restore(client);
         assertEquals(1,backing.getXPositionMode());assertEquals(2,backing.getYPositionMode());assertEquals(1,backing.getWidthMode());assertEquals(1,backing.getHeightMode());
-        input.apply(parent,backing,button,null,new Rectangle(33,10,34,34));button.setOriginalX(99);
+        input.apply(parent,backing,button,null,new Rectangle(33,10,34,34),true);button.setOriginalX(99);
         Widget replacement=mock(Widget.class);when(client.getWidget(2)).thenReturn(replacement);
         input.restore(client);assertEquals(99,button.getOriginalX());verifyNoInteractions(replacement);
 
@@ -72,7 +72,7 @@ public class CircularOrbInputTest {
         Widget parent=widget(client,1,null,0,0,57,34),backing=widget(client,2,parent,0,0,57,34),blocker=widget(client,1,parent,0,0,57,34);
         when(client.getWidget(1)).thenReturn(parent);when(blocker.getIndex()).thenReturn(4);when(parent.getChild(4)).thenReturn(blocker);
         when(parent.getChildren()).thenReturn(new Widget[]{blocker});blocker.setNoClickThrough(true);
-        input.apply(parent,backing,null,null,new Rectangle(23,0,34,34));assertEquals(34,blocker.getOriginalWidth());
+        input.apply(parent,backing,null,null,new Rectangle(23,0,34,34),true);assertEquals(34,blocker.getOriginalWidth());
         input.restore(client);assertEquals(57,blocker.getOriginalWidth());
     }
 
@@ -87,7 +87,7 @@ public class CircularOrbInputTest {
         backing.setNoClickThrough(true);when(parent.getChildren()).thenReturn(new Widget[]{backing});
         Rectangle circle=new Rectangle(323,70,34,34);
         for(int frame=0;frame<12;frame++) {
-            input.apply(parent,backing,prayer,number,circle);
+            input.apply(parent,backing,prayer,number,circle,true);
             assertEquals(circle,com.interfacelayout.util.WidgetGeometry.bounds(prayer));
             assertFalse(com.interfacelayout.util.WidgetGeometry.bounds(prayer).contains(305,85));
             assertEquals(circle,com.interfacelayout.util.WidgetGeometry.bounds(backing));

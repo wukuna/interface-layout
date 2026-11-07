@@ -182,6 +182,23 @@ public class ShieldSpecialOrbTest
         overlay.setPreferredLocation(null); paint(); assertEquals(new java.awt.Point(239, 300), overlay.getBounds().getLocation());
     }
 
+    @Test public void circularShieldKeepsItsPositionWhenNativeInputCollapsesAndIgnoresCorners()
+    {
+        when(config.hideOrbTabs()).thenReturn(true); when(config.showShieldSpecialOrb()).thenReturn(true);
+        CircularOrbInputTest.widget(client, InterfaceID.Orbs.SPECENERGY_INDICATOR, null, 227, 104, 26, 26);
+        for(Rectangle nativeBounds:new Rectangle[]{new Rectangle(200,100,57,34),new Rectangle(240,117,0,0)}) {
+            when(orb.getBounds()).thenReturn(nativeBounds);
+            Graphics2D graphics=new BufferedImage(765,503,BufferedImage.TYPE_INT_ARGB).createGraphics();
+            try { assertEquals(new java.awt.Dimension(34,34),overlay.render(graphics)); }
+            finally { graphics.dispose(); }
+            assertEquals(new java.awt.Point(185,100),overlay.getBounds().getLocation());
+        }
+        when(client.getMouseCanvasPosition()).thenReturn(new Point(186,101));
+        overlay.onPostMenuSort(new PostMenuSort()); verify(menu,never()).createMenuEntry(anyInt());
+        when(client.getMouseCanvasPosition()).thenReturn(new Point(202,117));
+        overlay.onPostMenuSort(new PostMenuSort()); verify(menu).createMenuEntry(-1);
+    }
+
     @Test public void explicitClickTargetsOnlyExistingShieldOperationAndRejectsStaleMenu()
     {
         paint(); when(client.getMouseCanvasPosition()).thenReturn(new Point(150, 115));

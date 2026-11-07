@@ -28,6 +28,7 @@ package com.interfacelayout.layout.orbs;
 
 import com.interfacelayout.InterfaceLayoutConfig;
 import com.interfacelayout.layout.menu.MenuButtonSprites;
+import com.interfacelayout.util.WidgetGeometry;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -161,6 +162,10 @@ public final class ShieldSpecialOrb extends Overlay
         if (getPreferredLocation() == null && getPreferredPosition() == null)
         {
             Rectangle nativeBounds = state.orb.getBounds();
+            if (circular) {
+                Rectangle fillBounds = WidgetGeometry.bounds(client.getWidget(InterfaceID.Orbs.SPECENERGY_INDICATOR));
+                if (!fillBounds.isEmpty()) nativeBounds = CircularOrbArtwork.around(fillBounds);
+            }
             int x = nativeBounds.x - width - 4, y = nativeBounds.y;
             if (x < 0) { x = nativeBounds.x; y += HEIGHT + 4; }
             getBounds().setLocation(Math.max(0, Math.min(client.getCanvasWidth() - width, x)),
@@ -171,7 +176,7 @@ public final class ShieldSpecialOrb extends Overlay
         {
             draw.translate(getBounds().x - previousX, getBounds().y - previousY);
             if (circular) {
-                artwork.paint(draw, new Rectangle(0, 0, 34, 34));
+                artwork.paintBackground(draw, new Rectangle(0, 0, 34, 34));
             } else draw.drawImage(frame, 0, 0, width, HEIGHT, null);
             draw.drawImage(fill, circleX, 4, 26, 26, null);
             Graphics2D mask = (Graphics2D) draw.create();
@@ -182,7 +187,10 @@ public final class ShieldSpecialOrb extends Overlay
             }
             finally { mask.dispose(); }
             Color chargeColor = state.charges < state.cost ? Color.RED : state.charges == MAX_CHARGES ? Color.GREEN : Color.YELLOW;
-            if (circular) CircularOrbs.paintContent(draw,new Rectangle(0,0,34,34),shield,Integer.toString(state.charges),chargeColor,config.orbContent(),0,0);
+            if (circular) {
+                artwork.paint(draw,new Rectangle(0,0,34,34));
+                CircularOrbs.paintContent(draw,new Rectangle(0,0,34,34),shield,Integer.toString(state.charges),chargeColor,config.orbContent(),0,0);
+            }
             else {
             draw.drawImage(shield, circleX, 4, 26, 26, null);
             draw.setFont(FontManager.getRunescapeSmallFont());
@@ -197,10 +205,16 @@ public final class ShieldSpecialOrb extends Overlay
         hitbox.setBounds(getBounds().x, getBounds().y, width, HEIGHT);
         painted = state;
         net.runelite.api.Point mouse = client.getMouseCanvasPosition();
-        if (!client.isMenuOpen() && mouse != null && hitbox.contains(mouse.getX(), mouse.getY()))
+        if (!client.isMenuOpen() && mouse != null && contains(mouse.getX(), mouse.getY()))
             tooltips.add(new Tooltip("Shield special: " + state.charges + "/" + MAX_CHARGES
                 + " charges<br>Requires " + state.cost + " charges. Drag using RuneLite's overlay modifier."));
         return new Dimension(width, HEIGHT);
+    }
+
+    private boolean contains(int x,int y)
+    {
+        return config.hideOrbTabs() && !config.editInterface()
+            ? CircularOrbArtwork.contains(hitbox,x,y) : hitbox.contains(x,y);
     }
 
     @Subscribe(priority = -20)
@@ -209,7 +223,7 @@ public final class ShieldSpecialOrb extends Overlay
         if (client.isMenuOpen()) return;
         State current = resolve();
         net.runelite.api.Point mouse = client.getMouseCanvasPosition();
-        if (!sameControl(painted, current) || mouse == null || !hitbox.contains(mouse.getX(), mouse.getY())) return;
+        if (!sameControl(painted, current) || mouse == null || !contains(mouse.getX(), mouse.getY())) return;
         Menu menu = client.getMenu();
         if (menu == null) return;
 

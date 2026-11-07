@@ -92,12 +92,12 @@ public class GameframeCoordinator
     }
     @Subscribe(priority = 2) public void onScriptPreFired(ScriptPreFired event)
     {
-        if (running && visibilityScript(event.getScriptId()) && visibilityDepth++ == 0)
-            nativeStates.restoreVisibility();
         if (running && layoutScript(event.getScriptId()))
         {
             if (layoutDepth++ == 0) restore();
         }
+        if (running && visibilityScript(event.getScriptId()) && visibilityDepth++ == 0)
+            nativeStates.restoreVisibility();
     }
     @Subscribe(priority = -2) public void onScriptPostFired(ScriptPostFired event)
     {

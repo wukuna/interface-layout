@@ -36,9 +36,15 @@ public class CircularOrbsTest {
         }
         orb.start();EventBus bus=new EventBus();bus.register(orb);
         for(InterfaceLayoutConfig.OrbContent mode:InterfaceLayoutConfig.OrbContent.values()) {
-            when(orb.config.orbContent()).thenReturn(mode);bus.post(new ClientTick());for(Widget button:buttons)assertEquals(34,button.getOriginalWidth());
-            bus.post(new ScriptPreFired(446));for(Widget button:buttons)assertEquals(57,button.getOriginalWidth());
-            bus.post(new ScriptPostFired(446));for(Widget button:buttons)assertEquals(34,button.getOriginalWidth());
+            when(orb.config.orbContent()).thenReturn(mode);
+            for(int hovered=0;hovered<buttons.length;hovered++) {
+                when(orb.client.getMouseCanvasPosition()).thenReturn(new net.runelite.api.Point(140,hovered*40+17));
+                bus.post(new ClientTick());
+                for(int n=0;n<buttons.length;n++)assertEquals(n==hovered?34:0,buttons[n].getOriginalWidth());
+                bus.post(new ScriptPreFired(446));for(Widget button:buttons)assertEquals(57,button.getOriginalWidth());
+                bus.post(new ScriptPostFired(446));
+                for(int n=0;n<buttons.length;n++)assertEquals(n==hovered?34:0,buttons[n].getOriginalWidth());
+            }
         }
         Menu menu=mock(Menu.class);when(orb.client.getMenu()).thenReturn(menu);
         MenuEntry action=mock(MenuEntry.class),unrelated=mock(MenuEntry.class);
@@ -59,7 +65,7 @@ public class CircularOrbsTest {
         when(w.getRelativeX()).thenReturn(bounds.x);when(w.getRelativeY()).thenReturn(bounds.y);when(w.getWidth()).thenReturn(bounds.width);when(w.getHeight()).thenReturn(bounds.height);
         AtomicInteger opacity=new AtomicInteger();when(w.getOpacity()).thenAnswer(i->opacity.get());doAnswer(i->{opacity.set(i.getArgument(0));return w;}).when(w).setOpacity(anyInt());return w;
     }
-    @Test public void lifecyclePreservesNativeVisibilityScriptsAndActionsAndWaitsForArtwork() {
+    @Test public void lifecyclePreservesNativeVisibilityAndActionsWhileArtworkLoads() {
         CircularOrbs orb=new CircularOrbs();orb.client=mock(Client.class);orb.manager=mock(OrbController.class);orb.thread=mock(ClientThread.class);orb.config=mock(InterfaceLayoutConfig.class,CALLS_REAL_METHODS);orb.sprites=mock(MenuButtonSprites.class);
         doAnswer(i->{((Runnable)i.getArgument(0)).run();return null;}).when(orb.thread).invoke(any(Runnable.class));
         when(orb.client.getGameState()).thenReturn(GameState.LOGGED_IN);
@@ -69,7 +75,7 @@ public class CircularOrbsTest {
         Widget icon=widget(orb,InterfaceID.Orbs.ORB_HEALTH_HEART_ICON,new Rectangle(27,4,26,26));
         Widget number=widget(orb,InterfaceID.Orbs.HEALTH_TEXT,new Rectangle(0,0,25,34));when(number.getText()).thenReturn("99");
         EventBus bus=new EventBus();bus.register(orb);orb.start();bus.post(new BeforeRender());assertEquals(0,backing.getOpacity());
-        when(orb.config.hideOrbTabs()).thenReturn(true);bus.post(new BeforeRender());assertEquals(0,backing.getOpacity());
+        when(orb.config.hideOrbTabs()).thenReturn(true);bus.post(new BeforeRender());assertEquals(255,backing.getOpacity());
         when(orb.sprites.get(backing)).thenReturn(new BufferedImage(57,34,2));when(orb.sprites.get(icon)).thenReturn(new BufferedImage(26,26,2));
         bus.post(new BeforeRender());assertEquals(255,backing.getOpacity());assertEquals(255,number.getOpacity());assertEquals(0,fill.getOpacity());
         bus.post(new ScriptPreFired(446));assertEquals(0,backing.getOpacity());backing.setOpacity(60);

@@ -31,6 +31,7 @@ public class CircularOrbRestoreRegressionTest {
             orbs.thread=mock(ClientThread.class);orbs.sprites=mock(MenuButtonSprites.class);
             orbs.config=mock(InterfaceLayoutConfig.class,CALLS_REAL_METHODS);
             when(orbs.client.getGameState()).thenReturn(GameState.LOGGED_IN);
+            when(orbs.client.getMouseCanvasPosition()).thenReturn(new net.runelite.api.Point(140,87));
             when(orbs.config.hideOrbTabs()).thenReturn(true);
             doAnswer(i->{queued.add(i.getArgument(0));return null;}).when(orbs.thread).invoke(any(Runnable.class));
             Widget parent=CircularOrbInputTest.widget(orbs.client,InterfaceID.Orbs.ORB_PRAYER,null,100,70,57,34);
