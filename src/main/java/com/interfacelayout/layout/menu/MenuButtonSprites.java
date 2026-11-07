@@ -17,6 +17,7 @@ public class MenuButtonSprites
     private final Map<Integer, BufferedImage> originals = boundedMap();
     private final Map<Integer, BufferedImage> paddedOriginals = boundedMap();
     private final Map<Integer, OverrideImage> replacements = boundedMap();
+    private final Map<Integer, OverrideImage> paddedReplacements = boundedMap();
 
     public BufferedImage get(Widget widget)
     {
@@ -50,6 +51,20 @@ public class MenuButtonSprites
         return image;
     }
 
+    public BufferedImage getPadded(Widget widget)
+    {
+        if (widget == null) return null;
+        SpritePixels replacement = client.getWidgetSpriteOverrides().get(widget.getId());
+        if (replacement == null) return getSprite(widget.getSpriteId());
+        OverrideImage cached = paddedReplacements.get(widget.getId());
+        if (cached == null || cached.source != replacement)
+        {
+            cached = new OverrideImage(replacement, paddedImage(replacement));
+            paddedReplacements.put(widget.getId(), cached);
+        }
+        return cached.image;
+    }
+
     public BufferedImage getSprite(int spriteId)
     {
         if (spriteId < 0) return null;
@@ -79,7 +94,7 @@ public class MenuButtonSprites
         return image;
     }
 
-    public void clear() { originals.clear(); paddedOriginals.clear(); replacements.clear(); }
+    public void clear() { originals.clear(); paddedOriginals.clear(); replacements.clear(); paddedReplacements.clear(); }
 
     private static BufferedImage paddedImage(SpritePixels sprite)
     {

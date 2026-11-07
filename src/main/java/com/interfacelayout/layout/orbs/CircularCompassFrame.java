@@ -25,8 +25,8 @@ final class CircularCompassFrame {
     void refresh(Client client, OrbController manager) {
         if (manager.isCompassHidden() || manager.isMinimapMinimized()) return;
         int id = manager.isFixedMode() ? InterfaceID.Toplevel.MAPCONTAINER_GRAPHIC5
-            : manager.isClassicResizable() ? InterfaceID.ToplevelPreEoc.MAP_MINIMAP_GRAPHIC6
-            : InterfaceID.ToplevelOsrsStretch.MAP_MINIMAP_GRAPHIC6;
+            : manager.isClassicResizable() ? OrbConstants.Widgets.Classic.COMPASS
+            : OrbConstants.Widgets.Modern.COMPASS;
         Widget widget = client.getWidget(id);
         if (widget == null || widget.getContentType() != OrbConstants.Layout.MinimapOverlay.COMPASS_CONTENT
             || widget.isHidden() || widget.getOpacity() == 255) return;

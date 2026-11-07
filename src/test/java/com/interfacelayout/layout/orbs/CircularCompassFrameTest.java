@@ -12,8 +12,8 @@ import static org.mockito.Mockito.*;
 
 public class CircularCompassFrameTest {
     @Test public void followsLiveCompassInAllModesWithoutChangingNeedleOrActions() {
-        int[] ids={InterfaceID.Toplevel.MAPCONTAINER_GRAPHIC5,InterfaceID.ToplevelPreEoc.MAP_MINIMAP_GRAPHIC6,
-            InterfaceID.ToplevelOsrsStretch.MAP_MINIMAP_GRAPHIC6};
+        int[] ids={InterfaceID.Toplevel.MAPCONTAINER_GRAPHIC5,OrbConstants.Widgets.Classic.COMPASS,
+            OrbConstants.Widgets.Modern.COMPASS};
         for(int mode=0;mode<ids.length;mode++) {
             Client client=mock(Client.class);OrbController manager=mock(OrbController.class);
             when(manager.isFixedMode()).thenReturn(mode==0);when(manager.isClassicResizable()).thenReturn(mode==1);
@@ -34,7 +34,7 @@ public class CircularCompassFrameTest {
 
     @Test public void restoresOwnedCompactFrameAndHonorsHiddenAndMinimizedStates() {
         Client client=mock(Client.class);OrbController manager=mock(OrbController.class);
-        Widget compass=CircularOrbInputTest.widget(client,InterfaceID.ToplevelOsrsStretch.MAP_MINIMAP_GRAPHIC6,null,100,50,35,35);
+        Widget compass=CircularOrbInputTest.widget(client,OrbConstants.Widgets.Modern.COMPASS,null,100,50,35,35);
         when(compass.getContentType()).thenReturn(OrbConstants.Layout.MinimapOverlay.COMPASS_CONTENT);
         Widget nativeFrame=CircularOrbInputTest.widget(client,1,null,96,46,43,43);nativeFrame.setOpacity(40);
         manager.compassFrame=nativeFrame;

@@ -24,9 +24,9 @@ import static org.mockito.Mockito.*;
 
 public class CompassToggleIntegrationTest {
     private static final int[] COMPASSES={InterfaceID.Toplevel.MAPCONTAINER_GRAPHIC5,
-        InterfaceID.ToplevelPreEoc.MAP_MINIMAP_GRAPHIC6,InterfaceID.ToplevelOsrsStretch.MAP_MINIMAP_GRAPHIC6};
+        OrbConstants.Widgets.Classic.COMPASS,OrbConstants.Widgets.Modern.COMPASS};
     private static final int[] CLICKS={InterfaceID.Toplevel.COMPASSCLICK,
-        InterfaceID.ToplevelPreEoc.COMPASSCLICK,InterfaceID.ToplevelOsrsStretch.COMPASSCLICK};
+        InterfaceID.ToplevelOsrsStretch.COMPASSCLICK,InterfaceID.ToplevelPreEoc.COMPASSCLICK};
     private static final class Fixture {
         final CircularOrbs orbs=new CircularOrbs();
         final EventBus bus=new EventBus();

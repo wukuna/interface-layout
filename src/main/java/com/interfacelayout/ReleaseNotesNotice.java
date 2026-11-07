@@ -23,8 +23,9 @@ final class ReleaseNotesNotice
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] UPDATES = {
         "Added equipment help with set effects, target conditions and adjusted weapon speed to the Beta equipment panel.",
-        "Added clean circular rims to orbs, the shield orb and the compass.",
-        "Fixed orb click areas after moving, redrawing or turning off circular orbs, including restored native backgrounds.",
+        "Added complete circular orb overlays and clean rims for the shield orb and compass.",
+        "Removed invisible side-tab hover areas and fixed native orb and compass restoration when circular orbs are turned off.",
+        "Fixed logout button visibility after restoring the layout.",
     };
 
     @Inject private Client client;
