@@ -53,6 +53,7 @@ public class FreeOrbOverlayBridge
                 elements.put(key, overlay); overlays.add(overlay);
             }
             ElementOverlay overlay = elements.get(key);
+            overlay.layoutBounds = new Rectangle(bounds);
             overlay.getBounds().setSize(bounds.getSize());
             if (overlay.getPreferredLocation() == null && overlay.getPreferredPosition() == null)
                 overlay.getBounds().setLocation(bounds.getLocation());
@@ -78,6 +79,7 @@ public class FreeOrbOverlayBridge
     {
         private final String name;
         private final TargetWidget target;
+        private Rectangle layoutBounds;
         private Point lastApplied;
         private boolean reset;
         private ElementOverlay(String name, TargetWidget target)
@@ -94,13 +96,13 @@ public class FreeOrbOverlayBridge
         @Override public Dimension render(Graphics2D graphics)
         {
             if (!running || !name.equals(FreeOrbOverlayBridge.this.name(target))) return null;
-            Rectangle actual = free.bounds().get(target);
-            if (actual == null) return null;
+            if (!free.bounds().containsKey(target)) return null;
+            Rectangle actual = layoutBounds;
             if (reset && getPreferredLocation() == null && getPreferredPosition() == null)
             {
                 reset = false; lastApplied = null; free.reset(target); refresh.run();
-                actual = free.bounds().get(target);
-                if (actual == null) return null;
+                if (!free.bounds().containsKey(target)) return null;
+                actual = layoutBounds;
             }
             reset = false;
             if (getPreferredLocation() != null || getPreferredPosition() != null)

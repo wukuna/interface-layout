@@ -26,6 +26,7 @@ final class ReleaseNotesNotice
         "Fixed orb edge clicks, moved-orb click offsets and shield special actions.",
         "Fixed circular orbs disappearing after layout refreshes.",
         "Fixed circular orb values and fills freezing until hovered.",
+        "Fixed circular free orbs flickering and shifting inside custom UI anchors.",
         "Smoothed circular rims and added a dark grey rim option.",
         "Aligned prayer indicators and HP/special regeneration rings with circular orbs.",
         "Extended menu gap protection to adjacent rows and outer stone edges.",
