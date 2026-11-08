@@ -169,6 +169,31 @@ public class MenuStoneClickPriorityTest
         verify(f.menu, never()).setMenuEntries(any(MenuEntry[].class));
     }
 
+    @Test public void outerPaddingBlocksWorldActionsWithoutSelectingAStoneOrRemovingWidgetActions()
+    {
+        for (int mode = 0; mode < 3; mode++)
+        {
+            Fixture f = new Fixture(mock(Client.class), mode);
+            when(f.config.allowClicksThroughGaps()).thenReturn(false);
+            Rectangle stone = f.stones.stones().get(0);
+            when(f.client.getMouseCanvasPosition()).thenReturn(new Point(stone.x - 4, stone.y + 10));
+            f.entries.set(new MenuEntry[]{f.cancel, f.exit});
+            f.guard.onPostMenuSort(new PostMenuSort());
+            assertArrayEquals(new MenuEntry[]{f.cancel}, f.entries.get());
+            MenuEntry widget = entry(MenuAction.CC_OP, "Open");
+            when(widget.getWidget()).thenReturn(mock(Widget.class));
+            f.entries.set(new MenuEntry[]{f.cancel, widget});
+            f.guard.onPostMenuSort(new PostMenuSort());
+            assertArrayEquals(new MenuEntry[]{f.cancel, widget}, f.entries.get());
+            assertFalse(f.stones.isBlockedGap(new java.awt.Point(stone.x - 4, stone.y + 10)));
+            assertTrue(f.stones.isBlockedGap(new java.awt.Point(stone.x - 5, stone.y + 10)));
+            f.entries.set(new MenuEntry[]{f.cancel, f.exit});
+            f.guard.onPostMenuSort(new PostMenuSort());
+            assertTrue(f.stones.isBlockedGap(new java.awt.Point(stone.x - 4, stone.y + 10)));
+            verify(f.action, never()).setType(any());
+        }
+    }
+
     private static final class Fixture
     {
         final Client client;

@@ -159,6 +159,25 @@ public class MenuFeedbackDiagnosticsTest {
         assertFalse(f.editor.mousePressed(f.event(MouseEvent.MOUSE_PRESSED, gap.x, gap.y, MouseEvent.BUTTON1)).isConsumed());
     }
 
+    @Test public void outerGapConsumesLeftAndRightClicksButLeavesMiddleMouseAndStoneDraggingAlone() {
+        Fixture f = new Fixture(); f.allowGaps = false;
+        for (int button : new int[]{MouseEvent.BUTTON1, MouseEvent.BUTTON3}) {
+            assertTrue(f.editor.mousePressed(f.event(MouseEvent.MOUSE_PRESSED, 96, 115, button)).isConsumed());
+            assertTrue(f.editor.mouseReleased(f.event(MouseEvent.MOUSE_RELEASED, 96, 115, button)).isConsumed());
+            assertTrue(f.editor.mouseClicked(f.event(MouseEvent.MOUSE_CLICKED, 96, 115, button)).isConsumed());
+        }
+        assertFalse(f.editor.mousePressed(f.event(MouseEvent.MOUSE_PRESSED, 96, 115, MouseEvent.BUTTON2)).isConsumed());
+        assertFalse(f.editor.mouseReleased(f.event(MouseEvent.MOUSE_RELEASED, 96, 115, MouseEvent.BUTTON2)).isConsumed());
+        assertFalse(f.editor.mouseClicked(f.event(MouseEvent.MOUSE_CLICKED, 96, 115, MouseEvent.BUTTON2)).isConsumed());
+        assertTrue(f.editor.mousePressed(f.event(MouseEvent.MOUSE_PRESSED, 110, 110, MouseEvent.BUTTON1)).isConsumed());
+        f.editor.cancel();
+        f.manager.isEditingLayout = false;
+        assertFalse(f.editor.mousePressed(f.event(MouseEvent.MOUSE_PRESSED, 110, 110, MouseEvent.BUTTON1)).isConsumed());
+        assertFalse(f.editor.mousePressed(f.event(MouseEvent.MOUSE_PRESSED, 80, 115, MouseEvent.BUTTON1)).isConsumed());
+        when(f.client.isMenuOpen()).thenReturn(true);
+        assertFalse(f.editor.mousePressed(f.event(MouseEvent.MOUSE_PRESSED, 96, 115, MouseEvent.BUTTON1)).isConsumed());
+    }
+
     private void dragOnePixel(Fixture f) {
         Rectangle stone = f.menu.stones().get(5);
         f.editor.mousePressed(f.event(MouseEvent.MOUSE_PRESSED, stone.x + 10, stone.y + 10, MouseEvent.BUTTON1));

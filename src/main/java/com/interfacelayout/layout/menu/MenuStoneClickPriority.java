@@ -61,6 +61,7 @@ public class MenuStoneClickPriority
 
     private void blockGapActions()
     {
+        stones.setGapInterfacePoint(null);
         if (client.isMenuOpen() || client.getGameState() != GameState.LOGGED_IN) return;
         Point point = client.getMouseCanvasPosition();
         if (point == null || !stones.isBlockedGap(new java.awt.Point(point.getX(), point.getY()))) return;
@@ -82,7 +83,11 @@ public class MenuStoneClickPriority
                 case GROUND_ITEM_FOURTH_OPTION: case GROUND_ITEM_FIFTH_OPTION: case EXAMINE_ITEM_GROUND:
                 case WIDGET_TARGET_ON_GAME_OBJECT: case WIDGET_TARGET_ON_NPC: case WIDGET_TARGET_ON_GROUND_ITEM:
                     break;
-                default: return;
+                default:
+                    if (entry.getWidget() != null || entry.getType() == MenuAction.RUNELITE
+                        || entry.getType() == MenuAction.RUNELITE_OVERLAY || entry.getType() == MenuAction.RUNELITE_OVERLAY_CONFIG)
+                        stones.setGapInterfacePoint(new java.awt.Point(point.getX(), point.getY()));
+                    return;
             }
         }
         if (cancel != null && entries.length > 1) menu.setMenuEntries(new MenuEntry[]{cancel});

@@ -28,6 +28,7 @@ final class ReleaseNotesNotice
         "Fixed circular orb values and fills freezing until hovered.",
         "Smoothed circular rims and added a dark grey rim option.",
         "Aligned prayer indicators and HP/special regeneration rings with circular orbs.",
+        "Extended menu gap protection to adjacent rows and outer stone edges.",
     };
 
     @Inject private Client client;

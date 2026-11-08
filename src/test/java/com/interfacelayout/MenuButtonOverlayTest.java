@@ -275,6 +275,126 @@ public class MenuButtonOverlayTest
         assertEquals(33, f.controller.stones().get(3).width);
     }
 
+    @Test public void hiddenStonesProtectAdjacentRowsAndOuterEdgesAcrossModesAndSizes()
+    {
+        for (int mode = 0; mode < 3; mode++) for (boolean overlay : new boolean[]{false, true})
+            for (int scale : overlay ? new int[]{50, 100, 200} : new int[]{100})
+            {
+                Fixture f = new Fixture(mode);
+                arrangeGapRows(f, mode, overlay, scale);
+                Rectangle top = f.controller.groups().get(0), bottom = f.controller.groups().get(1);
+                assertEquals(12, f.controller.stones().size());
+                assertTrue(f.controller.isBlockedGap(new java.awt.Point(top.x + 10, top.y + top.height + 3)));
+                assertTrue(f.controller.isBlockedGap(new java.awt.Point(top.x + top.width + 4, top.y + 10)));
+                assertTrue(f.controller.isBlockedGap(new java.awt.Point(top.x - 4, top.y + 10)));
+                assertTrue(f.controller.isBlockedGap(new java.awt.Point(bottom.x + 10, bottom.y + bottom.height + 4)));
+                assertFalse(f.controller.isBlockedGap(new java.awt.Point(top.x + top.width + 20, top.y + 10)));
+                for (Rectangle stone : f.controller.stones().values())
+                {
+                    assertFalse(f.controller.isBlockedGap(stone.getLocation()));
+                    assertFalse(f.controller.isBlockedGap(new java.awt.Point(stone.x + stone.width - 1, stone.y + stone.height - 1)));
+                }
+                when(f.config.allowClicksThroughGaps()).thenReturn(true);
+                assertFalse(f.controller.isBlockedGap(new java.awt.Point(top.x + top.width + 4, top.y + 10)));
+            }
+    }
+
+    @Test public void outerGapProtectionClearsWhenHiddenResetOrTemporarilyRestored()
+    {
+        for (int state = 0; state < 3; state++)
+        {
+            Fixture f = new Fixture(2); arrangeGapRows(f, 2, true, 100);
+            Rectangle top = f.controller.groups().get(0);
+            java.awt.Point edge = new java.awt.Point(top.x - 4, top.y + 10);
+            assertTrue(f.controller.isBlockedGap(edge));
+            if (state == 0) { when(f.config.menuLayout()).thenReturn(MenuStoneController.Layout.HIDDEN); f.states.restore(); f.apply(); }
+            if (state == 1) f.controller.resetSession();
+            if (state == 2) { f.controller.toggleShown(); f.states.restore(); f.apply(); }
+            assertFalse(f.controller.isBlockedGap(edge));
+        }
+    }
+
+    @Test public void distantRowsDoNotBlockTheWorldBetweenThemAndOverlappingButtonsStayClickable()
+    {
+        Fixture f = new Fixture(2); arrangeGapRows(f, 2, true, 100);
+        when(f.configs.getConfiguration(eq("interfacelayout"), eq("menuGroupPosition_modern_overlay_1"), eq(java.awt.Point.class)))
+            .thenReturn(new java.awt.Point(300, 400));
+        f.states.restore(); f.apply();
+        assertFalse(f.controller.isBlockedGap(new java.awt.Point(310, 250)));
+        when(f.configs.getConfiguration(eq("interfacelayout"), eq("menuGroupPosition_modern_overlay_1"), eq(java.awt.Point.class)))
+            .thenReturn(new java.awt.Point(300, 135));
+        f.states.restore(); f.apply();
+        assertFalse(f.controller.isBlockedGap(new java.awt.Point(310, 138)));
+    }
+
+    @Test public void bankAndPinKeepInputEvenWhenOnlyOverlappingTheOuterPadding()
+    {
+        for (int mode = 0; mode < 3; mode++) for (boolean overlay : new boolean[]{false, true})
+            for (int id : new int[]{InterfaceID.Bankmain.UNIVERSE, InterfaceID.BankpinKeypad.UNIVERSE})
+            {
+                Fixture f = new Fixture(mode); arrangeGapRows(f, mode, overlay, 100);
+                Rectangle top = f.controller.groups().get(0);
+                java.awt.Point edge = new java.awt.Point(top.x - 4, top.y + 10);
+                assertTrue(f.controller.isBlockedGap(edge));
+                Widget window = f.widget(id, top.x - 6, top.y, 5, top.height);
+                f.states.restore(); f.apply();
+                assertFalse(f.controller.isBlockedGap(edge));
+                assertEquals(12, f.controller.stones().size());
+                window.setHidden(true); f.states.restore(); f.apply();
+                assertTrue(f.controller.isBlockedGap(edge));
+            }
+    }
+
+    @Test public void movingRowsClearsOldEdgeProtection()
+    {
+        Fixture f = new Fixture(2); arrangeGapRows(f, 2, true, 100);
+        java.awt.Point old = new java.awt.Point(296, 110);
+        assertTrue(f.controller.isBlockedGap(old));
+        when(f.configs.getConfiguration(eq("interfacelayout"), eq("menuPosition_modern_overlay"), eq(java.awt.Point.class)))
+            .thenReturn(new java.awt.Point(800, 100));
+        f.states.restore(); f.apply();
+        assertFalse(f.controller.isBlockedGap(old));
+        assertTrue(f.controller.isBlockedGap(new java.awt.Point(796, 110)));
+    }
+
+    @Test public void nativeRowsAndVerticalLayoutsProtectOnlyTheirCurrentVisibleStones()
+    {
+        for (int mode = 0; mode < 3; mode++) for (boolean overlay : new boolean[]{false, true})
+            for (MenuStoneController.Layout layout : new MenuStoneController.Layout[]{
+                MenuStoneController.Layout.VANILLA_HORIZONTAL, MenuStoneController.Layout.VERTICAL_LEFT,
+                MenuStoneController.Layout.VERTICAL_RIGHT})
+            {
+                Fixture f = new Fixture(mode); arrangeGapRows(f, mode, overlay, 100);
+                when(f.config.menuLayout()).thenReturn(layout);
+                when(f.configs.getConfiguration(eq("interfacelayout"), startsWith("menuHorizontal_"), eq(Boolean.class)))
+                    .thenReturn(false);
+                f.states.restore(); f.apply();
+                Rectangle bar = f.controller.groups().get(0);
+                assertTrue(f.controller.isBlockedGap(new java.awt.Point(bar.x + bar.width + 4, bar.y + 10)));
+                assertFalse(f.controller.isBlockedGap(new java.awt.Point(bar.x + bar.width + 20, bar.y + 10)));
+                for (Rectangle stone : f.controller.stones().values())
+                    assertFalse(f.controller.isBlockedGap(new java.awt.Point(stone.x + 1, stone.y + 1)));
+            }
+    }
+
+    private static void arrangeGapRows(Fixture f, int mode, boolean overlay, int scale)
+    {
+        when(f.config.menuOverlayButtons()).thenReturn(overlay);
+        when(f.config.menuGroupSize()).thenReturn(scale);
+        when(f.config.menuLayout()).thenReturn(MenuStoneController.Layout.FREE_POSITION);
+        when(f.config.hiddenStones()).thenReturn((1 << 2) | (1 << 8));
+        when(f.config.allowClicksThroughGaps()).thenReturn(false);
+        String key = new String[]{"fixed", "classic", "modern"}[mode] + (overlay ? "_overlay" : "");
+        when(f.configs.getConfiguration(eq("interfacelayout"), eq("menuSeparateRows_" + key), eq(Boolean.class))).thenReturn(true);
+        for (int i = 0; i < 14; i++)
+            when(f.configs.getConfiguration(eq("interfacelayout"), eq("menuGroup_" + key + "_" + i), eq(Integer.class)))
+                .thenReturn(i / 7);
+        when(f.configs.getConfiguration(eq("interfacelayout"), eq("menuGroupPosition_" + key + "_1"), eq(java.awt.Point.class)))
+            .thenReturn(new java.awt.Point(300, 106 + (int)Math.round(36 * scale / 100.0)));
+        f.states.restore(); f.apply();
+        assertEquals(overlay, f.overlay.active());
+    }
+
     private static SpritePixels pixels(Color color)
     {
         BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);

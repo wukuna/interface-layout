@@ -55,6 +55,7 @@ import net.runelite.client.config.ConfigManager;
 @Singleton
 public class MenuStoneController
 {
+    private static final int GAP_EDGE_PADDING = 8;
     private static final int[] WINDOW_ROOTS = {
         InterfaceID.Bankmain.UNIVERSE, InterfaceID.BankpinKeypad.UNIVERSE,
         InterfaceID.Collection.FRAME, InterfaceID.CollectionOverview.UNIVERSE,
@@ -101,14 +102,17 @@ public class MenuStoneController
     private boolean dragSourceHorizontal;
     private Rectangle stack = new Rectangle();
     private volatile Map<Integer, Rectangle> groupBounds = Map.of(), stoneBounds = Map.of();
+    private volatile Point gapInterfacePoint;
     private volatile List<Rectangle> gapBounds = List.of(), windowBounds = List.of();
 
     public Rectangle bounds() { return new Rectangle(stack); }
     public void toggleShown() { temporarilyShown = !temporarilyShown; }
-    public void resetSession() { dragStone = -1; temporarilyShown = false; stack = new Rectangle(); groupBounds = Map.of(); stoneBounds = Map.of(); gapBounds = List.of(); windowBounds = List.of(); }
+    public void resetSession() { dragStone = -1; temporarilyShown = false; stack = new Rectangle(); groupBounds = Map.of(); stoneBounds = Map.of(); gapBounds = List.of(); windowBounds = List.of(); gapInterfacePoint = null; }
+    void setGapInterfacePoint(Point point) { gapInterfacePoint = point; }
     public boolean isBlockedGap(Point point)
     {
-        return !config.allowClicksThroughGaps() && gapBounds.stream().anyMatch(bounds -> bounds.contains(point))
+        return !config.allowClicksThroughGaps() && !point.equals(gapInterfacePoint) && gapBounds.stream().anyMatch(bounds -> bounds.contains(point))
+            && stoneBounds.values().stream().noneMatch(bounds -> bounds.contains(point))
             && windowBounds.stream().noneMatch(bounds -> bounds.contains(point));
     }
     public Map<Integer, Rectangle> groups() { return copyBounds(groupBounds); }
@@ -157,6 +161,7 @@ public class MenuStoneController
         stack = new Rectangle();
         groupBounds = Map.of(); stoneBounds = Map.of();
         gapBounds = List.of();
+        gapInterfacePoint = null;
         windowBounds = List.of();
         if (!orbs.isLoggedIn() || temporarilyShown) return;
         windowBounds = modalBounds();
@@ -345,6 +350,13 @@ public class MenuStoneController
                 offset += (horizontal ? entry.width : entry.height) + config.menuSpacing();
             }
             nextGroups.put(id, new Rectangle(origin.x, origin.y, width, height));
+        }
+        Rectangle canvas = new Rectangle(0, 0, client.getCanvasWidth(), client.getCanvasHeight());
+        for (Rectangle stone : nextStones.values())
+        {
+            Rectangle edge = new Rectangle(stone);
+            edge.grow(GAP_EDGE_PADDING, GAP_EDGE_PADDING);
+            nextGaps.add(edge.intersection(canvas));
         }
         groupBounds = Map.copyOf(nextGroups); stoneBounds = Map.copyOf(nextStones);
         gapBounds = List.copyOf(nextGaps);

@@ -167,7 +167,8 @@ public class InterfaceEditor extends Overlay implements MouseListener
             || dragStretched && !java.util.Objects.equals(dragStretch, client.getStretchedDimensions());
     }
     @Override public MouseEvent mouseClicked(MouseEvent event) {
-        if (blockedGapClick || inBlockedGap(event.getPoint())) event.consume();
+        if (blockedGapClick || (event.getButton() == MouseEvent.BUTTON1 || event.getButton() == MouseEvent.BUTTON3)
+            && inBlockedGap(event.getPoint())) event.consume();
         blockedGapClick = false;
         return event;
     }
