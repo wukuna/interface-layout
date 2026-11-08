@@ -36,12 +36,14 @@ public final class CircularOrbs extends Overlay {
     private static final int[] NUMBERS={InterfaceID.Orbs.HEALTH_TEXT,InterfaceID.Orbs.PRAYER_TEXT,InterfaceID.Orbs.RUNENERGY_TEXT,InterfaceID.Orbs.SPECENERGY_TEXT};
     @Inject Client client;
     @Inject ClientThread thread;
+    @Inject net.runelite.client.ui.DrawManager drawManager;
     @Inject InterfaceLayoutConfig config;
     @Inject MenuButtonSprites sprites;
     @Inject OrbController manager;
     @Inject SoulreaperOrbCompatibility soulreaper;
     private final Map<Widget,Integer> opacities=new IdentityHashMap<>();
     private final CircularOrbInput input = new CircularOrbInput();
+    private final Runnable afterFrame = () -> input.restoreRenderBounds(client);
     private final CircularOrbArtwork artwork = new CircularOrbArtwork();
     private final CircularCompassFrame compass = new CircularCompassFrame();
     private final List<View> views=new ArrayList<>();
@@ -57,10 +59,10 @@ public final class CircularOrbs extends Overlay {
             return null;
         }
     };
-    public CircularOrbs() {setPosition(OverlayPosition.DYNAMIC);setLayer(OverlayLayer.ABOVE_WIDGETS);}
+    public CircularOrbs() {setPosition(OverlayPosition.DYNAMIC);setLayer(OverlayLayer.ABOVE_WIDGETS);setPriority(Overlay.PRIORITY_HIGHEST);}
     public Overlay frames() {return frames;}
-    public void start() {running=true;generation++;}
-    public void stop() {running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation){scriptDepth=0;restore();if(soulreaper!=null)soulreaper.restore();artwork.clear();}});}
+    public void start() {running=true;generation++;if(drawManager!=null)drawManager.registerEveryFrameListener(afterFrame);}
+    public void stop() {if(drawManager!=null)drawManager.unregisterEveryFrameListener(afterFrame);running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation){scriptDepth=0;restore();if(soulreaper!=null)soulreaper.restore();artwork.clear();}});}
     public void releaseForLayout() {restore();}
     public void refreshAfterLayout() {refresh();}
     private void restore() {
@@ -162,6 +164,9 @@ public final class CircularOrbs extends Overlay {
                 artwork.paint(draw,v.circle,config.orbRim());
                 paintContent(draw,v.circle,v.icon,v.number,v.color,config.orbContent(),v.iconOpacity,v.numberOpacity);
             } finally {draw.dispose();}
+            net.runelite.api.Point mouse = client.getMouseCanvasPosition();
+            if (mouse == null || !CircularOrbArtwork.contains(v.circle, mouse.getX(), mouse.getY()))
+                input.maskOutsideHover(v.parent);
         }
         return null;
     }

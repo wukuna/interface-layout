@@ -12,6 +12,7 @@ import net.runelite.api.widgets.Widget;
 final class CircularOrbInput {
     private final Map<Widget, Geometry> geometry = new IdentityHashMap<>();
     private final List<Widget> order = new ArrayList<>();
+    private final Map<Widget, Integer> renderWidths = new IdentityHashMap<>();
     private final Map<Widget, Boolean> blocking = new IdentityHashMap<>();
 
     void apply(Widget parent, Widget backing, Widget button, Widget number, Rectangle circle, boolean hovered) {
@@ -56,7 +57,30 @@ final class CircularOrbInput {
         state.apply(widget, x, y, bounds.width, bounds.height);
     }
 
+    void maskOutsideHover(Widget parent) {
+        if (!geometry.containsKey(parent) || renderWidths.containsKey(parent)) return;
+        renderWidths.put(parent, parent.getOriginalWidth());
+        renderWidth(parent, 0);
+    }
+
+    void restoreRenderBounds(Client client) {
+        renderWidths.forEach((widget, width) -> {
+            if (current(client, widget) && widget.getOriginalWidth() == 0 && widget.getWidthMode() == 0)
+                renderWidth(widget, width);
+        });
+        renderWidths.clear();
+    }
+
+    private static void renderWidth(Widget widget, int width) {
+        int x = widget.getRelativeX(), y = widget.getRelativeY();
+        widget.setOriginalWidth(width);
+        widget.revalidate();
+        widget.setRelativeX(x);
+        widget.setRelativeY(y);
+    }
+
     void restore(Client client) {
+        restoreRenderBounds(client);
         for (Widget widget : order) if (current(client, widget)) geometry.get(widget).restore(widget);
         blocking.forEach((widget, before) -> {
             if (current(client, widget) && widget.getNoClickThrough() != before) widget.setNoClickThrough(before);

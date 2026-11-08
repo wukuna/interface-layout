@@ -33,6 +33,7 @@ public class CircularOrbOverlayTest
         Fixture(Orbs orb, int textId)
         {
             overlay.client = mock(Client.class);
+            overlay.drawManager = new net.runelite.client.ui.DrawManager();
             overlay.config = mock(InterfaceLayoutConfig.class, CALLS_REAL_METHODS);
             overlay.sprites = mock(MenuButtonSprites.class);
             overlay.thread = mock(ClientThread.class);
@@ -71,7 +72,7 @@ public class CircularOrbOverlayTest
         {
             BufferedImage image = new BufferedImage(200, 130, BufferedImage.TYPE_INT_ARGB);
             Graphics2D draw = image.createGraphics();
-            overlay.render(draw); draw.dispose(); return image;
+            overlay.render(draw); draw.dispose(); overlay.drawManager.processDrawComplete(() -> image); return image;
         }
     }
 
