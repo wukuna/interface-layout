@@ -21,16 +21,18 @@ final class CircularOrbInput {
             if (widget != null && widget.getParent() == parent && !children.contains(widget)) children.add(widget);
         Map<Widget, Rectangle> positions = new IdentityHashMap<>();
         for (Widget child : children) positions.put(child, WidgetGeometry.bounds(child));
-        setBounds(parent, circle);
+        setBounds(parent, new Rectangle(circle.x - 23, circle.y, circle.width + 23, circle.height));
         for (Widget child : children) setBounds(child, positions.get(child));
         if (backing != null) setBounds(backing, active);
-        if (button != null) setBounds(button, active);
+        if (button != null) setBounds(button, new Rectangle(circle.x - 25, circle.y,
+            hovered ? circle.width + 25 : 0, circle.height + 2));
         if (number != null) setBounds(number, active);
+        if (button != null && button.getNoClickThrough()) block(button, false);
         if (parent.getNoClickThrough()) {
             block(parent, false);
             if (backing != null) block(backing, hovered);
         }
-        for (Widget child : children) if (child.getNoClickThrough()) {
+        for (Widget child : children) if (child != button && child.getNoClickThrough()) {
             setBounds(child, active);
             if (!hovered) block(child, false);
         }

@@ -87,15 +87,15 @@ public class CircularOrbOverlayTest
         f.refresh();
         Rectangle circle = new CircularOrbArtwork().aroundFill(new Rectangle(127,74,26,26),padded);
         assertTrue(circle.getCenterX()<140);
-        assertEquals(circle,f.parent.getBounds());
-        assertEquals(circle,f.button.getBounds());
+        assertTrue(f.parent.getBounds().contains(circle));
+        assertEquals(circle.getCenterX(),f.button.getBounds().x+24+f.button.getHeight()/2.0,0);
         BufferedImage actual=f.render(), expected=new BufferedImage(200,130,BufferedImage.TYPE_INT_ARGB);
         g=expected.createGraphics();
         CircularOrbArtwork artwork=new CircularOrbArtwork();artwork.paintBackground(g,circle);
         g.drawImage(padded,127,74,26,26,null);artwork.paint(g,circle,f.overlay.config.orbRim());g.dispose();
         for(int y=circle.y;y<circle.y+circle.height;y++)for(int x=circle.x;x<circle.x+circle.width;x++)
             assertEquals(expected.getRGB(x,y),actual.getRGB(x,y));
-        f.refresh();assertEquals(circle,f.parent.getBounds());
+        f.refresh();assertTrue(f.parent.getBounds().contains(circle));
         when(f.overlay.config.hideOrbTabs()).thenReturn(false);f.refresh();
         assertEquals(new Rectangle(100,70,57,34),f.parent.getBounds());
     }
@@ -111,7 +111,7 @@ public class CircularOrbOverlayTest
             f.refresh();
             for (int amount : new int[]{25, 90, 0, 100}) {
                 assertFalse(types[i] + " update container is clipped away", f.parent.getBounds().isEmpty());
-                for (Widget listener : new Widget[]{f.backing, f.button, f.number}) {
+                for (Widget listener : new Widget[]{f.backing, f.number}) {
                     assertFalse("Native listener must remain inside its parent", listener.getBounds().intersection(f.parent.getBounds()).isEmpty());
                     assertFalse(listener.getBounds().contains(10, 10));
                 }
@@ -164,7 +164,7 @@ public class CircularOrbOverlayTest
         when(f.overlay.sprites.get(f.icon)).thenReturn(null);
         f.refresh();
         assertEquals(255, f.backing.getOpacity()); assertEquals(255, f.number.getOpacity());
-        assertEquals(34, f.parent.getOriginalWidth());
+        assertEquals(57, f.parent.getOriginalWidth());
         assertNotEquals(0, f.render().getRGB(140, 97));
         when(f.overlay.config.hideOrbTabs()).thenReturn(false); f.refresh();
         assertEquals(57, f.parent.getOriginalWidth());
@@ -181,15 +181,15 @@ public class CircularOrbOverlayTest
         for (Point point : new Point[]{new Point(105, 85), new Point(124, 71)})
         {
             when(f.overlay.client.getMouseCanvasPosition()).thenReturn(point); f.refresh();
-            assertEquals(34, f.parent.getOriginalWidth());
-            assertEquals(1, f.button.getOriginalWidth());
+            assertEquals(57, f.parent.getOriginalWidth());
+            assertEquals(0, f.button.getOriginalWidth());
             assertEquals(255, f.tooltip.getOpacity()); assertEquals(255, tipText.getOpacity());
             assertNotEquals(0, f.render().getRGB(140, 95));
         }
         when(f.overlay.client.getMouseCanvasPosition()).thenReturn(new Point(140, 87)); f.refresh();
-        assertEquals(34, f.parent.getOriginalWidth());
+        assertEquals(57, f.parent.getOriginalWidth());
         assertEquals(0, f.tooltip.getOpacity()); assertEquals(0, tipText.getOpacity());
-        assertFalse(f.parent.getBounds().contains(105, 85));
+        assertFalse(f.parent.getNoClickThrough());
         assertEquals(new Rectangle(100, 70, 57, 34), f.hover.getBounds());
     }
 

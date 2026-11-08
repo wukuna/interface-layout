@@ -40,10 +40,10 @@ public class CircularOrbsTest {
             for(int hovered=0;hovered<buttons.length;hovered++) {
                 when(orb.client.getMouseCanvasPosition()).thenReturn(new net.runelite.api.Point(140,hovered*40+17));
                 bus.post(new ClientTick());
-                for(int n=0;n<buttons.length;n++)assertEquals(n==hovered?34:1,buttons[n].getOriginalWidth());
+                for(int n=0;n<buttons.length;n++)assertEquals(n==hovered?59:0,buttons[n].getOriginalWidth());
                 bus.post(new ScriptPreFired(446));for(Widget button:buttons)assertEquals(57,button.getOriginalWidth());
                 bus.post(new ScriptPostFired(446));
-                for(int n=0;n<buttons.length;n++)assertEquals(n==hovered?34:1,buttons[n].getOriginalWidth());
+                for(int n=0;n<buttons.length;n++)assertEquals(n==hovered?59:0,buttons[n].getOriginalWidth());
             }
         }
         Menu menu=mock(Menu.class);when(orb.client.getMenu()).thenReturn(menu);
@@ -69,7 +69,7 @@ public class CircularOrbsTest {
         Widget parent=CircularOrbInputTest.widget(circular.client,InterfaceID.Orbs.ORB_HEALTH,null,100,70,57,34);
         Widget backing=CircularOrbInputTest.widget(circular.client,InterfaceID.Orbs.HEALTH_BACKING,parent,0,0,57,34);
         CircularOrbInputTest.widget(circular.client,InterfaceID.Orbs.HEALTH_INDICATOR,parent,27,4,26,26);
-        circular.start();circular.onBeforeRender(new BeforeRender());assertEquals(34,parent.getOriginalWidth());
+        circular.start();circular.onBeforeRender(new BeforeRender());assertEquals(57,parent.getOriginalWidth());
         com.interfacelayout.layout.GameframeCoordinator frame=new com.interfacelayout.layout.GameframeCoordinator();
         com.interfacelayout.util.WidgetStateStore states=new com.interfacelayout.util.WidgetStateStore();
         FreePositionController free=mock(FreePositionController.class);
