@@ -1,5 +1,6 @@
 package com.interfacelayout.layout.orbs;
 
+import com.interfacelayout.InterfaceLayoutConfig.OrbRim;
 import com.interfacelayout.util.WidgetGeometry;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
@@ -43,12 +44,12 @@ final class CircularCompassFrame {
         }
     }
 
-    void paint(Graphics2D g, CircularOrbArtwork artwork) {
+    void paint(Graphics2D g, CircularOrbArtwork artwork, OrbRim style) {
         if (compass == null || circle == null || compass.isHidden()) return;
         Graphics2D draw = (Graphics2D) g.create();
         try {
             draw.setComposite(AlphaComposite.SrcOver.derive((255 - compassOpacity) / 255f));
-            artwork.paint(draw, circle);
+            artwork.paint(draw, circle, style);
         } finally { draw.dispose(); }
     }
 }

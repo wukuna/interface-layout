@@ -52,7 +52,7 @@ public final class CircularOrbs extends Overlay {
         {setPosition(OverlayPosition.DYNAMIC);setLayer(OverlayLayer.ABOVE_WIDGETS);}
         @Override public Dimension render(Graphics2D g) {
             if(running && config.hideOrbTabs()) {
-                compass.paint(g, artwork);
+                compass.paint(g, artwork, config.orbRim());
             }
             return null;
         }
@@ -159,7 +159,7 @@ public final class CircularOrbs extends Overlay {
                 artwork.paintBackground(draw,v.circle);
                 v.layers.paint(draw,v.circle);
                 if(soulreaper!=null && v.parent.getId()==InterfaceID.Orbs.ORB_SPECENERGY)soulreaper.paintNativeTimer(draw,v.circle);
-                artwork.paint(draw,v.circle);
+                artwork.paint(draw,v.circle,config.orbRim());
                 paintContent(draw,v.circle,v.icon,v.number,v.color,config.orbContent(),v.iconOpacity,v.numberOpacity);
             } finally {draw.dispose();}
         }

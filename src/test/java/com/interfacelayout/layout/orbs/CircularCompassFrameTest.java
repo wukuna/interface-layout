@@ -54,7 +54,7 @@ public class CircularCompassFrameTest {
 
     private static BufferedImage render(CircularCompassFrame frame) {
         BufferedImage image=new BufferedImage(300,200,BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g=image.createGraphics();frame.paint(g,new CircularOrbArtwork());g.dispose();return image;
+        Graphics2D g=image.createGraphics();frame.paint(g,new CircularOrbArtwork(),com.interfacelayout.InterfaceLayoutConfig.OrbRim.SILVER);g.dispose();return image;
     }
     private static void assertEmpty(BufferedImage image) {
         for(int y=0;y<image.getHeight();y++)for(int x=0;x<image.getWidth();x++)assertEquals(0,image.getRGB(x,y));

@@ -110,7 +110,8 @@ public class CircularOrbInputTest {
                 boolean inside=CircularOrbArtwork.contains(circle,x,y);
                 input.apply(parent,backing,button,null,circle,inside);
                 assertEquals("Native click area must match visible circle",inside,button.getBounds().contains(x,y));
-                assertEquals(inside,parent.getBounds().contains(x,y));
+                assertEquals(circle,parent.getBounds());
+                assertFalse(parent.getNoClickThrough());
                 input.restore(client);assertEquals(old,button.getBounds());
             }
         }

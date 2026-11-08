@@ -102,6 +102,16 @@ public interface InterfaceLayoutConfig extends Config
         description="Contents inside circular orbs: the native number, the icon, or a small icon above the number. Used with Circular orbs enabled.",section=presentation,position=3)
     default OrbContent orbContent() {return OrbContent.ICON_AND_NUMBER;}
 
+    enum OrbRim {
+        SILVER("Silver"), DARK_GREY("Dark grey");
+        private final String label;
+        OrbRim(String label) {this.label=label;}
+        @Override public String toString() {return label;}
+    }
+    @ConfigItem(keyName="orbRim",name="Circular orb rim",
+        description="Rim color for circular orbs and the compass, including Soulreaper and shield orbs.",section=presentation,position=4)
+    default OrbRim orbRim() {return OrbRim.SILVER;}
+
 	enum HorizontalAnchor
 	{
 		LEFT, RIGHT;

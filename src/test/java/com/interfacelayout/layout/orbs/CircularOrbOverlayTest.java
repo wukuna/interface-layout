@@ -1,6 +1,7 @@
 package com.interfacelayout.layout.orbs;
 
 import com.interfacelayout.InterfaceLayoutConfig;
+import com.interfacelayout.layout.orbs.widget.elements.Orbs;
 import com.interfacelayout.layout.menu.MenuButtonSprites;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -28,7 +29,8 @@ public class CircularOrbOverlayTest
     {
         final CircularOrbs overlay = new CircularOrbs();
         final Widget parent, backing, button, indicator, emptyParent, empty, icon, number, hover, tooltip;
-        Fixture()
+        Fixture() { this(Orbs.SPEC_ORB_CONTAINER, InterfaceID.Orbs.SPECENERGY_TEXT); }
+        Fixture(Orbs orb, int textId)
         {
             overlay.client = mock(Client.class);
             overlay.config = mock(InterfaceLayoutConfig.class, CALLS_REAL_METHODS);
@@ -38,14 +40,14 @@ public class CircularOrbOverlayTest
             when(overlay.config.hideOrbTabs()).thenReturn(true);
             when(overlay.client.getGameState()).thenReturn(GameState.LOGGED_IN);
             when(overlay.client.getMouseCanvasPosition()).thenReturn(new Point(140, 87));
-            parent = widget(InterfaceID.Orbs.ORB_SPECENERGY, null, 100, 70, 57, 34);
-            backing = widget(InterfaceID.Orbs.SPECENERGY_BACKING, parent, 0, 0, 57, 34);
-            button = widget(InterfaceID.Orbs.SPECBUTTON, parent, 0, 0, 57, 34);
-            indicator = widget(InterfaceID.Orbs.SPECENERGY_INDICATOR, parent, 27, 4, 26, 26);
-            emptyParent = widget(InterfaceID.Orbs.ORB_SPECENERGY_EMPTY, parent, 27, 4, 26, 13);
-            empty = widget(InterfaceID.Orbs.ORB_SPECENERGY_EMPTY_GRAPHIC0, emptyParent, 0, 0, 26, 26);
-            icon = widget(InterfaceID.Orbs.SPECENERGY_ICON, parent, 27, 4, 26, 26);
-            number = widget(InterfaceID.Orbs.SPECENERGY_TEXT, parent, 0, 0, 25, 34);
+            parent = widget(orb.getComponentId(), null, 100, 70, 57, 34);
+            backing = widget(orb.getBackingId(), parent, 0, 0, 57, 34);
+            button = widget(orb.getButtonId(), parent, 0, 0, 57, 34);
+            indicator = widget(orb.getIndicatorId(), parent, 27, 4, 26, 26);
+            emptyParent = widget(orb.getEmptyId(), parent, 27, 4, 26, 13);
+            empty = widget(7001, emptyParent, 0, 0, 26, 26);
+            icon = widget(orb.getIconId(), parent, 27, 4, 26, 26);
+            number = widget(textId, parent, 0, 0, 25, 34);
             hover = widget(1001, parent, 0, 0, 57, 34);
             tooltip = widget(InterfaceID.Orbs.TOOLTIP, null, 0, 0, 60, 30);
             when(parent.getStaticChildren()).thenReturn(new Widget[]{backing, button, indicator, emptyParent, icon, number, hover});
@@ -70,6 +72,41 @@ public class CircularOrbOverlayTest
             BufferedImage image = new BufferedImage(200, 130, BufferedImage.TYPE_INT_ARGB);
             Graphics2D draw = image.createGraphics();
             overlay.render(draw); draw.dispose(); return image;
+        }
+    }
+
+    @Test public void resourceUpdatesRemainReachableWithoutHovering() {
+        Orbs[] types = {Orbs.HP_ORB_CONTAINER, Orbs.PRAYER_ORB_CONTAINER, Orbs.RUN_ORB_CONTAINER, Orbs.SPEC_ORB_CONTAINER};
+        int[] numbers = {InterfaceID.Orbs.HEALTH_TEXT, InterfaceID.Orbs.PRAYER_TEXT, InterfaceID.Orbs.RUNENERGY_TEXT, InterfaceID.Orbs.SPECENERGY_TEXT};
+        for (int i = 0; i < types.length; i++) {
+            Fixture f = new Fixture(types[i], numbers[i]);
+            when(f.overlay.client.getMouseCanvasPosition()).thenReturn(new Point(10, 10));
+            when(f.overlay.config.orbContent()).thenReturn(InterfaceLayoutConfig.OrbContent.ICON_ONLY);
+            when(f.icon.isHidden()).thenReturn(true);
+            f.refresh();
+            for (int amount : new int[]{25, 90, 0, 100}) {
+                assertFalse(types[i] + " update container is clipped away", f.parent.getBounds().isEmpty());
+                for (Widget listener : new Widget[]{f.backing, f.button, f.number}) {
+                    assertFalse("Native listener must remain inside its parent", listener.getBounds().intersection(f.parent.getBounds()).isEmpty());
+                    assertFalse(listener.getBounds().contains(10, 10));
+                }
+                f.overlay.onScriptPreFired(new net.runelite.api.events.ScriptPreFired(1000));
+                when(f.number.getText()).thenReturn(Integer.toString(amount));
+                f.emptyParent.setOriginalHeight(26 * (100 - amount) / 100);
+                f.overlay.onScriptPostFired(new net.runelite.api.events.ScriptPostFired(1000));
+                BufferedImage actual = f.render();
+                int expected = amount >= 90 ? Color.CYAN.getRGB() : new Color(20, 30, 40).getRGB();
+                assertEquals("Fill follows resource changes without mouse movement", expected, actual.getRGB(140, 80));
+                when(f.overlay.config.orbContent()).thenReturn(InterfaceLayoutConfig.OrbContent.NUMBER_ONLY);
+                BufferedImage textImage = f.render();
+                Graphics2D g = actual.createGraphics();
+                CircularOrbs.paintContent(g, new Rectangle(123, 70, 34, 34), null, Integer.toString(amount), Color.GREEN,
+                    InterfaceLayoutConfig.OrbContent.NUMBER_ONLY, 255, 0);
+                g.dispose();
+                for (int y = 70; y < 104; y++) for (int x = 123; x < 157; x++)
+                    assertEquals("Number follows native updates without hovering", actual.getRGB(x, y), textImage.getRGB(x, y));
+                when(f.overlay.config.orbContent()).thenReturn(InterfaceLayoutConfig.OrbContent.ICON_ONLY);
+            }
         }
     }
 
@@ -119,8 +156,8 @@ public class CircularOrbOverlayTest
         for (Point point : new Point[]{new Point(105, 85), new Point(124, 71)})
         {
             when(f.overlay.client.getMouseCanvasPosition()).thenReturn(point); f.refresh();
-            assertEquals(0, f.parent.getOriginalWidth());
-            assertEquals(0, f.button.getOriginalWidth());
+            assertEquals(34, f.parent.getOriginalWidth());
+            assertEquals(1, f.button.getOriginalWidth());
             assertEquals(255, f.tooltip.getOpacity()); assertEquals(255, tipText.getOpacity());
             assertNotEquals(0, f.render().getRGB(140, 95));
         }

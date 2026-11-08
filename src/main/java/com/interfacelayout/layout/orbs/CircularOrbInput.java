@@ -15,23 +15,23 @@ final class CircularOrbInput {
     private final Map<Widget, Boolean> blocking = new IdentityHashMap<>();
 
     void apply(Widget parent, Widget backing, Widget button, Widget number, Rectangle circle, boolean hovered) {
-        Rectangle active = hovered ? circle : new Rectangle(circle.x + circle.width / 2, circle.y + circle.height / 2, 0, 0);
+        Rectangle active = hovered ? circle : new Rectangle(circle.x + circle.width / 2, circle.y + circle.height / 2, 1, 1);
         List<Widget> children = CircularOrbLayers.children(parent);
         for (Widget widget : new Widget[]{backing, button, number})
             if (widget != null && widget.getParent() == parent && !children.contains(widget)) children.add(widget);
         Map<Widget, Rectangle> positions = new IdentityHashMap<>();
         for (Widget child : children) positions.put(child, WidgetGeometry.bounds(child));
-        setBounds(parent, active);
+        setBounds(parent, circle);
         for (Widget child : children) setBounds(child, positions.get(child));
         if (backing != null) setBounds(backing, active);
         if (button != null) setBounds(button, active);
-        clip(number, active);
+        if (number != null) setBounds(number, active);
         if (parent.getNoClickThrough()) {
             block(parent, false);
             if (backing != null) block(backing, hovered);
         }
         for (Widget child : children) if (child.getNoClickThrough()) {
-            clip(child, active);
+            setBounds(child, active);
             if (!hovered) block(child, false);
         }
     }
@@ -40,13 +40,6 @@ final class CircularOrbInput {
         if (widget.getNoClickThrough() == value) return;
         blocking.putIfAbsent(widget, widget.getNoClickThrough());
         widget.setNoClickThrough(value);
-    }
-
-    private void clip(Widget widget, Rectangle circle) {
-        if (widget == null) return;
-        Rectangle clipped = WidgetGeometry.bounds(widget).intersection(circle);
-        clipped.width = Math.max(0, clipped.width); clipped.height = Math.max(0, clipped.height);
-        setBounds(widget, clipped);
     }
 
     private void setBounds(Widget widget, Rectangle bounds) {

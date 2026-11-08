@@ -25,6 +25,8 @@ final class ReleaseNotesNotice
         "Matched circular special, Soulreaper Axe QoL and shield orbs to the selected icon and number display.",
         "Fixed orb edge clicks, moved-orb click offsets and shield special actions.",
         "Fixed circular orbs disappearing after layout refreshes.",
+        "Fixed circular orb values and fills freezing until hovered.",
+        "Smoothed circular rims and added a dark grey rim option.",
     };
 
     @Inject private Client client;
