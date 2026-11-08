@@ -6,6 +6,18 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class CircularOrbArtworkTest {
+    @Test public void paddedAxeAndShieldIconsHaveTheSameVisibleSizeAsTightSprites() {
+        BufferedImage padded=SoulreaperOrbCompatibilityTest.icon();
+        BufferedImage tight=padded.getSubimage(9,6,8,14);
+        for(com.interfacelayout.InterfaceLayoutConfig.OrbContent mode:com.interfacelayout.InterfaceLayoutConfig.OrbContent.values()) {
+            BufferedImage a=new BufferedImage(34,34,2),b=new BufferedImage(34,34,2);
+            Graphics2D ga=a.createGraphics(),gb=b.createGraphics();
+            CircularOrbs.paintContent(ga,new Rectangle(0,0,34,34),padded,"100",Color.GREEN,mode,0,0);
+            CircularOrbs.paintContent(gb,new Rectangle(0,0,34,34),tight,"100",Color.GREEN,mode,0,0);
+            ga.dispose();gb.dispose();
+            for(int y=0;y<34;y++)for(int x=0;x<34;x++)assertEquals(a.getRGB(x,y),b.getRGB(x,y));
+        }
+    }
     @Test public void rimIsContinuousAtEveryAngleWithClearCenterAndCorners() {
         CircularOrbArtwork art=new CircularOrbArtwork();
         for(int diameter:new int[]{33,34,41,43,68}) {
