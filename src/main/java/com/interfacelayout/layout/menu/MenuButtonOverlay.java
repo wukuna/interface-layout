@@ -66,6 +66,7 @@ public class MenuButtonOverlay extends Overlay
     @Inject private WidgetStateStore states;
     @Inject private MenuButtonSprites sprites;
     @Inject private MenuIconCache iconImages;
+    @Inject private MenuIconThemes iconThemes;
     @Inject private EventBus eventBus;
     private final Map<Integer, Button> prepared = new HashMap<>();
     private final List<Button> placed = new ArrayList<>();
@@ -81,7 +82,7 @@ public class MenuButtonOverlay extends Overlay
     }
 
     public void clear() { active = false; prepared.clear(); placed.clear(); }
-    public void stop() { clear(); sprites.clear(); iconImages.clear(); }
+    public void stop() { clear(); sprites.clear(); iconImages.clear(); iconThemes.clear(); }
     public boolean active() { return active; }
     public int scaled(int size)
     {
@@ -92,7 +93,7 @@ public class MenuButtonOverlay extends Overlay
     public void prepare(int[][] registry, int[] rows, boolean modern)
     {
         clear();
-        if (!config.menuOverlayButtons()) { iconImages.clear(); return; }
+        if (!config.menuOverlayButtons()) { iconImages.clear(); iconThemes.clear(); return; }
         this.modern = modern;
         root = client.getTopLevelInterfaceId();
         for (int index = 0; index < registry.length; index++)
@@ -215,6 +216,11 @@ public class MenuButtonOverlay extends Overlay
     {
         BufferedImage image = sprites.get(widget);
         if (image == null || area.width <= 0 || area.height <= 0) return;
+        if (icon && !tiled)
+        {
+            BufferedImage themed = iconThemes.get(widget.getSpriteId(), config.menuIconTheme());
+            if (themed != null) image = themed;
+        }
         if (icon && !tiled && config.menuIconStyle() == InterfaceLayoutConfig.MenuIconStyle.FAITHFUL_CONTOURS)
         {
             java.awt.geom.AffineTransform transform = graphics.getTransform();

@@ -192,6 +192,40 @@ public class MenuButtonOverlayTest
         }
     }
 
+    @Test public void bundledThemesSwitchBooksAndRestoreResourcePackArtworkWithoutChangingInput()
+    {
+        for (int mode = 0; mode < 3; mode++)
+        {
+            Fixture f = new Fixture(mode); f.apply();
+            Rectangle bounds = new Rectangle(f.controller.stones().get(6));
+            when(f.icons[6].getSpriteId()).thenReturn(780);
+            f.spriteOverrides.put(780, pixels(Color.RED));
+            assertEquals(Color.RED.getRGB(), f.renderIcon(6));
+            when(f.config.menuIconTheme()).thenReturn(com.interfacelayout.layout.menu.MenuIconThemes.Theme.DARK);
+            int[] dark = iconPixels(f.render(), bounds);
+            when(f.icons[6].getSpriteId()).thenReturn(1583);
+            assertFalse(java.util.Arrays.equals(dark, iconPixels(f.render(), bounds)));
+            when(f.config.menuIconTheme()).thenReturn(com.interfacelayout.layout.menu.MenuIconThemes.Theme.BLUSH);
+            int[] pink = iconPixels(f.render(), bounds);
+            assertFalse(java.util.Arrays.equals(dark, pink));
+            when(f.config.menuIconStyle()).thenReturn(InterfaceLayoutConfig.MenuIconStyle.ORIGINAL);
+            assertFalse(java.util.Arrays.equals(pink, iconPixels(f.render(), bounds)));
+            f.widgetOverrides.put(f.icons[6].getId(), pixels(Color.GREEN));
+            when(f.config.menuIconTheme()).thenReturn(com.interfacelayout.layout.menu.MenuIconThemes.Theme.CURRENT);
+            assertEquals(Color.GREEN.getRGB(), f.renderIcon(6));
+            when(f.config.menuIconTheme()).thenReturn(com.interfacelayout.layout.menu.MenuIconThemes.Theme.BLUSH);
+            when(f.icons[6].getSpriteId()).thenReturn(999999);
+            assertEquals(Color.GREEN.getRGB(), f.renderIcon(6));
+            f.hover(6); f.overlay.onPostMenuSort(new PostMenuSort());
+            assertTrue(f.entries.stream().anyMatch(e -> e.getType() == MenuAction.CC_OP && e.getParam1() == f.stones[6].getId()));
+            assertEquals(bounds, f.controller.stones().get(6)); verifyNoInteractions(f.configs);
+            f.overlay.stop();
+        }
+    }
+
+    private static int[] iconPixels(BufferedImage image, Rectangle bounds)
+    { return image.getRGB(bounds.x, bounds.y, bounds.width, bounds.height, null, 0, bounds.width); }
+
     @Test public void scaleBoundsAndDefaultsAreSupportedByRealConfigurationProxy()
     {
         ConfigManager configs = mock(ConfigManager.class);
@@ -199,6 +233,7 @@ public class MenuButtonOverlayTest
         assertFalse(config.menuOverlayButtons()); assertEquals(100, config.menuGroupSize());
         assertFalse(config.menuKeepNativeIcons());
         assertEquals(InterfaceLayoutConfig.MenuIconStyle.FAITHFUL_CONTOURS, config.menuIconStyle());
+        assertEquals(com.interfacelayout.layout.menu.MenuIconThemes.Theme.CURRENT, config.menuIconTheme());
         Fixture f = new Fixture(0);
         when(f.config.menuGroupSize()).thenReturn(Integer.MAX_VALUE);
         assertEquals(66, f.overlay.scaled(33));
