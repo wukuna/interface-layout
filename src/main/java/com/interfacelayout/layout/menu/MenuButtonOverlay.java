@@ -65,6 +65,7 @@ public class MenuButtonOverlay extends Overlay
     @Inject private InterfaceLayoutConfig config;
     @Inject private WidgetStateStore states;
     @Inject private MenuButtonSprites sprites;
+    @Inject private MenuIconCache iconImages;
     @Inject private EventBus eventBus;
     private final Map<Integer, Button> prepared = new HashMap<>();
     private final List<Button> placed = new ArrayList<>();
@@ -80,7 +81,7 @@ public class MenuButtonOverlay extends Overlay
     }
 
     public void clear() { active = false; prepared.clear(); placed.clear(); }
-    public void stop() { clear(); sprites.clear(); }
+    public void stop() { clear(); sprites.clear(); iconImages.clear(); }
     public boolean active() { return active; }
     public int scaled(int size)
     {
@@ -91,7 +92,7 @@ public class MenuButtonOverlay extends Overlay
     public void prepare(int[][] registry, int[] rows, boolean modern)
     {
         clear();
-        if (!config.menuOverlayButtons()) return;
+        if (!config.menuOverlayButtons()) { iconImages.clear(); return; }
         this.modern = modern;
         root = client.getTopLevelInterfaceId();
         for (int index = 0; index < registry.length; index++)
@@ -171,7 +172,7 @@ public class MenuButtonOverlay extends Overlay
                         button.stone.getWidth(), button.stone.getHeight()), button.stone.getSpriteTiling());
                 if (!keepNativeIcons)
                     paint(draw, button.icon, new Rectangle(button.iconOffset.x, button.iconOffset.y,
-                        button.icon.getWidth(), button.icon.getHeight()), button.icon.getSpriteTiling());
+                        button.icon.getWidth(), button.icon.getHeight()), button.icon.getSpriteTiling(), true);
             }
             finally { draw.dispose(); }
             if (keepNativeIcons)
@@ -182,7 +183,7 @@ public class MenuButtonOverlay extends Overlay
                 {
                     iconDraw.clip(button.bounds);
                     iconDraw.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-                    paint(iconDraw, button.icon, centredIconBounds(button), button.icon.getSpriteTiling());
+                    paint(iconDraw, button.icon, centredIconBounds(button), button.icon.getSpriteTiling(), true);
                 }
                 finally { iconDraw.dispose(); }
             }
@@ -207,8 +208,21 @@ public class MenuButtonOverlay extends Overlay
 
     private void paint(Graphics2D graphics, Widget widget, Rectangle area, boolean tiled)
     {
+        paint(graphics, widget, area, tiled, false);
+    }
+
+    private void paint(Graphics2D graphics, Widget widget, Rectangle area, boolean tiled, boolean icon)
+    {
         BufferedImage image = sprites.get(widget);
         if (image == null || area.width <= 0 || area.height <= 0) return;
+        if (icon && !tiled && config.menuIconStyle() == InterfaceLayoutConfig.MenuIconStyle.FAITHFUL_CONTOURS)
+        {
+            java.awt.geom.AffineTransform transform = graphics.getTransform();
+            int width = (int) Math.ceil(area.width * Math.hypot(transform.getScaleX(), transform.getShearY()));
+            int height = (int) Math.ceil(area.height * Math.hypot(transform.getShearX(), transform.getScaleY()));
+            BufferedImage refined = iconImages.get(image, width, height);
+            if (refined != null) image = refined;
+        }
         Graphics2D draw = (Graphics2D) graphics.create();
         try
         {

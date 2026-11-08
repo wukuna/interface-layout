@@ -44,7 +44,7 @@ public class ReleaseNotesNoticeTest
         verify(chat,times(1)).queue(messages.capture());
         String message=messages.getValue().getRuneLiteFormattedMessage();
         assertTrue(message.contains("Updates:<br>* "));
-        assertEquals(8,message.split("<br>\\* ",-1).length-1);
+        assertEquals(9,message.split("<br>\\* ",-1).length-1);
         assertFalse(message.contains("Recent updates"));
         assertFalse(message.contains("1. "));
         assertEquals(ReleaseNotesNotice.RELEASE,seen);

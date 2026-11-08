@@ -656,6 +656,15 @@ public interface InterfaceLayoutConfig extends Config
     default int menuGroupSize() { return 100; }
     @ConfigItem(keyName = "menuKeepNativeIcons", name = "Keep icons at native size", description = "Keep overlay menu icons centred at their native size when buttons are enlarged. Below 100%, icons shrink with the buttons. Uses your active game/resource-pack artwork. Off scales the icons with the buttons at every size.", section = menu, position = 11)
     default boolean menuKeepNativeIcons() { return false; }
+
+    enum MenuIconStyle {
+        ORIGINAL("Original"), FAITHFUL_CONTOURS("Faithful contours");
+        private final String label;
+        MenuIconStyle(String label) { this.label = label; }
+        @Override public String toString() { return label; }
+    }
+    @ConfigItem(keyName = "menuIconStyle", name = "Overlay icon style", description = "Faithful contours smooths the current game or resource-pack tab icons as they scale, preserving their designs and colours. Original keeps their pixel artwork. Applies only to overlay menu icons.", section = menu, position = 12)
+    default MenuIconStyle menuIconStyle() { return MenuIconStyle.FAITHFUL_CONTOURS; }
     @Range(min = 0, max = 20)
     @ConfigItem(keyName = "menuSpacing", name = "Stone spacing", description = "Pixels between visible stones. Hidden stones close the gap without changing the group's saved position.", section = menu, position = 2)
     default int menuSpacing() { return 0; }

@@ -30,6 +30,7 @@ final class ReleaseNotesNotice
         "Smoothed circular rims and added a dark grey rim option.",
         "Aligned prayer indicators and HP/special regeneration rings with circular orbs.",
         "Extended menu gap protection to adjacent rows and outer stone edges.",
+        "Added Faithful contours for scalable menu tab icons, including your active resource-pack artwork.",
     };
 
     @Inject private Client client;

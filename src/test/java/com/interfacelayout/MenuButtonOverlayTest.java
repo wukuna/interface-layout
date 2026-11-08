@@ -159,12 +159,46 @@ public class MenuButtonOverlayTest
         verifyNoInteractions(f.configs);
     }
 
+    @Test public void faithfulIconsRetainCustomPackDesignsThroughReloadsAndNativeStyleToggle()
+    {
+        for (int mode = 0; mode < 3; mode++)
+        {
+            Fixture f = new Fixture(mode); f.apply();
+            Rectangle bounds = new Rectangle(f.controller.stones().get(3));
+            BufferedImage custom = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = custom.createGraphics();
+            g.setColor(Color.RED); g.fillPolygon(new int[]{2, 13, 2}, new int[]{2, 13, 13}, 3);
+            g.setColor(Color.BLUE); g.fillRect(4, 8, 3, 3); g.dispose();
+            SpritePixels replacement = mock(SpritePixels.class);
+            when(replacement.toBufferedImage()).thenReturn(custom);
+            f.spriteOverrides.put(f.icons[3].getSpriteId(), replacement);
+            BufferedImage faithful = f.render();
+            assertTrue(colouredBounds(faithful, bounds, Color.RED).width > 0);
+            assertTrue(colouredBounds(faithful, bounds, Color.BLUE).width > 0);
+            when(f.config.menuIconStyle()).thenReturn(InterfaceLayoutConfig.MenuIconStyle.ORIGINAL);
+            BufferedImage original = f.render();
+            assertFalse(java.util.Arrays.equals(faithful.getRGB(bounds.x, bounds.y, bounds.width, bounds.height, null, 0, bounds.width),
+                original.getRGB(bounds.x, bounds.y, bounds.width, bounds.height, null, 0, bounds.width)));
+            when(f.config.menuIconStyle()).thenReturn(InterfaceLayoutConfig.MenuIconStyle.FAITHFUL_CONTOURS);
+            f.widgetOverrides.put(f.icons[3].getId(), pixels(Color.GREEN));
+            assertEquals(Color.GREEN.getRGB(), f.renderIcon(3));
+            f.widgetOverrides.put(f.icons[3].getId(), pixels(Color.MAGENTA));
+            assertEquals(Color.MAGENTA.getRGB(), f.renderIcon(3));
+            f.widgetOverrides.clear();
+            assertTrue(colouredBounds(f.render(), bounds, Color.BLUE).width > 0);
+            f.spriteOverrides.clear(); assertEquals(Color.WHITE.getRGB(), f.renderIcon(3));
+            assertEquals(bounds, f.controller.stones().get(3));
+            verifyNoInteractions(f.configs);
+        }
+    }
+
     @Test public void scaleBoundsAndDefaultsAreSupportedByRealConfigurationProxy()
     {
         ConfigManager configs = mock(ConfigManager.class);
         InterfaceLayoutConfig config = RealConfigProxy.create(InterfaceLayoutConfig.class, configs);
         assertFalse(config.menuOverlayButtons()); assertEquals(100, config.menuGroupSize());
         assertFalse(config.menuKeepNativeIcons());
+        assertEquals(InterfaceLayoutConfig.MenuIconStyle.FAITHFUL_CONTOURS, config.menuIconStyle());
         Fixture f = new Fixture(0);
         when(f.config.menuGroupSize()).thenReturn(Integer.MAX_VALUE);
         assertEquals(66, f.overlay.scaled(33));
@@ -453,6 +487,7 @@ public class MenuButtonOverlayTest
             Injector injector = Guice.createInjector(new AbstractModule() {
                 @Override protected void configure() {
                     bind(Client.class).toInstance(client); bind(InterfaceLayoutConfig.class).toInstance(config);
+                    bind(com.interfacelayout.layout.menu.MenuIconCache.class).toInstance(new com.interfacelayout.layout.menu.MenuIconCache(Runnable::run));
                     bind(ConfigManager.class).toInstance(configs); bind(OrbController.class).toProvider(() -> orbs);
                     bind(WidgetStateStore.class).toInstance(states); bind(EventBus.class).toInstance(events);
                     com.interfacelayout.layout.menu.MenuStoneBackgrounds backgrounds = mock(com.interfacelayout.layout.menu.MenuStoneBackgrounds.class);
