@@ -31,14 +31,35 @@ final class CircularOrbArtwork {
         @Override protected boolean removeEldestEntry(Map.Entry<Integer, BufferedImage> entry) { return size() > 8; }
     };
 
+    private final Map<BufferedImage, Rectangle> fillBounds = new LinkedHashMap<BufferedImage, Rectangle>(8, .75f, true) {
+        @Override protected boolean removeEldestEntry(Map.Entry<BufferedImage, Rectangle> entry) { return size() > 8; }
+    };
+
     private OrbRim rim = OrbRim.SILVER;
 
-    void clear() { frames.clear(); }
+    void clear() { frames.clear(); fillBounds.clear(); }
 
     static Rectangle around(Rectangle content) {
         int diameter = Math.max(content.width, content.height) + 8;
         return new Rectangle(content.x + (content.width - diameter) / 2,
             content.y + (content.height - diameter) / 2, diameter, diameter);
+    }
+
+    Rectangle aroundFill(Rectangle content, BufferedImage image) {
+        Rectangle circle = around(content);
+        if (image == null || image.getWidth() > 512 || image.getHeight() > 512) return circle;
+        Rectangle visible = fillBounds.computeIfAbsent(image, source -> {
+            int left=source.getWidth(),top=source.getHeight(),right=-1,bottom=-1;
+            for(int y=0;y<source.getHeight();y++)for(int x=0;x<source.getWidth();x++)
+                if((source.getRGB(x,y)>>>24)!=0) {
+                    left=Math.min(left,x);top=Math.min(top,y);right=Math.max(right,x);bottom=Math.max(bottom,y);
+                }
+            return right<left ? new Rectangle(0,0,source.getWidth(),source.getHeight())
+                : new Rectangle(left,top,right-left+1,bottom-top+1);
+        });
+        circle.x = (int)Math.round(content.x + visible.getCenterX() * content.width / image.getWidth() - circle.width / 2.0);
+        circle.y = (int)Math.round(content.y + visible.getCenterY() * content.height / image.getHeight() - circle.height / 2.0);
+        return circle;
     }
 
     static boolean contains(Rectangle circle, int x, int y) {

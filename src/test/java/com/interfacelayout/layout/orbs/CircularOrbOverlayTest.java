@@ -75,6 +75,31 @@ public class CircularOrbOverlayTest
         }
     }
 
+    @Test public void paddedFillArtworkKeepsFrameContentAndClickAreaConcentric() {
+        Fixture f = new Fixture(Orbs.PRAYER_ORB_CONTAINER, InterfaceID.Orbs.PRAYER_TEXT);
+        BufferedImage padded = new BufferedImage(26,26,BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g=padded.createGraphics();g.setColor(Color.CYAN);g.fillOval(0,2,22,22);g.dispose();
+        when(f.overlay.sprites.getPadded(f.indicator)).thenReturn(padded);
+        when(f.emptyParent.isHidden()).thenReturn(true);
+        when(f.icon.isHidden()).thenReturn(true);
+        when(f.number.isHidden()).thenReturn(true);
+        when(f.overlay.client.getMouseCanvasPosition()).thenReturn(new Point(138,87));
+        f.refresh();
+        Rectangle circle = new CircularOrbArtwork().aroundFill(new Rectangle(127,74,26,26),padded);
+        assertTrue(circle.getCenterX()<140);
+        assertEquals(circle,f.parent.getBounds());
+        assertEquals(circle,f.button.getBounds());
+        BufferedImage actual=f.render(), expected=new BufferedImage(200,130,BufferedImage.TYPE_INT_ARGB);
+        g=expected.createGraphics();
+        CircularOrbArtwork artwork=new CircularOrbArtwork();artwork.paintBackground(g,circle);
+        g.drawImage(padded,127,74,26,26,null);artwork.paint(g,circle,f.overlay.config.orbRim());g.dispose();
+        for(int y=circle.y;y<circle.y+circle.height;y++)for(int x=circle.x;x<circle.x+circle.width;x++)
+            assertEquals(expected.getRGB(x,y),actual.getRGB(x,y));
+        f.refresh();assertEquals(circle,f.parent.getBounds());
+        when(f.overlay.config.hideOrbTabs()).thenReturn(false);f.refresh();
+        assertEquals(new Rectangle(100,70,57,34),f.parent.getBounds());
+    }
+
     @Test public void resourceUpdatesRemainReachableWithoutHovering() {
         Orbs[] types = {Orbs.HP_ORB_CONTAINER, Orbs.PRAYER_ORB_CONTAINER, Orbs.RUN_ORB_CONTAINER, Orbs.SPEC_ORB_CONTAINER};
         int[] numbers = {InterfaceID.Orbs.HEALTH_TEXT, InterfaceID.Orbs.PRAYER_TEXT, InterfaceID.Orbs.RUNENERGY_TEXT, InterfaceID.Orbs.SPECENERGY_TEXT};
