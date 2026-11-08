@@ -61,6 +61,8 @@ public final class CircularOrbs extends Overlay {
     public Overlay frames() {return frames;}
     public void start() {running=true;generation++;}
     public void stop() {running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation){scriptDepth=0;restore();if(soulreaper!=null)soulreaper.restore();artwork.clear();}});}
+    public void releaseForLayout() {restore();}
+    public void refreshAfterLayout() {refresh();}
     private void restore() {
         compass.restore(manager);
         input.restore(client);

@@ -218,7 +218,7 @@ public final class ShieldSpecialOrb extends Overlay
             ? CircularOrbArtwork.contains(hitbox,x,y) : hitbox.contains(x,y);
     }
 
-    @Subscribe(priority = -20)
+    @Subscribe(priority = -40)
     public void onPostMenuSort(PostMenuSort event)
     {
         if (client.isMenuOpen()) return;

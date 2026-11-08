@@ -95,4 +95,46 @@ public class CircularOrbInputTest {
             assertEquals(0,backing.getOriginalX());assertEquals(57,backing.getOriginalWidth());
         }
     }
+    @Test public void completeCircleRemainsClickableWithInsetNativeButtonsAndScaledMovedParents() {
+        for(int diameter:new int[]{26,34,42,52}) for(int parentWidth:new int[]{57,65}) {
+            Client client=mock(Client.class);CircularOrbInput input=new CircularOrbInput();
+            Widget root=widget(client,10,null,310,110,200,200);
+            when(root.getScrollX()).thenReturn(7);when(root.getScrollY()).thenReturn(3);
+            Widget parent=widget(client,11,root,20,30,parentWidth,diameter);
+            Widget backing=widget(client,12,parent,0,0,parentWidth,diameter);
+            Widget button=widget(client,13,parent,parentWidth-diameter+4,4,diameter-8,diameter-8);
+            Rectangle old=button.getBounds();
+            Rectangle circle=new Rectangle(parent.getBounds().x+parentWidth-diameter,parent.getBounds().y,diameter,diameter);
+            for(int[] point:new int[][]{{diameter/2,diameter/2},{0,diameter/2},{diameter-1,diameter/2},{diameter/2,0},{diameter/2,diameter-1},{0,0},{-4,diameter/2}}) {
+                int x=circle.x+point[0],y=circle.y+point[1];
+                boolean inside=CircularOrbArtwork.contains(circle,x,y);
+                input.apply(parent,backing,button,null,circle,inside);
+                assertEquals("Native click area must match visible circle",inside,button.getBounds().contains(x,y));
+                assertEquals(inside,parent.getBounds().contains(x,y));
+                input.restore(client);assertEquals(old,button.getBounds());
+            }
+        }
+    }
+
+    @Test public void forcedFreePositionsDoNotOffsetTheCircleAndSurviveRestoration() {
+        Client client=mock(Client.class);CircularOrbInput input=new CircularOrbInput();
+        Widget parent=widget(client,1,null,100,70,57,34),backing=widget(client,2,parent,0,0,57,34),button=widget(client,3,parent,0,0,57,34);
+        forced(parent,300,120);forced(backing,0,0);forced(button,0,0);
+        Rectangle original=parent.getBounds(),circle=new Rectangle(323,120,34,34);
+        for(int i=0;i<5;i++){
+            input.apply(parent,backing,button,null,circle,true);
+            assertEquals(circle,parent.getBounds());assertEquals(circle,button.getBounds());
+            input.restore(client);assertEquals(original,parent.getBounds());assertEquals(original,button.getBounds());
+        }
+        verify(parent,never()).setForcedPosition(anyInt(),anyInt());
+    }
+    private static void forced(Widget widget,int x,int y) {
+        AtomicInteger rx=new AtomicInteger(x),ry=new AtomicInteger(y);
+        when(widget.getRelativeX()).thenAnswer(i->rx.get());when(widget.getRelativeY()).thenAnswer(i->ry.get());
+        doAnswer(i->{rx.set(i.getArgument(0));return null;}).when(widget).setRelativeX(anyInt());
+        doAnswer(i->{ry.set(i.getArgument(0));return null;}).when(widget).setRelativeY(anyInt());
+        doAnswer(i->{rx.set(x);ry.set(y);return null;}).when(widget).revalidate();
+        when(widget.getBounds()).thenAnswer(i->com.interfacelayout.util.WidgetGeometry.bounds(widget));
+    }
+
 }

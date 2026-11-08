@@ -19,13 +19,12 @@ import net.runelite.client.events.ProfileChanged;
 @Singleton
 final class ReleaseNotesNotice
 {
-    static final String RELEASE = "2026-11-02-orb-hover";
+    static final String RELEASE = "2026-11-07-circular-orbs";
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] UPDATES = {
-        "Added equipment help with set effects, target conditions and adjusted weapon speed to the Beta equipment panel.",
-        "Added matching circular special, Soulreaper Axe QoL and shield orbs with consistent icon and number options.",
-        "Removed invisible side-tab hover areas and fixed native orb and compass restoration when circular orbs are turned off.",
-        "Fixed logout button visibility after restoring the layout.",
+        "Matched circular special, Soulreaper Axe QoL and shield orbs to the selected icon and number display.",
+        "Fixed orb edge clicks, moved-orb click offsets and shield special actions.",
+        "Fixed circular orbs disappearing after layout refreshes.",
     };
 
     @Inject private Client client;

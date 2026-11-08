@@ -28,6 +28,7 @@ import net.runelite.client.events.ProfileChanged;
 public class GameframeCoordinator
 {
     @Inject private WidgetStateStore states;
+    @Inject private javax.inject.Provider<com.interfacelayout.layout.orbs.CircularOrbs> circular;
     @Inject private WidgetBoundsExpander expander;
     @Inject private MenuStoneController menu;
     @Inject private com.interfacelayout.layout.menu.MenuOverlayBridge menuOverlays;
@@ -47,7 +48,7 @@ public class GameframeCoordinator
 
     public void start() { running = true; editor.setRefresh(this::refresh); refresh(); menuOverlays.start(this::refresh); freeOverlays.start(this::refresh); }
     public void stop() { running = false; layoutDepth = 0; visibilityDepth = 0; editor.cancel(); freeOverlays.stop(); menuOverlays.stop(); restore(); menu.resetSession(); }
-    private void restore() { minimapClicks.restore(); menu.restoreBackgrounds(); states.restore(); expander.clear(); }
+    private void restore() { if(circular!=null)circular.get().releaseForLayout(); minimapClicks.restore(); menu.restoreBackgrounds(); states.restore(); expander.clear(); }
     public void prepareNativeLayout() { restore(); }
     public boolean isHiddenByGame(net.runelite.api.widgets.Widget widget)
     {
@@ -57,6 +58,7 @@ public class GameframeCoordinator
     {
         if (!running || layoutDepth > 0) return;
         restore(); menu.apply(); free.apply(); minimapClicks.apply(); menuOverlays.sync(); freeOverlays.sync();
+        if(circular!=null)circular.get().refreshAfterLayout();
     }
     public void toggleShown() { if (running) { menu.toggleShown(); refresh(); } }
     @Subscribe(priority = -2) public void onBeforeRender(BeforeRender event)
