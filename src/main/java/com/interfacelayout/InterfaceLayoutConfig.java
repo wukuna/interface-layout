@@ -648,25 +648,15 @@ public interface InterfaceLayoutConfig extends Config
     default com.interfacelayout.layout.menu.MenuStoneController.Layout menuLayout() { return com.interfacelayout.layout.menu.MenuStoneController.Layout.VANILLA_HORIZONTAL; }
     @ConfigItem(keyName = "menuDirection", name = "Initial bar direction", description = "Initial direction in Free position. Existing bars keep their direction. Joining two separate stones side-by-side makes a row; above or below makes a column.", section = menu, position = 1)
     default com.interfacelayout.layout.menu.MenuStoneController.Direction menuDirection() { return com.interfacelayout.layout.menu.MenuStoneController.Direction.VERTICAL; }
-    @ConfigItem(keyName = "menuOverlayButtons", name = "Use overlay menu buttons", description = "Replace visible menu tabs with scalable overlay buttons using the current game/resource-pack artwork. Works in Fixed, Classic and Modern. Existing bars, hiding and grouping are retained; native interface contents are unchanged.", section = menu, position = 9)
+    @ConfigItem(keyName = "menuOverlayButtons", name = "Use overlay menu buttons", description = "Replace visible menu tabs with scalable overlay buttons using dark icons with faithful contours and active game/resource-pack backgrounds. Works in Fixed, Classic and Modern. Existing bars, hiding and grouping are retained; native interface contents are unchanged.", section = menu, position = 9)
     default boolean menuOverlayButtons() { return false; }
     @Range(min = 25, max = 200)
     @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
     @ConfigItem(keyName = "menuGroupSize", name = "Resize menu tabs (%)", description = "Scale all replacement menu buttons and their click areas together. Only applies with Use overlay menu buttons enabled. 100% follows the native tab size. Orbs and interface contents are unchanged.", section = menu, position = 10)
     default int menuGroupSize() { return 100; }
-    @ConfigItem(keyName = "menuKeepNativeIcons", name = "Keep icons at native size", description = "Keep overlay menu icons centred at their native size when buttons are enlarged. Below 100%, icons shrink with the buttons. Uses the selected overlay icon theme. Off scales the icons with the buttons at every size.", section = menu, position = 11)
+    @ConfigItem(keyName = "menuKeepNativeIcons", name = "Keep icons at native size", description = "Keep overlay menu icons centred at their native size when buttons are enlarged. Below 100%, icons shrink with the buttons. Off scales the icons with the buttons at every size.", section = menu, position = 11)
     default boolean menuKeepNativeIcons() { return false; }
 
-    enum MenuIconStyle {
-        ORIGINAL("Original"), FAITHFUL_CONTOURS("Faithful contours");
-        private final String label;
-        MenuIconStyle(String label) { this.label = label; }
-        @Override public String toString() { return label; }
-    }
-    @ConfigItem(keyName = "menuIconStyle", name = "Overlay icon style", description = "Faithful contours smooths the selected tab artwork as it scales, preserving its design and colours. Original keeps the pixel artwork. Applies only to overlay menu icons.", section = menu, position = 12)
-    default MenuIconStyle menuIconStyle() { return MenuIconStyle.FAITHFUL_CONTOURS; }
-    @ConfigItem(keyName = "menuIconTheme", name = "Overlay icon theme", description = "Current artwork follows your active resource pack or the game. The two Dark Mode themes and Pink Mode use bundled familiar tab designs. Dark themes retain the custom spellbooks; Pink uses blush and pearl books. Applies only to overlay tab icons.", section = menu, position = 13)
-    default com.interfacelayout.layout.menu.MenuIconThemes.Theme menuIconTheme() { return com.interfacelayout.layout.menu.MenuIconThemes.Theme.CURRENT; }
     @Range(min = 0, max = 20)
     @ConfigItem(keyName = "menuSpacing", name = "Stone spacing", description = "Pixels between visible stones. Hidden stones close the gap without changing the group's saved position.", section = menu, position = 2)
     default int menuSpacing() { return 0; }

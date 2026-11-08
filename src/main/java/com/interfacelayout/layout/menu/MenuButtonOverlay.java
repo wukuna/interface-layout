@@ -66,7 +66,7 @@ public class MenuButtonOverlay extends Overlay
     @Inject private WidgetStateStore states;
     @Inject private MenuButtonSprites sprites;
     @Inject private MenuIconCache iconImages;
-    @Inject private MenuIconThemes iconThemes;
+    @Inject private MenuIconSprites iconSprites;
     @Inject private EventBus eventBus;
     private final Map<Integer, Button> prepared = new HashMap<>();
     private final List<Button> placed = new ArrayList<>();
@@ -82,7 +82,7 @@ public class MenuButtonOverlay extends Overlay
     }
 
     public void clear() { active = false; prepared.clear(); placed.clear(); }
-    public void stop() { clear(); sprites.clear(); iconImages.clear(); iconThemes.clear(); }
+    public void stop() { clear(); sprites.clear(); iconImages.clear(); iconSprites.clear(); }
     public boolean active() { return active; }
     public int scaled(int size)
     {
@@ -93,7 +93,7 @@ public class MenuButtonOverlay extends Overlay
     public void prepare(int[][] registry, int[] rows, boolean modern)
     {
         clear();
-        if (!config.menuOverlayButtons()) { iconImages.clear(); iconThemes.clear(); return; }
+        if (!config.menuOverlayButtons()) { iconImages.clear(); iconSprites.clear(); return; }
         this.modern = modern;
         root = client.getTopLevelInterfaceId();
         for (int index = 0; index < registry.length; index++)
@@ -218,11 +218,8 @@ public class MenuButtonOverlay extends Overlay
         if (image == null || area.width <= 0 || area.height <= 0) return;
         if (icon && !tiled)
         {
-            BufferedImage themed = iconThemes.get(widget.getSpriteId(), config.menuIconTheme());
-            if (themed != null) image = themed;
-        }
-        if (icon && !tiled && config.menuIconStyle() == InterfaceLayoutConfig.MenuIconStyle.FAITHFUL_CONTOURS)
-        {
+            BufferedImage bundled = iconSprites.get(widget.getSpriteId());
+            if (bundled != null) image = bundled;
             java.awt.geom.AffineTransform transform = graphics.getTransform();
             int width = (int) Math.ceil(area.width * Math.hypot(transform.getScaleX(), transform.getShearY()));
             int height = (int) Math.ceil(area.height * Math.hypot(transform.getShearX(), transform.getScaleY()));

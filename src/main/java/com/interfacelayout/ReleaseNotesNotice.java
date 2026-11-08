@@ -30,7 +30,7 @@ final class ReleaseNotesNotice
         "Smoothed circular rims and added a dark grey rim option.",
         "Aligned prayer indicators and HP/special regeneration rings with circular orbs.",
         "Extended menu gap protection to adjacent rows and outer stone edges.",
-        "Added Faithful contours and two Dark Mode themes plus Pink Mode, with matching spellbooks; Current artwork follows your resource pack.",
+        "Added faithful contours for dark menu overlay icons, retaining original accents and custom spellbooks.",
     };
 
     @Inject private Client client;

@@ -159,7 +159,7 @@ public class MenuButtonOverlayTest
         verifyNoInteractions(f.configs);
     }
 
-    @Test public void faithfulIconsRetainCustomPackDesignsThroughReloadsAndNativeStyleToggle()
+    @Test public void faithfulFallbackIconsRetainCustomPackDesignsThroughReloads()
     {
         for (int mode = 0; mode < 3; mode++)
         {
@@ -175,11 +175,6 @@ public class MenuButtonOverlayTest
             BufferedImage faithful = f.render();
             assertTrue(colouredBounds(faithful, bounds, Color.RED).width > 0);
             assertTrue(colouredBounds(faithful, bounds, Color.BLUE).width > 0);
-            when(f.config.menuIconStyle()).thenReturn(InterfaceLayoutConfig.MenuIconStyle.ORIGINAL);
-            BufferedImage original = f.render();
-            assertFalse(java.util.Arrays.equals(faithful.getRGB(bounds.x, bounds.y, bounds.width, bounds.height, null, 0, bounds.width),
-                original.getRGB(bounds.x, bounds.y, bounds.width, bounds.height, null, 0, bounds.width)));
-            when(f.config.menuIconStyle()).thenReturn(InterfaceLayoutConfig.MenuIconStyle.FAITHFUL_CONTOURS);
             f.widgetOverrides.put(f.icons[3].getId(), pixels(Color.GREEN));
             assertEquals(Color.GREEN.getRGB(), f.renderIcon(3));
             f.widgetOverrides.put(f.icons[3].getId(), pixels(Color.MAGENTA));
@@ -192,28 +187,24 @@ public class MenuButtonOverlayTest
         }
     }
 
-    @Test public void bundledThemesSwitchBooksAndRestoreResourcePackArtworkWithoutChangingInput()
+    @Test public void bundledDarkIconsSwitchBooksAndFallBackForUnknownStatesWithoutChangingInput()
     {
         for (int mode = 0; mode < 3; mode++)
         {
             Fixture f = new Fixture(mode); f.apply();
             Rectangle bounds = new Rectangle(f.controller.stones().get(6));
             when(f.icons[6].getSpriteId()).thenReturn(780);
+            int[] standard = iconPixels(f.render(), bounds);
             f.spriteOverrides.put(780, pixels(Color.RED));
-            assertEquals(Color.RED.getRGB(), f.renderIcon(6));
-            when(f.config.menuIconTheme()).thenReturn(com.interfacelayout.layout.menu.MenuIconThemes.Theme.DARK);
-            int[] dark = iconPixels(f.render(), bounds);
-            when(f.icons[6].getSpriteId()).thenReturn(1583);
-            assertFalse(java.util.Arrays.equals(dark, iconPixels(f.render(), bounds)));
-            when(f.config.menuIconTheme()).thenReturn(com.interfacelayout.layout.menu.MenuIconThemes.Theme.BLUSH);
-            int[] pink = iconPixels(f.render(), bounds);
-            assertFalse(java.util.Arrays.equals(dark, pink));
-            when(f.config.menuIconStyle()).thenReturn(InterfaceLayoutConfig.MenuIconStyle.ORIGINAL);
-            assertFalse(java.util.Arrays.equals(pink, iconPixels(f.render(), bounds)));
             f.widgetOverrides.put(f.icons[6].getId(), pixels(Color.GREEN));
-            when(f.config.menuIconTheme()).thenReturn(com.interfacelayout.layout.menu.MenuIconThemes.Theme.CURRENT);
-            assertEquals(Color.GREEN.getRGB(), f.renderIcon(6));
-            when(f.config.menuIconTheme()).thenReturn(com.interfacelayout.layout.menu.MenuIconThemes.Theme.BLUSH);
+            assertArrayEquals(standard, iconPixels(f.render(), bounds));
+            java.util.Set<Integer> books = new java.util.HashSet<>();
+            for (int sprite : new int[]{780, 1583, 1584, 1711})
+            {
+                when(f.icons[6].getSpriteId()).thenReturn(sprite);
+                books.add(java.util.Arrays.hashCode(iconPixels(f.render(), bounds)));
+            }
+            assertEquals(4, books.size());
             when(f.icons[6].getSpriteId()).thenReturn(999999);
             assertEquals(Color.GREEN.getRGB(), f.renderIcon(6));
             f.hover(6); f.overlay.onPostMenuSort(new PostMenuSort());
@@ -232,8 +223,6 @@ public class MenuButtonOverlayTest
         InterfaceLayoutConfig config = RealConfigProxy.create(InterfaceLayoutConfig.class, configs);
         assertFalse(config.menuOverlayButtons()); assertEquals(100, config.menuGroupSize());
         assertFalse(config.menuKeepNativeIcons());
-        assertEquals(InterfaceLayoutConfig.MenuIconStyle.FAITHFUL_CONTOURS, config.menuIconStyle());
-        assertEquals(com.interfacelayout.layout.menu.MenuIconThemes.Theme.CURRENT, config.menuIconTheme());
         Fixture f = new Fixture(0);
         when(f.config.menuGroupSize()).thenReturn(Integer.MAX_VALUE);
         assertEquals(66, f.overlay.scaled(33));
