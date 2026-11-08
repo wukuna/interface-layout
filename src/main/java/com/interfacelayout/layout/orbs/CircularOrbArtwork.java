@@ -11,6 +11,20 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 final class CircularOrbArtwork {
+    private static final Map<BufferedImage, BufferedImage> icons = new LinkedHashMap<BufferedImage, BufferedImage>(32, .75f, true) {
+        @Override protected boolean removeEldestEntry(Map.Entry<BufferedImage, BufferedImage> entry) { return size() > 32; }
+    };
+    static BufferedImage content(BufferedImage image) {
+        return icons.computeIfAbsent(image, source -> {
+            int left=source.getWidth(),top=source.getHeight(),right=-1,bottom=-1;
+            if(left>512 || top>512)return source;
+            for(int y=0;y<source.getHeight();y++)for(int x=0;x<source.getWidth();x++)
+                if((source.getRGB(x,y)>>>24)!=0) {
+                    left=Math.min(left,x);top=Math.min(top,y);right=Math.max(right,x);bottom=Math.max(bottom,y);
+                }
+            return right<left?source:source.getSubimage(left,top,right-left+1,bottom-top+1);
+        });
+    }
     private final Map<Integer, BufferedImage> frames = new LinkedHashMap<Integer, BufferedImage>(8, .75f, true) {
         @Override protected boolean removeEldestEntry(Map.Entry<Integer, BufferedImage> entry) { return size() > 8; }
     };

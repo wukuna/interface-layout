@@ -49,6 +49,7 @@ public class InterfaceLayoutPlugin extends Plugin
     @Inject private net.runelite.client.ui.overlay.OverlayManager overlayManager;
     @Inject private com.interfacelayout.layout.equipment.BetaEquipmentPanel equipmentPanel;
     @Inject private com.interfacelayout.layout.orbs.CircularOrbs circularOrbs;
+    @Inject private com.interfacelayout.layout.orbs.SoulreaperOrbCompatibility soulreaperOrbs;
 
     @Override public void configure(Binder binder)
     {
@@ -68,11 +69,11 @@ public class InterfaceLayoutPlugin extends Plugin
         eventBus.register(shieldOrb);
         overlayManager.add(shieldOrb);
         equipmentPanel.start();eventBus.register(equipmentPanel);overlayManager.add(equipmentPanel);
-        circularOrbs.start();eventBus.register(circularOrbs);overlayManager.add(circularOrbs.frames());overlayManager.add(circularOrbs);
+        overlayManager.add(soulreaperOrbs);circularOrbs.start();eventBus.register(circularOrbs);overlayManager.add(circularOrbs.frames());overlayManager.add(circularOrbs);
     }
     @Override protected void shutDown() throws Exception
     {
-        circularOrbs.stop();overlayManager.remove(circularOrbs);overlayManager.remove(circularOrbs.frames());eventBus.unregister(circularOrbs);
+        circularOrbs.stop();overlayManager.remove(soulreaperOrbs);overlayManager.remove(circularOrbs);overlayManager.remove(circularOrbs.frames());eventBus.unregister(circularOrbs);
         equipmentPanel.stop();overlayManager.remove(equipmentPanel);eventBus.unregister(equipmentPanel);
         shieldOrb.stop();
         overlayManager.remove(shieldOrb);

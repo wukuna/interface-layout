@@ -151,10 +151,10 @@ public final class ShieldSpecialOrb extends Overlay
         BufferedImage fill = sprites.getSprite(state.action.startsWith("Deactivate") ? 1608 : 1607);
         BufferedImage empty = sprites.getSprite(1059);
         BufferedImage shield = sprites.getSprite(SHIELD_SPRITE);
-        if (frame == null || fill == null || empty == null || shield == null) return null;
+        boolean circular = config.hideOrbTabs() && !config.editInterface();
+        if ((!circular && frame == null) || fill == null || empty == null || shield == null) return null;
         boolean wideFrame = backing != null && (backing.getSpriteId() == 5791 || backing.getSpriteId() == 5792);
         int sourceWidth = wideFrame ? 65 : WIDTH;
-        boolean circular = config.hideOrbTabs() && !config.editInterface();
         int width = circular ? 34 : sourceWidth;
         int circleX = width - 30;
         int baseline = wideFrame ? 22 : 26;
@@ -178,6 +178,7 @@ public final class ShieldSpecialOrb extends Overlay
             if (circular) {
                 artwork.paintBackground(draw, new Rectangle(0, 0, 34, 34));
             } else draw.drawImage(frame, 0, 0, width, HEIGHT, null);
+            if(circular)draw.clip(new java.awt.geom.Ellipse2D.Double(0,0,34,34));
             draw.drawImage(fill, circleX, 4, 26, 26, null);
             Graphics2D mask = (Graphics2D) draw.create();
             try

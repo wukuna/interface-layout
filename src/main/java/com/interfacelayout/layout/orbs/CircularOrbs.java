@@ -39,6 +39,7 @@ public final class CircularOrbs extends Overlay {
     @Inject InterfaceLayoutConfig config;
     @Inject MenuButtonSprites sprites;
     @Inject OrbController manager;
+    @Inject SoulreaperOrbCompatibility soulreaper;
     private final Map<Widget,Integer> opacities=new IdentityHashMap<>();
     private final CircularOrbInput input = new CircularOrbInput();
     private final CircularOrbArtwork artwork = new CircularOrbArtwork();
@@ -59,7 +60,7 @@ public final class CircularOrbs extends Overlay {
     public CircularOrbs() {setPosition(OverlayPosition.DYNAMIC);setLayer(OverlayLayer.ABOVE_WIDGETS);}
     public Overlay frames() {return frames;}
     public void start() {running=true;generation++;}
-    public void stop() {running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation){scriptDepth=0;restore();artwork.clear();}});}
+    public void stop() {running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation){scriptDepth=0;restore();if(soulreaper!=null)soulreaper.restore();artwork.clear();}});}
     private void restore() {
         compass.restore(manager);
         input.restore(client);
@@ -70,7 +71,7 @@ public final class CircularOrbs extends Overlay {
         if(running && scriptDepth++==0)restore();
     }
     @Subscribe public void onGameStateChanged(GameStateChanged event) {
-        if(event.getGameState()!=GameState.LOGGED_IN){scriptDepth=0;restore();}
+        if(event.getGameState()!=GameState.LOGGED_IN){scriptDepth=0;restore();if(soulreaper!=null)soulreaper.restore();}
     }
     @Subscribe(priority=-4) public void onBeforeRender(BeforeRender event) {
 
@@ -86,7 +87,7 @@ public final class CircularOrbs extends Overlay {
     private void releaseBeforeLayout() {
         if(!running)return;
         int token=generation;
-        thread.invoke(()->{if(running && token==generation)restore();});
+        thread.invoke(()->{if(running && token==generation){restore();if(soulreaper!=null)soulreaper.restore();}});
     }
     @Subscribe(priority=4) public void onConfigChanged(ConfigChanged event) {
         if(OrbConstants.ConfigGroup.GROUP_NAME.equals(event.getGroup()))releaseBeforeLayout();
@@ -95,7 +96,11 @@ public final class CircularOrbs extends Overlay {
     private void refresh() {
         if(scriptDepth>0)return;
         restore();
-        if(!running || !config.hideOrbTabs() || config.editInterface() || client.getGameState()!=GameState.LOGGED_IN)return;
+        boolean enabled=running && config.hideOrbTabs() && !config.editInterface() && client.getGameState()==GameState.LOGGED_IN;
+        Widget spec=client.getWidget(InterfaceID.Orbs.ORB_SPECENERGY),specBacking=client.getWidget(InterfaceID.Orbs.SPECENERGY_BACKING);
+        if(soulreaper!=null)soulreaper.refresh(enabled && visible(spec) && visible(specBacking)
+            && !WidgetGeometry.bounds(spec).isEmpty() && !WidgetGeometry.bounds(specBacking).isEmpty());
+        if(!enabled)return;
         compass.refresh(client,manager);
         for(int i=0;i<ORBS.length;i++) {
             Orbs orb=ORBS[i];Widget parent=client.getWidget(orb.getComponentId()),backing=client.getWidget(orb.getBackingId());
@@ -105,6 +110,7 @@ public final class CircularOrbs extends Overlay {
             if(bounds.width<=0 || bounds.height<=0 || WidgetGeometry.bounds(parent).isEmpty())continue;
             if(fill.width<=0 || fill.height<=0)fill=new Rectangle(bounds.x+bounds.width-30,bounds.y+4,26,26);
             Rectangle circle=CircularOrbArtwork.around(fill);
+            if(soulreaper!=null && orb==Orbs.SPEC_ORB_CONTAINER)soulreaper.anchor(circle);
             Widget button=client.getWidget(orb.getButtonId());
             CircularOrbLayers layers=CircularOrbLayers.capture(parent,backing,button,icon,sprites,this::hide);
             View v=new View(parent,sprites.get(icon),circle,WidgetGeometry.bounds(parent),layers,
@@ -150,6 +156,7 @@ public final class CircularOrbs extends Overlay {
                 draw.setComposite(AlphaComposite.SrcOver.derive((255-v.frameOpacity)/255f));
                 artwork.paintBackground(draw,v.circle);
                 v.layers.paint(draw,v.circle);
+                if(soulreaper!=null && v.parent.getId()==InterfaceID.Orbs.ORB_SPECENERGY)soulreaper.paintNativeTimer(draw,v.circle);
                 artwork.paint(draw,v.circle);
                 paintContent(draw,v.circle,v.icon,v.number,v.color,config.orbContent(),v.iconOpacity,v.numberOpacity);
             } finally {draw.dispose();}
@@ -164,6 +171,7 @@ public final class CircularOrbs extends Overlay {
             draw.clip(new Ellipse2D.Double(circle.x,circle.y,circle.width,circle.height));
             int cx=circle.x+circle.width/2;
             if(mode!=OrbContent.NUMBER_ONLY && icon!=null) {
+                icon=CircularOrbArtwork.content(icon);
                 int size=mode==OrbContent.ICON_ONLY?Math.min(26,circle.width-8):12;
                 double scale=Math.min(1,Math.min((double)size/icon.getWidth(),(double)size/icon.getHeight()));
                 int w=Math.max(1,(int)(icon.getWidth()*scale)),h=Math.max(1,(int)(icon.getHeight()*scale));
