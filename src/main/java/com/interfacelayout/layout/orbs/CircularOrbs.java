@@ -111,7 +111,7 @@ public final class CircularOrbs extends Overlay {
             Rectangle fill=WidgetGeometry.bounds(indicator),bounds=WidgetGeometry.bounds(backing);
             if(bounds.width<=0 || bounds.height<=0 || WidgetGeometry.bounds(parent).isEmpty())continue;
             if(fill.width<=0 || fill.height<=0)fill=new Rectangle(bounds.x+bounds.width-30,bounds.y+4,26,26);
-            Rectangle circle=CircularOrbArtwork.around(fill);
+            Rectangle circle=artwork.aroundFill(fill,sprites.getPadded(indicator));
             if(soulreaper!=null && orb==Orbs.SPEC_ORB_CONTAINER)soulreaper.anchor(circle);
             Widget button=client.getWidget(orb.getButtonId());
             CircularOrbLayers layers=CircularOrbLayers.capture(parent,backing,button,icon,sprites,this::hide);
