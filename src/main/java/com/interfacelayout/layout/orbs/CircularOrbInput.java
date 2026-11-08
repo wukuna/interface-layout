@@ -23,8 +23,8 @@ final class CircularOrbInput {
         for (Widget child : children) positions.put(child, WidgetGeometry.bounds(child));
         setBounds(parent, active);
         for (Widget child : children) setBounds(child, positions.get(child));
-        clip(backing, active);
-        clip(button, active);
+        if (backing != null) setBounds(backing, active);
+        if (button != null) setBounds(button, active);
         clip(number, active);
         if (parent.getNoClickThrough()) {
             block(parent, false);
@@ -85,6 +85,7 @@ final class CircularOrbInput {
             nextX=nx;nextY=ny;nextWidth=nw;nextHeight=nh;
             w.setXPositionMode(0);w.setYPositionMode(0);w.setWidthMode(0);w.setHeightMode(0);
             w.setOriginalX(nx);w.setOriginalY(ny);w.setOriginalWidth(nw);w.setOriginalHeight(nh);w.revalidate();
+            w.setRelativeX(nx);w.setRelativeY(ny);
         }
         void restore(Widget w) {
             if(w.getOriginalX()==nextX && w.getXPositionMode()==0) { w.setOriginalX(x);w.setXPositionMode(xMode); }

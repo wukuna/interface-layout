@@ -242,6 +242,39 @@ public class ShieldSpecialOrbTest
         overlay.stop(); verify(menu).removeMenuEntry(entry); verify(menu, never()).removeMenuEntry(cancel);
     }
 
+
+    @Test public void shieldClicksSurviveCircularOrbMenuFilteringAtEveryVisibleEdge() {
+        when(config.hideOrbTabs()).thenReturn(true);when(config.showShieldSpecialOrb()).thenReturn(true);
+        when(orb.getId()).thenReturn(InterfaceID.Orbs.ORB_SPECENERGY);
+        when(orb.getRelativeX()).thenReturn(200);when(orb.getRelativeY()).thenReturn(100);
+        when(orb.getWidth()).thenReturn(57);when(orb.getHeight()).thenReturn(34);
+        when(backing.getId()).thenReturn(InterfaceID.Orbs.SPECENERGY_BACKING);
+        when(backing.getParent()).thenReturn(orb);when(backing.getWidth()).thenReturn(57);when(backing.getHeight()).thenReturn(34);
+        when(button.getParent()).thenReturn(orb);when(button.getWidth()).thenReturn(57);when(button.getHeight()).thenReturn(34);
+        CircularOrbInputTest.widget(client,InterfaceID.Orbs.SPECENERGY_INDICATOR,null,227,104,26,26);
+        CircularOrbs circular=new CircularOrbs();circular.client=client;circular.config=config;circular.sprites=sprites;
+        circular.manager=mock(OrbController.class);circular.thread=thread;circular.start();
+        circular.onClientTick(new net.runelite.api.events.ClientTick());
+        java.util.List<MenuEntry> entries=new java.util.ArrayList<>();
+        when(menu.getMenuEntries()).thenAnswer(i->entries.toArray(new MenuEntry[0]));
+        when(menu.createMenuEntry(-1)).thenAnswer(i->{entries.add(entry);return entry;});
+        doAnswer(i->{entries.clear();java.util.Collections.addAll(entries,(MenuEntry[])i.getArgument(0));return null;}).when(menu).setMenuEntries(any());
+        when(entry.getParam1()).thenReturn(InterfaceID.Orbs.SPECBUTTON);when(entry.getType()).thenReturn(MenuAction.CC_OP);
+        net.runelite.client.eventbus.EventBus bus=new net.runelite.client.eventbus.EventBus();bus.register(overlay);bus.register(circular);
+        for(boolean moved:new boolean[]{false,true}) for(InterfaceLayoutConfig.OrbContent mode:InterfaceLayoutConfig.OrbContent.values()) {
+            when(config.orbContent()).thenReturn(mode);
+            if(moved){overlay.setPreferredLocation(new java.awt.Point(400,200));overlay.getBounds().setLocation(400,200);}
+            Graphics2D draw=new BufferedImage(765,503,BufferedImage.TYPE_INT_ARGB).createGraphics();
+            draw.translate(overlay.getBounds().x,overlay.getBounds().y);
+            try{assertEquals(new java.awt.Dimension(34,34),overlay.render(draw));}finally{draw.dispose();}
+            for(int[] point:new int[][]{{17,17},{0,17},{33,17},{17,0},{17,33},{0,0},{-4,17}}){
+                entries.clear();int x=overlay.getBounds().x+point[0],y=overlay.getBounds().y+point[1];
+                when(client.getMouseCanvasPosition()).thenReturn(new Point(x,y));bus.post(new PostMenuSort());
+                assertEquals("Shield target must survive native orb filtering",CircularOrbArtwork.contains(new Rectangle(overlay.getBounds().x,overlay.getBounds().y,34,34),x,y),entries.contains(entry));
+            }
+        }
+    }
+
     private void paint()
     {
         when(config.showShieldSpecialOrb()).thenReturn(true);

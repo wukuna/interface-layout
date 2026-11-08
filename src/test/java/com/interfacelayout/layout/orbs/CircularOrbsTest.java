@@ -60,6 +60,38 @@ public class CircularOrbsTest {
         GameStateChanged logout=new GameStateChanged();logout.setGameState(GameState.LOGIN_SCREEN);bus.post(logout);for(Widget button:buttons)assertEquals(57,button.getOriginalWidth());
         bus.post(new BeforeRender());orb.stop();for(Widget button:buttons)assertEquals(57,button.getOriginalWidth());bus.unregister(orb);
     }
+
+    @Test public void asynchronousLayoutRefreshCannotCaptureCollapsedOrbSizes() throws Exception {
+        CircularOrbs circular=new CircularOrbs();circular.client=mock(Client.class);circular.config=mock(InterfaceLayoutConfig.class,CALLS_REAL_METHODS);
+        circular.manager=mock(OrbController.class);circular.thread=mock(ClientThread.class);circular.sprites=mock(MenuButtonSprites.class);
+        when(circular.config.hideOrbTabs()).thenReturn(true);when(circular.client.getGameState()).thenReturn(GameState.LOGGED_IN);
+        doAnswer(i->{((Runnable)i.getArgument(0)).run();return null;}).when(circular.thread).invoke(any(Runnable.class));
+        Widget parent=CircularOrbInputTest.widget(circular.client,InterfaceID.Orbs.ORB_HEALTH,null,100,70,57,34);
+        Widget backing=CircularOrbInputTest.widget(circular.client,InterfaceID.Orbs.HEALTH_BACKING,parent,0,0,57,34);
+        CircularOrbInputTest.widget(circular.client,InterfaceID.Orbs.HEALTH_INDICATOR,parent,27,4,26,26);
+        circular.start();circular.onBeforeRender(new BeforeRender());assertEquals(0,parent.getOriginalWidth());
+        com.interfacelayout.layout.GameframeCoordinator frame=new com.interfacelayout.layout.GameframeCoordinator();
+        com.interfacelayout.util.WidgetStateStore states=new com.interfacelayout.util.WidgetStateStore();
+        FreePositionController free=mock(FreePositionController.class);
+        java.util.Map<String,Object> fields=new java.util.HashMap<>();
+        fields.put("states",states);fields.put("free",free);fields.put("running",true);
+        fields.put("menu",mock(com.interfacelayout.layout.menu.MenuStoneController.class));
+        fields.put("minimapClicks",mock(MinimapClickProtection.class));fields.put("expander",mock(com.interfacelayout.util.WidgetBoundsExpander.class));
+        fields.put("menuOverlays",mock(com.interfacelayout.layout.menu.MenuOverlayBridge.class));fields.put("freeOverlays",mock(FreeOrbOverlayBridge.class));
+        for(java.util.Map.Entry<String,Object> entry:fields.entrySet()) {
+            java.lang.reflect.Field field=frame.getClass().getDeclaredField(entry.getKey());field.setAccessible(true);field.set(frame,entry.getValue());
+        }
+        java.lang.reflect.Field provider=frame.getClass().getDeclaredField("circular");provider.setAccessible(true);
+        provider.set(frame,(javax.inject.Provider<CircularOrbs>)()->circular);
+        doAnswer(i->{assertEquals("Only native geometry may enter layout snapshots",57,parent.getOriginalWidth());states.capture(parent);return null;}).when(free).apply();
+        for(int i=0;i<6;i++) {
+            frame.refresh();circular.onBeforeRender(new BeforeRender());
+            BufferedImage image=new BufferedImage(300,200,BufferedImage.TYPE_INT_ARGB);Graphics2D draw=image.createGraphics();
+            circular.render(draw);draw.dispose();assertNotEquals(0,image.getRGB(140,87));
+        }
+        circular.stop();frame.prepareNativeLayout();assertEquals(57,parent.getOriginalWidth());assertEquals(0,backing.getOpacity());
+    }
+
     private static Widget widget(CircularOrbs orb,int id,Rectangle bounds) {
         Widget w=mock(Widget.class);when(w.getId()).thenReturn(id);when(w.getBounds()).thenReturn(bounds);when(orb.client.getWidget(id)).thenReturn(w);
         when(w.getRelativeX()).thenReturn(bounds.x);when(w.getRelativeY()).thenReturn(bounds.y);when(w.getWidth()).thenReturn(bounds.width);when(w.getHeight()).thenReturn(bounds.height);

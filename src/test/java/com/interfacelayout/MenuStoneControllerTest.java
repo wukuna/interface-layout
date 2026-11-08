@@ -136,6 +136,9 @@ public class MenuStoneControllerTest
             @Override protected void configure()
             {
                 bind(Client.class).toInstance(client);
+                bind(InterfaceLayoutConfig.class).toInstance(config);
+                bind(ConfigManager.class).toInstance(configs);
+                bind(net.runelite.client.ui.overlay.OverlayManager.class).toInstance(mock(net.runelite.client.ui.overlay.OverlayManager.class));
                 bind(MenuStoneController.class).toProvider(() -> menu);
                 bind(com.interfacelayout.layout.menu.MenuOverlayBridge.class).toProvider(() -> mock(com.interfacelayout.layout.menu.MenuOverlayBridge.class));
                 bind(WidgetStateStore.class).toInstance(states);
