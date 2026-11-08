@@ -72,7 +72,7 @@ public class CircularOrbRestoreRegressionTest {
 
     @Test public void abortedScriptDoesNotLeaveOrbsInNativeModeForever() {
         Fixture f=new Fixture();f.bus.post(new ScriptPreFired(1000));f.nativeAppearance();
-        f.bus.post(new BeforeRender());assertEquals(34,f.button.getOriginalWidth());
+        f.bus.post(new BeforeRender());assertEquals(59,f.button.getOriginalWidth());
         when(f.orbs.config.hideOrbTabs()).thenReturn(false);f.bus.post(new BeforeRender());f.nativeAppearance();
     }
 }

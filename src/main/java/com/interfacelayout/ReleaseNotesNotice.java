@@ -27,6 +27,7 @@ final class ReleaseNotesNotice
         "Fixed circular orbs disappearing after layout refreshes.",
         "Fixed circular orb values and fills freezing until hovered.",
         "Smoothed circular rims and added a dark grey rim option.",
+        "Aligned prayer indicators and HP/special regeneration rings with circular orbs.",
     };
 
     @Inject private Client client;

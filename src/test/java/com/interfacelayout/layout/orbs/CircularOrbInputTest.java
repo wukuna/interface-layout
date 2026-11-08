@@ -44,8 +44,8 @@ public class CircularOrbInputTest {
             parent.setNoClickThrough(true);blocker.setNoClickThrough(true);when(parent.getChildren()).thenReturn(new Widget[]{blocker});
             Rectangle old=button.getBounds(),circle=new Rectangle(old.x+width-34,old.y,34,34);
             assertTrue(old.contains(offset+2,80));input.apply(parent,backing,button,number,circle,true);
-            assertEquals(circle,button.getBounds());assertEquals(circle,backing.getBounds());assertEquals(circle,blocker.getBounds());
-            assertFalse(button.getBounds().contains(offset+2,80));assertFalse(parent.getNoClickThrough());assertTrue(backing.getNoClickThrough());
+            assertEquals(circle.getCenterX(),button.getBounds().x+24+button.getBounds().height/2.0,0);assertEquals(circle,backing.getBounds());assertEquals(circle,blocker.getBounds());
+            input.restore(client);input.apply(parent,backing,button,number,circle,false);assertFalse(button.getBounds().contains(offset+2,80));input.restore(client);input.apply(parent,backing,button,number,circle,true);assertFalse(parent.getNoClickThrough());assertTrue(backing.getNoClickThrough());
             assertTrue(button.getBounds().contains(circle.getCenterX(),circle.getCenterY()));
             verify(button,never()).setAction(anyInt(),anyString());verify(button,never()).setHidden(anyBoolean());
             input.restore(client);assertEquals(old,button.getBounds());assertEquals(old,backing.getBounds());assertEquals(old,blocker.getBounds());
@@ -88,8 +88,8 @@ public class CircularOrbInputTest {
         Rectangle circle=new Rectangle(323,70,34,34);
         for(int frame=0;frame<12;frame++) {
             input.apply(parent,backing,prayer,number,circle,true);
-            assertEquals(circle,com.interfacelayout.util.WidgetGeometry.bounds(prayer));
-            assertFalse(com.interfacelayout.util.WidgetGeometry.bounds(prayer).contains(305,85));
+            assertEquals(new Rectangle(circle.x-25,circle.y,circle.width+25,circle.height+2),com.interfacelayout.util.WidgetGeometry.bounds(prayer));
+            input.restore(client);input.apply(parent,backing,prayer,number,circle,false);assertFalse(com.interfacelayout.util.WidgetGeometry.bounds(prayer).contains(305,85));input.restore(client);input.apply(parent,backing,prayer,number,circle,true);
             assertEquals(circle,com.interfacelayout.util.WidgetGeometry.bounds(backing));
             input.restore(client);assertEquals(0,prayer.getOriginalX());assertEquals(57,prayer.getOriginalWidth());
             assertEquals(0,backing.getOriginalX());assertEquals(57,backing.getOriginalWidth());
@@ -110,7 +110,7 @@ public class CircularOrbInputTest {
                 boolean inside=CircularOrbArtwork.contains(circle,x,y);
                 input.apply(parent,backing,button,null,circle,inside);
                 assertEquals("Native click area must match visible circle",inside,button.getBounds().contains(x,y));
-                assertEquals(circle,parent.getBounds());
+                assertTrue(parent.getBounds().contains(circle));
                 assertFalse(parent.getNoClickThrough());
                 input.restore(client);assertEquals(old,button.getBounds());
             }
@@ -124,7 +124,7 @@ public class CircularOrbInputTest {
         Rectangle original=parent.getBounds(),circle=new Rectangle(323,120,34,34);
         for(int i=0;i<5;i++){
             input.apply(parent,backing,button,null,circle,true);
-            assertEquals(circle,parent.getBounds());assertEquals(circle,button.getBounds());
+            assertTrue(parent.getBounds().contains(circle));assertEquals(circle.getCenterX(),button.getBounds().x+24+button.getBounds().height/2.0,0);
             input.restore(client);assertEquals(original,parent.getBounds());assertEquals(original,button.getBounds());
         }
         verify(parent,never()).setForcedPosition(anyInt(),anyInt());
