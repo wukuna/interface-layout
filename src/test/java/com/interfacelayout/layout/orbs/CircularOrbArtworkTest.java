@@ -1,5 +1,6 @@
 package com.interfacelayout.layout.orbs;
 
+import com.interfacelayout.InterfaceLayoutConfig.OrbRim;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import org.junit.Test;
@@ -20,9 +21,9 @@ public class CircularOrbArtworkTest {
     }
     @Test public void rimIsContinuousAtEveryAngleWithClearCenterAndCorners() {
         CircularOrbArtwork art=new CircularOrbArtwork();
-        for(int diameter:new int[]{33,34,41,43,68}) {
+        for(OrbRim style:OrbRim.values())for(int diameter:new int[]{33,34,41,43,68}) {
             BufferedImage image=new BufferedImage(diameter,diameter,BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g=image.createGraphics();art.paint(g,new Rectangle(0,0,diameter,diameter));g.dispose();
+            Graphics2D g=image.createGraphics();art.paint(g,new Rectangle(0,0,diameter,diameter),style);g.dispose();
             for(int angle=0;angle<360;angle++) {
                 double radians=Math.toRadians(angle),radius=diameter/2.0-2;
                 int x=(int)(diameter/2.0+Math.cos(radians)*radius);
@@ -37,6 +38,26 @@ public class CircularOrbArtworkTest {
             }
             assertTrue("Small curved edges have partial coverage",soft>20);
         }
+    }
+
+    @Test public void switchingRimColorPreservesCoverageAndRestoresCachedSilver() {
+        CircularOrbArtwork art = new CircularOrbArtwork();
+        BufferedImage[] images = new BufferedImage[3];
+        OrbRim[] styles = {OrbRim.SILVER, OrbRim.DARK_GREY, OrbRim.SILVER};
+        for (int i = 0; i < images.length; i++) {
+            images[i] = new BufferedImage(34, 34, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = images[i].createGraphics();
+            art.paint(g, new Rectangle(0, 0, 34, 34), styles[i]);
+            g.dispose();
+        }
+        for (int y = 0; y < 34; y++) for (int x = 0; x < 34; x++) {
+            int silver = images[0].getRGB(x, y), grey = images[1].getRGB(x, y);
+            assertEquals(silver >>> 24, grey >>> 24);
+            assertEquals(silver, images[2].getRGB(x, y));
+            assertTrue(((grey >> 16) & 255) <= ((silver >> 16) & 255));
+        }
+        assertTrue(new Color(images[1].getRGB(17, 1), true).getRed()
+            < new Color(images[0].getRGB(17, 1), true).getRed());
     }
 
     @Test public void rimStaysCircularAndCenteredAroundUnequalContentBounds() {
@@ -57,7 +78,7 @@ public class CircularOrbArtworkTest {
         int x=140;
         for(int diameter:new int[]{34,34,34,34,43}) {
             BufferedImage rim=new BufferedImage(diameter,diameter,BufferedImage.TYPE_INT_ARGB);
-            Graphics2D r=rim.createGraphics();art.paint(r,new Rectangle(0,0,diameter,diameter));r.dispose();
+            Graphics2D r=rim.createGraphics();art.paint(r,new Rectangle(0,0,diameter,diameter),OrbRim.SILVER);r.dispose();
             g.drawImage(rim,x,40,null);g.drawImage(rim,18+(x-140)*2,145,diameter*2,diameter*2,null);
             x+=60;
         }

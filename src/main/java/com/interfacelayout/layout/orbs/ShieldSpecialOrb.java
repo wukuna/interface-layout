@@ -189,7 +189,7 @@ public final class ShieldSpecialOrb extends Overlay
             finally { mask.dispose(); }
             Color chargeColor = state.charges < state.cost ? Color.RED : state.charges == MAX_CHARGES ? Color.GREEN : Color.YELLOW;
             if (circular) {
-                artwork.paint(draw,new Rectangle(0,0,34,34));
+                artwork.paint(draw,new Rectangle(0,0,34,34),config.orbRim());
                 CircularOrbs.paintContent(draw,new Rectangle(0,0,34,34),shield,Integer.toString(state.charges),chargeColor,config.orbContent(),0,0);
             }
             else {

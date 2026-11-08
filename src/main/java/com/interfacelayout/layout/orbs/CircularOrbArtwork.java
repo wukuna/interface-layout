@@ -1,5 +1,7 @@
 package com.interfacelayout.layout.orbs;
 
+import com.interfacelayout.InterfaceLayoutConfig.OrbRim;
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -29,6 +31,8 @@ final class CircularOrbArtwork {
         @Override protected boolean removeEldestEntry(Map.Entry<Integer, BufferedImage> entry) { return size() > 8; }
     };
 
+    private OrbRim rim = OrbRim.SILVER;
+
     void clear() { frames.clear(); }
 
     static Rectangle around(Rectangle content) {
@@ -53,30 +57,38 @@ final class CircularOrbArtwork {
         } finally { draw.dispose(); }
     }
 
-    void paint(Graphics2D g, Rectangle circle) {
+    void paint(Graphics2D g, Rectangle circle, OrbRim style) {
         if (circle.width < 10 || circle.width != circle.height) return;
-        g.drawImage(frames.computeIfAbsent(circle.width, CircularOrbArtwork::create), circle.x, circle.y, null);
+        if (rim != style) {
+            rim = style;
+            frames.clear();
+        }
+        g.drawImage(frames.computeIfAbsent(circle.width, diameter -> create(diameter, style)), circle.x, circle.y, null);
     }
 
-    private static BufferedImage create(int diameter) {
+    private static BufferedImage create(int diameter, OrbRim style) {
 
-        BufferedImage large = new BufferedImage(diameter * 4, diameter * 4, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage large = new BufferedImage(diameter * 8, diameter * 8, BufferedImage.TYPE_INT_ARGB_PRE);
         Graphics2D draw = large.createGraphics();
         try {
-            draw.scale(4, 4);
+            draw.scale(8, 8);
             draw.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             band(draw, diameter, 0, 4, new Color(18, 23, 27));
-            band(draw, diameter, .8, 1.7, new Color(139, 146, 152));
-            band(draw, diameter, 1.7, 3, new Color(48, 54, 59));
+            band(draw, diameter, .75, 2, style == OrbRim.DARK_GREY ? new Color(82, 86, 90) : new Color(139, 146, 152));
+            band(draw, diameter, 2, 3, style == OrbRim.DARK_GREY ? new Color(38, 42, 46) : new Color(55, 61, 66));
             band(draw, diameter, 3, 4, new Color(12, 16, 19));
         } finally { draw.dispose(); }
-        BufferedImage image = new BufferedImage(diameter, diameter, BufferedImage.TYPE_INT_ARGB);
-        draw = image.createGraphics();
-        try {
-            draw.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            draw.drawImage(large, 0, 0, diameter, diameter, null);
-        } finally { draw.dispose(); }
-        return image;
+        for (int size = large.getWidth() / 2; size >= diameter; size /= 2) {
+            BufferedImage reduced = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB_PRE);
+            draw = reduced.createGraphics();
+            try {
+                draw.setComposite(AlphaComposite.Src);
+                draw.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                draw.drawImage(large, 0, 0, size, size, null);
+            } finally { draw.dispose(); }
+            large = reduced;
+        }
+        return large;
     }
 
     private static void band(Graphics2D g, int diameter, double outside, double inside, Color color) {

@@ -40,10 +40,10 @@ public class CircularOrbsTest {
             for(int hovered=0;hovered<buttons.length;hovered++) {
                 when(orb.client.getMouseCanvasPosition()).thenReturn(new net.runelite.api.Point(140,hovered*40+17));
                 bus.post(new ClientTick());
-                for(int n=0;n<buttons.length;n++)assertEquals(n==hovered?34:0,buttons[n].getOriginalWidth());
+                for(int n=0;n<buttons.length;n++)assertEquals(n==hovered?34:1,buttons[n].getOriginalWidth());
                 bus.post(new ScriptPreFired(446));for(Widget button:buttons)assertEquals(57,button.getOriginalWidth());
                 bus.post(new ScriptPostFired(446));
-                for(int n=0;n<buttons.length;n++)assertEquals(n==hovered?34:0,buttons[n].getOriginalWidth());
+                for(int n=0;n<buttons.length;n++)assertEquals(n==hovered?34:1,buttons[n].getOriginalWidth());
             }
         }
         Menu menu=mock(Menu.class);when(orb.client.getMenu()).thenReturn(menu);
@@ -69,7 +69,7 @@ public class CircularOrbsTest {
         Widget parent=CircularOrbInputTest.widget(circular.client,InterfaceID.Orbs.ORB_HEALTH,null,100,70,57,34);
         Widget backing=CircularOrbInputTest.widget(circular.client,InterfaceID.Orbs.HEALTH_BACKING,parent,0,0,57,34);
         CircularOrbInputTest.widget(circular.client,InterfaceID.Orbs.HEALTH_INDICATOR,parent,27,4,26,26);
-        circular.start();circular.onBeforeRender(new BeforeRender());assertEquals(0,parent.getOriginalWidth());
+        circular.start();circular.onBeforeRender(new BeforeRender());assertEquals(34,parent.getOriginalWidth());
         com.interfacelayout.layout.GameframeCoordinator frame=new com.interfacelayout.layout.GameframeCoordinator();
         com.interfacelayout.util.WidgetStateStore states=new com.interfacelayout.util.WidgetStateStore();
         FreePositionController free=mock(FreePositionController.class);
@@ -123,7 +123,7 @@ public class CircularOrbsTest {
         BufferedImage preview=new BufferedImage(160,60,2);int offset=0;
         for(InterfaceLayoutConfig.OrbContent mode:InterfaceLayoutConfig.OrbContent.values()) {
             BufferedImage image=new BufferedImage(57,34,2);Graphics2D g=image.createGraphics();
-            new CircularOrbArtwork().paint(g,new Rectangle(23,0,34,34));
+            new CircularOrbArtwork().paint(g,new Rectangle(23,0,34,34),com.interfacelayout.InterfaceLayoutConfig.OrbRim.SILVER);
             assertEquals(0,image.getRGB(10,15));assertEquals(0,image.getRGB(40,17));assertEquals(0,image.getRGB(23,0));
             CircularOrbs.paintContent(g,new Rectangle(23,0,34,34),icon,"99",Color.YELLOW,mode,0,0);g.dispose();
             int blue=0,yellow=0;for(int y=0;y<34;y++)for(int x=0;x<57;x++){blue+=image.getRGB(x,y)==Color.BLUE.getRGB()?1:0;yellow+=image.getRGB(x,y)==Color.YELLOW.getRGB()?1:0;}

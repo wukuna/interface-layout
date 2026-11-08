@@ -130,7 +130,7 @@ public final class SoulreaperOrbCompatibility extends Overlay
                 body.fillRect(circle.x+4,circle.y+4,26,26);
             } finally { body.dispose(); }
             paintTimer(draw,extra,circle,true);
-            artwork.paint(draw,circle);
+            artwork.paint(draw,circle,config.orbRim());
             Color text = Color.getHSBColor((float)amount/maximum/3,1,1);
             CircularOrbs.paintContent(draw,circle,worn?specialIcon:axeIcon,Integer.toString(amount),text,config.orbContent(),0,0);
         } finally { draw.dispose(); }

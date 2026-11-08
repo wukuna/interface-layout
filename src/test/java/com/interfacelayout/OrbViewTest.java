@@ -25,6 +25,15 @@ public class OrbViewTest
         return controller;
     }
 
+    @Test public void rimColorLoadsThroughRuneLiteConfigProxy() {
+        for (InterfaceLayoutConfig.OrbRim style : InterfaceLayoutConfig.OrbRim.values()) {
+            ConfigManager configs = mock(ConfigManager.class);
+            when(configs.getConfiguration("interfacelayout", "orbRim")).thenReturn(style.name());
+            assertEquals(style, RealConfigProxy.create(InterfaceLayoutConfig.class, configs).orbRim());
+        }
+        assertEquals(InterfaceLayoutConfig.OrbRim.SILVER, new InterfaceLayoutConfig() {}.orbRim());
+    }
+
     @Test public void compactToggleControlsEveryRetainedPreset() throws Exception
     {
         for (OrbLayout layout : new OrbLayout[]{OrbLayout.VERTICAL, OrbLayout.HORIZONTAL, OrbLayout.HORIZONTAL_WIDE, OrbLayout.CUSTOM})
