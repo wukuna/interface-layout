@@ -260,3 +260,5 @@ If a layout does not behave as expected, check for another enabled plugin that m
 ## License and attribution
 
 Interface Layout is distributed under the [BSD-2-Clause license](LICENSE). The license attributes all contributing authors. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the original projects and adapted code.
+
+Moving menu tabs in classic resizable mode preserves inventory-panel click protection and restores the original widget settings when the layout is reset or disabled.

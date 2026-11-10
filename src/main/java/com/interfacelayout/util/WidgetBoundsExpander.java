@@ -12,6 +12,7 @@ import javax.inject.Singleton;
 import net.runelite.api.Client;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetSizeMode;
+import net.runelite.api.widgets.WidgetType;
 
 @Singleton
 public class WidgetBoundsExpander
@@ -61,6 +62,8 @@ public class WidgetBoundsExpander
 
         positions.keySet().forEach(child -> {
             states.capture(child);
+            if (parent.getNoClickThrough() && child.getType() == WidgetType.LAYER)
+                child.setNoClickThrough(true);
             int width = child.getWidth(), height = child.getHeight();
             child.setOriginalWidth(width); child.setOriginalHeight(height);
             child.setWidthMode(WidgetSizeMode.ABSOLUTE); child.setHeightMode(WidgetSizeMode.ABSOLUTE);
