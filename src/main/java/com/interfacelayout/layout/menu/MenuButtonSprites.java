@@ -19,6 +19,12 @@ public class MenuButtonSprites
     private final Map<Integer, OverrideImage> replacements = boundedMap();
     private final Map<Integer, OverrideImage> paddedReplacements = boundedMap();
 
+    public boolean hasOverride(Widget widget)
+    {
+        return widget != null && (client.getWidgetSpriteOverrides().get(widget.getId()) != null
+            || client.getSpriteOverrides().get(widget.getSpriteId()) != null);
+    }
+
     public BufferedImage get(Widget widget)
     {
         if (widget == null) return null;

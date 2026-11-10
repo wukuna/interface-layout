@@ -191,7 +191,9 @@ public class MenuButtonOverlayTest
     {
         for (int mode = 0; mode < 3; mode++)
         {
-            Fixture f = new Fixture(mode); f.apply();
+            Fixture f = new Fixture(mode);
+            when(f.config.menuOverlayIconStyle()).thenReturn(InterfaceLayoutConfig.MenuIconStyle.FAITHFUL_CONTOURS);
+            f.apply();
             Rectangle bounds = new Rectangle(f.controller.stones().get(6));
             when(f.icons[6].getSpriteId()).thenReturn(780);
             int[] standard = iconPixels(f.render(), bounds);
@@ -212,6 +214,77 @@ public class MenuButtonOverlayTest
             assertEquals(bounds, f.controller.stones().get(6)); verifyNoInteractions(f.configs);
             f.overlay.stop();
         }
+    }
+
+    @Test public void recognizedPackIconsTakePriorityAndRefreshAcrossStylesAndReloads()
+    {
+        for (int mode = 0; mode < 3; mode++) for (boolean nativeSize : new boolean[]{false, true})
+        {
+            Fixture f = new Fixture(mode);
+            when(f.config.menuKeepNativeIcons()).thenReturn(nativeSize);
+            when(f.icons[3].getSpriteId()).thenReturn(777);
+            f.apply();
+            Rectangle bounds = new Rectangle(f.controller.stones().get(3));
+            int[] fallback = iconPixels(f.render(), bounds);
+            f.spriteOverrides.put(777, pixels(Color.RED));
+            assertEquals(Color.RED.getRGB(), f.renderIcon(3));
+            f.spriteOverrides.put(777, pixels(Color.BLUE));
+            assertEquals(Color.BLUE.getRGB(), f.renderIcon(3));
+            f.widgetOverrides.put(f.icons[3].getId(), pixels(Color.GREEN));
+            assertEquals(Color.GREEN.getRGB(), f.renderIcon(3));
+            when(f.config.menuOverlayIconStyle()).thenReturn(InterfaceLayoutConfig.MenuIconStyle.FAITHFUL_CONTOURS);
+            assertArrayEquals(fallback, iconPixels(f.render(), bounds));
+            f.widgetOverrides.put(f.icons[3].getId(), pixels(Color.MAGENTA));
+            when(f.config.menuOverlayIconStyle()).thenReturn(InterfaceLayoutConfig.MenuIconStyle.RESOURCE_PACK);
+            assertEquals(Color.MAGENTA.getRGB(), f.renderIcon(3));
+            f.widgetOverrides.clear();
+            assertEquals(Color.BLUE.getRGB(), f.renderIcon(3));
+            f.spriteOverrides.clear();
+            assertArrayEquals(fallback, iconPixels(f.render(), bounds));
+            f.spriteOverrides.put(777, pixels(Color.RED));
+            f.overlay.stop(); f.states.restore(); f.apply();
+            assertEquals(Color.RED.getRGB(), f.renderIcon(3));
+            assertEquals(bounds, f.controller.stones().get(3));
+            f.hover(3); f.overlay.onPostMenuSort(new PostMenuSort());
+            assertTrue(f.entries.stream().anyMatch(e -> e.getType() == MenuAction.CC_OP && e.getParam1() == f.stones[3].getId()));
+            verifyNoInteractions(f.configs);
+        }
+    }
+
+    @Test public void partialPacksOverrideEachSpellbookAndAlternateTabIndependently()
+    {
+        for (int mode = 0; mode < 3; mode++)
+        {
+            Fixture f = new Fixture(mode); f.apply();
+            Rectangle bounds = new Rectangle(f.controller.stones().get(6));
+            for (int sprite : new int[]{780, 903, 1580, 1583, 1581, 1584, 1708, 1711, 2307, 2308, 1298, 3561})
+            {
+                when(f.icons[6].getSpriteId()).thenReturn(sprite);
+                int[] fallback = iconPixels(f.render(), bounds);
+                f.spriteOverrides.put(sprite, pixels(Color.CYAN));
+                assertEquals(Color.CYAN.getRGB(), f.renderIcon(6));
+                when(f.icons[6].getSpriteId()).thenReturn(785);
+                int[] missing = iconPixels(f.render(), bounds);
+                when(f.config.menuOverlayIconStyle()).thenReturn(InterfaceLayoutConfig.MenuIconStyle.FAITHFUL_CONTOURS);
+                assertArrayEquals(missing, iconPixels(f.render(), bounds));
+                when(f.config.menuOverlayIconStyle()).thenReturn(InterfaceLayoutConfig.MenuIconStyle.RESOURCE_PACK);
+                when(f.icons[6].getSpriteId()).thenReturn(sprite);
+                f.spriteOverrides.clear();
+                assertArrayEquals(fallback, iconPixels(f.render(), bounds));
+            }
+            verifyNoInteractions(f.configs);
+        }
+    }
+
+    @Test public void iconStyleDefaultsToResourcePackAndIgnoresRetiredStyleSetting()
+    {
+        ConfigManager configs = mock(ConfigManager.class);
+        when(configs.getConfiguration("interfacelayout", "menuIconStyle")).thenReturn("FAITHFUL_CONTOURS");
+        InterfaceLayoutConfig config = RealConfigProxy.create(InterfaceLayoutConfig.class, configs);
+        assertEquals(InterfaceLayoutConfig.MenuIconStyle.RESOURCE_PACK, config.menuOverlayIconStyle());
+        when(configs.getConfiguration("interfacelayout", "menuOverlayIconStyle")).thenReturn("FAITHFUL_CONTOURS");
+        config = RealConfigProxy.create(InterfaceLayoutConfig.class, configs);
+        assertEquals(InterfaceLayoutConfig.MenuIconStyle.FAITHFUL_CONTOURS, config.menuOverlayIconStyle());
     }
 
     private static int[] iconPixels(BufferedImage image, Rectangle bounds)

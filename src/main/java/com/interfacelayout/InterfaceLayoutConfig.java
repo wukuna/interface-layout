@@ -648,7 +648,7 @@ public interface InterfaceLayoutConfig extends Config
     default com.interfacelayout.layout.menu.MenuStoneController.Layout menuLayout() { return com.interfacelayout.layout.menu.MenuStoneController.Layout.VANILLA_HORIZONTAL; }
     @ConfigItem(keyName = "menuDirection", name = "Initial bar direction", description = "Initial direction in Free position. Existing bars keep their direction. Joining two separate stones side-by-side makes a row; above or below makes a column.", section = menu, position = 1)
     default com.interfacelayout.layout.menu.MenuStoneController.Direction menuDirection() { return com.interfacelayout.layout.menu.MenuStoneController.Direction.VERTICAL; }
-    @ConfigItem(keyName = "menuOverlayButtons", name = "Use overlay menu buttons", description = "Replace visible menu tabs with scalable overlay buttons using dark icons with faithful contours and active game/resource-pack backgrounds. Works in Fixed, Classic and Modern. Existing bars, hiding and grouping are retained; native interface contents are unchanged.", section = menu, position = 9)
+    @ConfigItem(keyName = "menuOverlayButtons", name = "Use overlay menu buttons", description = "Replace visible menu tabs with scalable overlay buttons using your resource-pack icons by default, with optional Faithful contours artwork and active game/resource-pack backgrounds. Works in Fixed, Classic and Modern. Existing bars, hiding and grouping are retained; native interface contents are unchanged.", section = menu, position = 9)
     default boolean menuOverlayButtons() { return false; }
     @Range(min = 25, max = 200)
     @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
@@ -656,6 +656,18 @@ public interface InterfaceLayoutConfig extends Config
     default int menuGroupSize() { return 100; }
     @ConfigItem(keyName = "menuKeepNativeIcons", name = "Keep icons at native size", description = "Keep overlay menu icons centred at their native size when buttons are enlarged. Below 100%, icons shrink with the buttons. Off scales the icons with the buttons at every size.", section = menu, position = 11)
     default boolean menuKeepNativeIcons() { return false; }
+
+    enum MenuIconStyle
+    {
+        RESOURCE_PACK("Resource pack"), FAITHFUL_CONTOURS("Faithful contours");
+
+        private final String label;
+        MenuIconStyle(String label) { this.label = label; }
+        @Override public String toString() { return label; }
+    }
+
+    @ConfigItem(keyName = "menuOverlayIconStyle", name = "Overlay icon style", description = "Resource pack uses active icon replacements, with Faithful contours for missing icons. Faithful contours always uses the bundled artwork where available. Tab backgrounds follow your active resource pack in both styles.", section = menu, position = 12)
+    default MenuIconStyle menuOverlayIconStyle() { return MenuIconStyle.RESOURCE_PACK; }
 
     @Range(min = 0, max = 20)
     @ConfigItem(keyName = "menuSpacing", name = "Stone spacing", description = "Pixels between visible stones. Hidden stones close the gap without changing the group's saved position.", section = menu, position = 2)

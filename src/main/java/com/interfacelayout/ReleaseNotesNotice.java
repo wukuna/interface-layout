@@ -19,18 +19,11 @@ import net.runelite.client.events.ProfileChanged;
 @Singleton
 final class ReleaseNotesNotice
 {
-    static final String RELEASE = "2026-11-07-circular-orbs";
+    static final String RELEASE = "2026-11-09-resource-pack-icons";
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] UPDATES = {
-        "Matched circular special, Soulreaper Axe QoL and shield orbs to the selected icon and number display.",
-        "Fixed orb edge clicks, moved-orb click offsets and shield special actions.",
-        "Fixed circular orbs disappearing after layout refreshes.",
-        "Fixed circular orb values and fills freezing until hovered.",
-        "Fixed circular free orbs flickering and shifting inside custom UI anchors.",
-        "Smoothed circular rims and added a dark grey rim option.",
-        "Aligned prayer indicators and HP/special regeneration rings with circular orbs.",
-        "Extended menu gap protection to adjacent rows and outer stone edges.",
-        "Added faithful contours for dark menu overlay icons, retaining original accents and custom spellbooks.",
+        "Menu overlay icons now follow your resource pack by default, including custom spellbooks.",
+        "Choose Faithful contours in Menu bars > Overlay icon style; missing pack icons use it as a fallback.",
     };
 
     @Inject private Client client;

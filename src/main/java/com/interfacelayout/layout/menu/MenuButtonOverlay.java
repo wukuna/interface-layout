@@ -218,8 +218,12 @@ public class MenuButtonOverlay extends Overlay
         if (image == null || area.width <= 0 || area.height <= 0) return;
         if (icon && !tiled)
         {
-            BufferedImage bundled = iconSprites.get(widget.getSpriteId());
-            if (bundled != null) image = bundled;
+            if (config.menuOverlayIconStyle() == InterfaceLayoutConfig.MenuIconStyle.FAITHFUL_CONTOURS
+                || !sprites.hasOverride(widget))
+            {
+                BufferedImage bundled = iconSprites.get(widget.getSpriteId());
+                if (bundled != null) image = bundled;
+            }
             java.awt.geom.AffineTransform transform = graphics.getTransform();
             int width = (int) Math.ceil(area.width * Math.hypot(transform.getScaleX(), transform.getShearY()));
             int height = (int) Math.ceil(area.height * Math.hypot(transform.getShearX(), transform.getScaleY()));
