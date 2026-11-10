@@ -43,15 +43,7 @@ import net.runelite.client.config.Range;
 @ConfigGroup(GROUP_NAME)
 public interface InterfaceLayoutConfig extends Config
 {
-	@ConfigSection(
-		name = "Presentation",
-		description = "Optional changes to the appearance of the game interface.",
-		closedByDefault = true,
-		position = 10
-	)
-	String presentation = "presentation";
-
-    @ConfigSection(name="Beta features",description="Optional features undergoing testing.",closedByDefault=true,position=11)
+    @ConfigSection(name="Beta features",description="Optional equipment and appearance features undergoing testing.",closedByDefault=true,position=11)
     String betaFeatures="betaFeatures";
 
     @ConfigItem(keyName="betaEquipmentPanel",name="Beta equipment panel",
@@ -68,8 +60,7 @@ public interface InterfaceLayoutConfig extends Config
 		keyName = "hideExtraSpecialAttackBar",
 		name = "Hide extra special-attack bar",
 		description = "Hide the small secondary meter beneath the special-attack orb. Keeps the orb, its number and normal special-attack controls.",
-		section = presentation,
-		position = 0
+		section=betaFeatures,position=2
 	)
 	default boolean hideExtraSpecialAttackBar()
 	{
@@ -80,8 +71,7 @@ public interface InterfaceLayoutConfig extends Config
 		keyName = "showShieldSpecialOrb",
 		name = "Show shield special orb",
 		description = "Show a movable shield-charge orb using the game's existing shield special action. The native special orb must remain visible. Uses the current resource pack; off by default.",
-		section = presentation,
-		position = 1
+		section=betaFeatures,position=3
 	)
 	default boolean showShieldSpecialOrb()
 	{
@@ -89,7 +79,7 @@ public interface InterfaceLayoutConfig extends Config
 	}
 
     @ConfigItem(keyName="hideOrbTabs",name="Circular orbs (hide number tabs)",
-        description="Hide the number tabs beside HP, Prayer, Run and Special, with a clean circular rim and matching click areas. Adds the same rim to the compass. Keeps native fill, icons and actions. Temporarily shows native artwork while editing the layout.",section=presentation,position=2)
+        description="Hide the number tabs beside HP, Prayer, Run and Special, with a clean circular rim and matching click areas. Adds the same rim to the compass. Keeps native fill, icons and actions. Temporarily shows native artwork while editing the layout.",section=betaFeatures,position=4)
     default boolean hideOrbTabs() {return false;}
 
     enum OrbContent {
@@ -99,7 +89,7 @@ public interface InterfaceLayoutConfig extends Config
         @Override public String toString() {return label;}
     }
     @ConfigItem(keyName="orbContent",name="Circular orb contents",
-        description="Contents inside circular orbs: the native number, the icon, or a small icon above the number. Used with Circular orbs enabled.",section=presentation,position=3)
+        description="Contents inside circular orbs: the native number, the icon, or a small icon above the number. Used with Circular orbs enabled.",section=betaFeatures,position=5)
     default OrbContent orbContent() {return OrbContent.ICON_AND_NUMBER;}
 
     enum OrbRim {
@@ -109,7 +99,7 @@ public interface InterfaceLayoutConfig extends Config
         @Override public String toString() {return label;}
     }
     @ConfigItem(keyName="orbRim",name="Circular orb rim",
-        description="Rim color for circular orbs and the compass, including Soulreaper and shield orbs.",section=presentation,position=4)
+        description="Rim color for circular orbs and the compass, including Soulreaper and shield orbs.",section=betaFeatures,position=6)
     default OrbRim orbRim() {return OrbRim.SILVER;}
 
 	enum HorizontalAnchor

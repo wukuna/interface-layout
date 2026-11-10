@@ -22,6 +22,7 @@ final class ReleaseNotesNotice
     static final String RELEASE = "2026-11-09-resource-pack-icons";
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] UPDATES = {
+        "Moved Presentation settings into Beta features; your saved choices are retained.",
         "Menu overlay icons now follow your resource pack by default, including custom spellbooks.",
         "Choose Faithful contours in Menu bars > Overlay icon style; missing pack icons use it as a fallback.",
     };

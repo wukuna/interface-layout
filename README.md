@@ -7,7 +7,7 @@ Arrange RuneLite around the way you play. Move orbs and the compass, detach menu
 ## Features
 
 - **Free-position orbs** — move individual orbs and the compass independently of the minimap in resizable modes.
-- **Circular orbs** — under Presentation, hide the number tabs beside HP, Prayer, Run and Special (including the optional shield orb). Choose number only, icon only, or a small icon and number inside the circle. The button and click-blocking area fit the circle; the removed tab no longer intercepts clicks. Use **Circular orb rim** to choose a smooth Silver or Dark grey edge for all circular orbs and the compass. Native fill/availability/actions and saved positions remain. Turning the option off restores the native background, number tab and full click area. Off by default; Edit interface temporarily uses native artwork.
+- **Circular orbs** — under Beta features, hide the number tabs beside HP, Prayer, Run and Special (including the optional shield orb). Choose number only, icon only, or a small icon and number inside the circle. The button and click-blocking area fit the circle; the removed tab no longer intercepts clicks. Use **Circular orb rim** to choose a smooth Silver or Dark grey edge for all circular orbs and the compass. Native fill/availability/actions and saved positions remain. Turning the option off restores the native background, number tab and full click area. Off by default; Edit interface temporarily uses native artwork.
 - **Compact orb layouts** — arrange orbs vertically, horizontally, in a wider row, or with a custom preset.
 - **Movable menu bars** — keep native rows or start with vertical bars, then drag each bar wherever you want.
 - **Menu icon style** — Resource pack is the default and uses your active icon replacements, including custom spellbooks. Missing pack icons fall back to bundled Faithful contours. Choose Faithful contours to use the bundled dark artwork and original accents instead. Both styles scale with your buttons and keep active resource-pack backgrounds.
@@ -17,7 +17,7 @@ Arrange RuneLite around the way you play. Move orbs and the compass, detach menu
 - **Saved layouts** — keep separate menu arrangements for Fixed, Resizable Classic and Resizable Modern.
 - **Editing controls** — use drag handles, optional grid snapping and resets to adjust your layout.
 - **Modern logout stone** — optionally give the existing logout X a stone background; both forms can join custom menu bars. Fixed and Classic keep their normal logout tabs.
-- **Shield special orb** — optionally show a separate, movable shield-charge orb under Presentation, using the game's existing off-hand special-attack action. Off by default.
+- **Shield special orb** — optionally show a separate, movable shield-charge orb under Beta features, using the game's existing off-hand special-attack action. Off by default.
 - **Beta equipment sidebar** — compact stats and spellbook information beneath your gear, small utility buttons, and optional reduced tooltips. The expanded equipment window and bank equipment view keep their native layouts.
 - **Shortcuts and protection** — toggle editing or minimap visibility, restore the native menu temporarily, and choose whether clicks pass through gaps between stones.
 
@@ -138,11 +138,11 @@ The logout control depends on the game's display mode. **Fixed** and **Resizable
 
 Fixed and Resizable Classic keep their native Logout tabs. **Hide Logout-X (Modern)**, the individual logout visibility setting and **Hide clan–music tabs** can hide the Modern control; check those settings if it is missing. In custom menu arrangements, the logout control belongs to the menu group, so individual orb dragging and the separate minimap logout copy are suspended. Turning restoration off removes only the added background and keeps custom group membership. The X opens the native logout panel; game-hidden controls remain hidden.
 
-### Presentation
+### Beta features: appearance
 
-Enable **Presentation > Hide extra special-attack bar** to hide the small secondary meter beneath the special-attack orb. This is optional and starts off. The orb's icon, number and normal special-attack controls remain available. Turning the setting off restores the meter when the game would normally show it.
+Enable **Beta features > Hide extra special-attack bar** to hide the small secondary meter beneath the special-attack orb. This is optional and starts off. The orb's icon, number and normal special-attack controls remain available. Turning the setting off restores the meter when the game would normally show it.
 
-Enable **Presentation > Show shield special orb** for a separate special-attack orb for supported shield-slot equipment, using the game's existing off-hand action. It uses the native shield icon, shows the shield's charges, and follows compatible resource-pack sprite replacements. It starts off and appears only while a supported shield and its native special-attack control are available. The current supported charge system has 20 charges and requires 10 to activate; other shield abilities are not assumed to work the same way.
+Enable **Beta features > Show shield special orb** for a separate special-attack orb for supported shield-slot equipment, using the game's existing off-hand action. It uses the native shield icon, shows the shield's charges, and follows compatible resource-pack sprite replacements. It starts off and appears only while a supported shield and its native special-attack control are available. The current supported charge system has 20 charges and requires 10 to activate; other shield abilities are not assumed to work the same way.
 
 The shield orb starts beside the regular special-attack orb. Move it with RuneLite's overlay-drag modifier (normally Alt). Clicking it selects **Use Offhand** or **Deactivate Offhand** when both weapon and shield specials are available; when the shield supplies the primary special, it uses that action instead. Keep the native special orb visible. **Hide extra special-attack bar** is a separate choice, so you can hide the small meter while using the new orb. Unequipping the shield removes the extra orb; two-handed weapon stacks do not activate it.
 
