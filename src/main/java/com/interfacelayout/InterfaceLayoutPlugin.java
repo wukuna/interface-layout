@@ -35,7 +35,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 @PluginDescriptor(
 	name = "Interface Layout",
-	description = "Move orbs and menu tabs, resize custom bars with resource-pack artwork, control minimap visibility and add an optional shield special orb.",
+	description = "Move and anchor the minimap, compass, orbs and menu tabs, with scalable menu buttons that respect your resource-pack icons.",
 	tags = {"compact", "orbs", "layout", "hide", "minimap", "resizable", "classic", "modern", "world", "map", "wiki", "swap", "overlay", "orb", "fixed"},
 	conflicts = {"Compact Orbs", "Menu Stones Hider", "Fixed Resizable Hybrid", "Orb Hider", "Minimap Hider", "Movable Orbs", "Custom Game Tabs"}
 )
