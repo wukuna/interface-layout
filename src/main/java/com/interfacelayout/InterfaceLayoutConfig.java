@@ -99,7 +99,7 @@ public interface InterfaceLayoutConfig extends Config
         @Override public String toString() {return label;}
     }
     @ConfigItem(keyName="orbRim",name="Circular orb rim",
-        description="Rim color for circular orbs and the compass, including Soulreaper and shield orbs.",section=betaFeatures,position=6)
+        description="Rim color for circular orbs, the compass and the free-position minimap, including Soulreaper and shield orbs.",section=betaFeatures,position=6)
     default OrbRim orbRim() {return OrbRim.SILVER;}
 
 	enum HorizontalAnchor
@@ -157,7 +157,7 @@ public interface InterfaceLayoutConfig extends Config
 	@ConfigItem(
 		keyName = ConfigKeys.ORB_LAYOUT,
 		name = "Orb arrangement",
-		description = "Free Position lets you Alt-drag individual orbs and the compass separately from the minimap. Preset arrangements apply when Hide minimap is enabled.",
+		description = "Free Position lets you Alt-drag and anchor the native minimap, individual orbs and compass in resizable modes. The compass follows the minimap until positioned separately. Preset arrangements apply when Hide minimap is enabled.",
 		section = hideAndSwapUpdate,
 		position = 0
 	)
@@ -347,7 +347,7 @@ public interface InterfaceLayoutConfig extends Config
 	@ConfigItem(
 		keyName = ConfigKeys.ENABLE_MINIMAP_OVERLAY,
 		name = "Show separate minimap",
-		description = "Show a separate minimap while Hide minimap is enabled in a resizable mode. Free Position moves orbs and the compass, not the minimap itself.<br>" +
+		description = "Show a separate minimap while Hide minimap is enabled in a resizable mode. Free Position can move the native minimap instead, retaining other plugins' minimap overlays.<br>" +
 			"Warning: this minimap is not supported by plugins that display overlays on the minimap (names, marker tiles, lines, etc.)",
 		section = layout,
 		position = 30
@@ -392,7 +392,7 @@ public interface InterfaceLayoutConfig extends Config
 	@ConfigItem(
 		keyName = ConfigKeys.MINIMAP,
 		name = "Hide minimap",
-		description = "Hide the native minimap in resizable modes. Preset arrangements also compact the orbs; Free Position keeps each saved orb position. Use Show separate minimap under Orb layout options if you want a map elsewhere.",
+		description = "Hide the native minimap in resizable modes. Preset arrangements also compact the orbs; Free Position retains saved minimap, orb and compass positions when hidden.",
 		section = hideAndSwapUpdate,
 		position = 1
 	)

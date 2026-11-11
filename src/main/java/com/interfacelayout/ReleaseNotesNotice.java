@@ -19,13 +19,12 @@ import net.runelite.client.events.ProfileChanged;
 @Singleton
 final class ReleaseNotesNotice
 {
-    static final String RELEASE = "2026-11-09-resource-pack-icons";
+    static final String RELEASE = "2026-11-10-free-minimap";
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] UPDATES = {
-        "Keep the inventory blocking clicks when repositioning menu tabs in classic resizable mode.",
-        "Moved Presentation settings into Beta features; your saved choices are retained.",
-        "Menu overlay icons now follow your resource pack by default, including custom spellbooks.",
-        "Choose Faithful contours in Menu bars > Overlay icon style; missing pack icons use it as a fallback.",
+        "Alt-drag and anchor the native minimap in Free Position in Classic and Modern resizable modes.",
+        "Use matching Silver or Dark grey rings for the free minimap and compass.",
+        "The compass follows the minimap until positioned separately; hidden controls retain their saved positions.",
     };
 
     @Inject private Client client;

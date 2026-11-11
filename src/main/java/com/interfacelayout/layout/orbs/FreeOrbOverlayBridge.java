@@ -1,7 +1,6 @@
 package com.interfacelayout.layout.orbs;
 
 import com.interfacelayout.layout.orbs.widget.TargetWidget;
-import com.interfacelayout.layout.orbs.widget.elements.Compass;
 import com.interfacelayout.layout.orbs.widget.layout.edit.EditManager;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -70,7 +69,7 @@ public class FreeOrbOverlayBridge
         {
             for (TargetWidget[] choices : EditManager.EDIT_TARGETS)
                 overlays.resetOverlay(new ElementOverlay(name(mode, choices[0]), choices[0]));
-            for (TargetWidget target : new TargetWidget[]{Compass.CLASSIC_COMPASS, Compass.MODERN_COMPASS})
+            for (TargetWidget target : FreePositionController.EXTRA_TARGETS)
                 overlays.resetOverlay(new ElementOverlay(name(mode, target), target));
         }
         elements.values().forEach(overlay -> { overlays.resetOverlay(overlay); overlay.lastApplied = null; overlay.reset = false; });

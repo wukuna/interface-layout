@@ -21,6 +21,50 @@ import static org.mockito.Mockito.*;
 
 public class FreeOrbOverlayBridgeTest
 {
+    @Test public void minimapAnchorsFollowCanvasUpdatesAndResetWithTheLayout()
+    {
+        TargetWidget map = com.interfacelayout.layout.orbs.widget.elements.Minimap.MODERN_MINIMAP_MASK;
+        Map<TargetWidget, Rectangle> visible = new HashMap<>();
+        visible.put(map, new Rectangle(800, 20, 160, 160));
+        FreePositionController free = mock(FreePositionController.class);
+        when(free.bounds()).thenAnswer(i -> new HashMap<>(visible));
+        OverlayManager overlays = mock(OverlayManager.class);
+        List<Overlay> registered = new ArrayList<>();
+        when(overlays.add(any())).thenAnswer(i -> registered.add(i.getArgument(0)));
+        FreeOrbOverlayBridge bridge = Guice.createInjector(new AbstractModule() {
+            @Override protected void configure() {
+                bind(FreePositionController.class).toProvider(() -> free);
+                bind(OverlayManager.class).toProvider(() -> overlays);
+                bind(OrbController.class).toProvider(() -> mock(OrbController.class));
+            }
+        }).getInstance(FreeOrbOverlayBridge.class);
+        bridge.start(() -> {});
+        Overlay overlay = registered.get(0);
+        assertTrue(overlay.isMovable());
+        assertTrue(overlay.isSnappable());
+        overlay.setPreferredPosition(net.runelite.client.ui.overlay.OverlayPosition.BOTTOM_LEFT);
+        overlay.getBounds().setLocation(100, 400);
+        assertEquals(new java.awt.Dimension(160, 160), overlay.render(null));
+        verify(free).save(map, new Point(100, 400));
+        overlay.getBounds().setLocation(100, 500);
+        overlay.render(null);
+        verify(free).save(map, new Point(100, 500));
+        visible.clear();
+        bridge.sync();
+        assertTrue(overlay.getBounds().isEmpty());
+        visible.put(map, new Rectangle(100, 500, 160, 160));
+        bridge.sync();
+        assertEquals(1, registered.size());
+        assertEquals(net.runelite.client.ui.overlay.OverlayPosition.BOTTOM_LEFT, overlay.getPreferredPosition());
+        bridge.resetAll();
+        org.mockito.ArgumentCaptor<Overlay> resets = org.mockito.ArgumentCaptor.forClass(Overlay.class);
+        verify(overlays, atLeastOnce()).resetOverlay(resets.capture());
+        for (String mode : new String[]{"classic", "modern"})
+            for (TargetWidget target : FreePositionController.EXTRA_TARGETS)
+                assertTrue(resets.getAllValues().stream().anyMatch(o -> o.getName().equals(
+                    "INTERFACE_LAYOUT_ORB_" + mode + "_" + target.getComponentId() + "_" + target.getArrayId())));
+    }
+
     @Test public void freeOrbsExposeIndependentOriginsAndPreserveAnchorsAcrossHideAndRestore()
     {
         TargetWidget hp = Orbs.HP_ORB_CONTAINER, prayer = Orbs.PRAYER_ORB_CONTAINER;

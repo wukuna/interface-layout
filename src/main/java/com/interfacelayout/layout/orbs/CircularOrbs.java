@@ -46,6 +46,7 @@ public final class CircularOrbs extends Overlay {
     private final Runnable afterFrame = () -> input.restoreRenderBounds(client);
     private final CircularOrbArtwork artwork = new CircularOrbArtwork();
     private final CircularCompassFrame compass = new CircularCompassFrame();
+    private final CircularMinimapFrame minimap = new CircularMinimapFrame();
     private final List<View> views=new ArrayList<>();
     private volatile boolean running;
     private volatile int generation;
@@ -53,7 +54,8 @@ public final class CircularOrbs extends Overlay {
     private final Overlay frames=new Overlay() {
         {setPosition(OverlayPosition.DYNAMIC);setLayer(OverlayLayer.ABOVE_WIDGETS);}
         @Override public Dimension render(Graphics2D g) {
-            if(running && config.hideOrbTabs()) {
+            if(running && (config.hideOrbTabs() || freeMinimap())) {
+                minimap.paint(g, artwork, config.orbRim());
                 compass.paint(g, artwork, config.orbRim());
             }
             return null;
@@ -66,6 +68,7 @@ public final class CircularOrbs extends Overlay {
     public void releaseForLayout() {restore();}
     public void refreshAfterLayout() {refresh();}
     private void restore() {
+        minimap.restore(client);
         compass.restore(manager);
         input.restore(client);
         opacities.forEach((widget,opacity)->{if(CircularOrbInput.current(client,widget) && widget.getOpacity()==255)widget.setOpacity(opacity);});
@@ -97,15 +100,21 @@ public final class CircularOrbs extends Overlay {
         if(OrbConstants.ConfigGroup.GROUP_NAME.equals(event.getGroup()))releaseBeforeLayout();
     }
     @Subscribe(priority=4) public void onProfileChanged(ProfileChanged event) {releaseBeforeLayout();}
+    private boolean freeMinimap() {
+        return config.layout() == OrbLayout.FREE_POSITION && !manager.isFixedMode();
+    }
     private void refresh() {
         if(scriptDepth>0)return;
         restore();
-        boolean enabled=running && config.hideOrbTabs() && !config.editInterface() && client.getGameState()==GameState.LOGGED_IN;
+        boolean visible=running && client.getGameState()==GameState.LOGGED_IN;
+        boolean enabled=visible && config.hideOrbTabs() && !config.editInterface();
+        boolean framedMap = visible && freeMinimap() && !config.hideMinimap() && minimap.refresh(client, manager);
+        if (framedMap) compass.refresh(client, manager);
         Widget spec=client.getWidget(InterfaceID.Orbs.ORB_SPECENERGY),specBacking=client.getWidget(InterfaceID.Orbs.SPECENERGY_BACKING);
         if(soulreaper!=null)soulreaper.refresh(enabled && visible(spec) && visible(specBacking)
             && !WidgetGeometry.bounds(spec).isEmpty() && !WidgetGeometry.bounds(specBacking).isEmpty());
         if(!enabled)return;
-        compass.refresh(client,manager);
+        if (!framedMap) compass.refresh(client,manager);
         for(int i=0;i<ORBS.length;i++) {
             Orbs orb=ORBS[i];Widget parent=client.getWidget(orb.getComponentId()),backing=client.getWidget(orb.getBackingId());
             Widget indicator=client.getWidget(orb.getIndicatorId()),icon=client.getWidget(orb.getIconId()),number=client.getWidget(NUMBERS[i]);
