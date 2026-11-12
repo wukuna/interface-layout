@@ -25,9 +25,17 @@ Interface Layout adapts these BSD-2-Clause plugins:
   - The original BSD-2-Clause license is retained in LICENSE-CUSTOM-GAME-TABS and
     packaged in META-INF/LICENSE-CUSTOM-GAME-TABS.
 
-All authors are attributed in the single BSD-2-Clause LICENSE at the repository
-root. The same license is included in the plugin JAR as META-INF/LICENSE, alongside
-this provenance notice. Original source copyright/license headers remain intact.
+- **RuneLite Regeneration Meter and Prayer**, https://github.com/runelite/runelite
+  - Reference tag: `runelite-parent-1.13.6`.
+  - Regeneration timing and prayer drain rates are adapted from these plugins.
+  - Copyright (c) 2019, Sean Dewar; (c) 2018, Abex; (c) 2018, Zimaya;
+    (c) 2017, Adam; (c) 2018, Raqes.
+  - Their BSD-2-Clause notices are retained in LICENSE-ORB-TIMERS and packaged
+    in META-INF/LICENSE-ORB-TIMERS.
+
+The BSD-2-Clause licenses are retained at the repository root and included in the
+plugin JAR under META-INF, alongside this provenance notice. Original source
+copyright/license headers remain intact.
 
 New layout coordination, clipping expansion, state journals, free-position editing,
 menu-stone placement and tests were added for Interface Layout. These received live

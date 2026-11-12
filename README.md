@@ -11,6 +11,7 @@ Arrange RuneLite around the way you play. Move menu bars, detach tabs into rows 
 - **Keep your artwork:** **Resource pack** is the default icon source, including custom spellbooks. **Faithful contours** is an optional style and a fallback for missing pack replacements.
 - **Position map controls:** move free orbs and the compass in resizable modes; the pending update adds native-minimap movement and anchoring.
 - **Use circular rims:** Silver or Dark grey frames, with optional number-only, icon-only or combined circular-orb contents.
+- **Track orb timers:** Optional inner rings for HP regeneration, special energy and prayer drain, including Rapid Heal, Lightbearer and equipment prayer bonus. The outer prayer potion-dose reminder stays separate.
 - **Save each display mode:** Fixed, Resizable Classic and Resizable Modern keep separate menu layouts.
 - **Control visibility:** hide individual tabs, map controls and decorative borders, with shortcuts and resets.
 
@@ -71,6 +72,8 @@ If you changed RuneLite’s overlay movement hotkey, use that modifier instead o
 ## Beta appearance features
 
 **Beta features** contains circular-orb presentation, the supported shield special orb and equipment presentation controls. The current **Beta equipment panel** adds compact bonuses, weight and spellbook information to the in-game Equipment tab. It is separate from RuneLite’s toolbar side panel and does not change the expanded equipment window.
+
+With circular orbs enabled, **HP regeneration ring**, **Special regeneration ring** and **Prayer drain ring** can be toggled independently. These timers work without enabling Regeneration Meter. The prayer ring starts full and empties counterclockwise toward the next point drained, adjusts to active prayers and equipped prayer bonus, and disappears when prayers are inactive. Potion restoration does not restart the drain estimate. RuneLite’s outer flashing potion-dose reminder and separate Prayer Regeneration Helper reminders retain their own settings. Timing is estimated, especially when enabling the plugin mid-session or rapidly switching prayers.
 
 ## Guide, compatibility and support
 

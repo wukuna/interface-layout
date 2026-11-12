@@ -20,7 +20,10 @@ import net.runelite.api.events.ScriptPostFired;
 import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.PostMenuSort;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GameTick;
+import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
@@ -41,6 +44,8 @@ public final class CircularOrbs extends Overlay {
     @Inject MenuButtonSprites sprites;
     @Inject OrbController manager;
     @Inject SoulreaperOrbCompatibility soulreaper;
+    @Inject net.runelite.client.game.ItemManager itemManager;
+    final OrbTimers timers = new OrbTimers();
     private final Map<Widget,Integer> opacities=new IdentityHashMap<>();
     private final CircularOrbInput input = new CircularOrbInput();
     private final Runnable afterFrame = () -> input.restoreRenderBounds(client);
@@ -50,6 +55,7 @@ public final class CircularOrbs extends Overlay {
     private final List<View> views=new ArrayList<>();
     private volatile boolean running;
     private volatile int generation;
+    private int timerGeneration = -1;
     private int scriptDepth;
     private final Overlay frames=new Overlay() {
         {setPosition(OverlayPosition.DYNAMIC);setLayer(OverlayLayer.ABOVE_WIDGETS);}
@@ -64,7 +70,7 @@ public final class CircularOrbs extends Overlay {
     public CircularOrbs() {setPosition(OverlayPosition.DYNAMIC);setLayer(OverlayLayer.ABOVE_WIDGETS);setPriority(Overlay.PRIORITY_HIGHEST);}
     public Overlay frames() {return frames;}
     public void start() {running=true;generation++;if(drawManager!=null)drawManager.registerEveryFrameListener(afterFrame);}
-    public void stop() {if(drawManager!=null)drawManager.unregisterEveryFrameListener(afterFrame);running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation){scriptDepth=0;restore();if(soulreaper!=null)soulreaper.restore();artwork.clear();}});}
+    public void stop() {if(drawManager!=null)drawManager.unregisterEveryFrameListener(afterFrame);running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation){scriptDepth=0;restore();timers.reset();if(soulreaper!=null)soulreaper.restore();artwork.clear();}});}
     public void releaseForLayout() {restore();}
     public void refreshAfterLayout() {refresh();}
     private void restore() {
@@ -78,7 +84,17 @@ public final class CircularOrbs extends Overlay {
         if(running && scriptDepth++==0)restore();
     }
     @Subscribe public void onGameStateChanged(GameStateChanged event) {
+        if(event.getGameState()==GameState.LOGIN_SCREEN || event.getGameState()==GameState.HOPPING)timers.reset();
         if(event.getGameState()!=GameState.LOGGED_IN){scriptDepth=0;restore();if(soulreaper!=null)soulreaper.restore();}
+    }
+    @Subscribe public void onGameTick(GameTick event) {
+        if(running && client.getGameState()==GameState.LOGGED_IN) {
+            if(timerGeneration!=generation){timers.reset();timerGeneration=generation;}
+            timers.tick(client,itemManager,System.nanoTime());
+        }
+    }
+    @Subscribe public void onVarbitChanged(VarbitChanged event) {
+        if(running && event.getVarbitId()==VarbitID.PRAYER_RAPIDHEAL)timers.resetHitpoints();
     }
     @Subscribe(priority=-4) public void onBeforeRender(BeforeRender event) {
 
@@ -172,6 +188,7 @@ public final class CircularOrbs extends Overlay {
                 if(soulreaper!=null && v.parent.getId()==InterfaceID.Orbs.ORB_SPECENERGY)soulreaper.paintNativeTimer(draw,v.circle);
                 artwork.paint(draw,v.circle,config.orbRim());
                 paintContent(draw,v.circle,v.icon,v.number,v.color,config.orbContent(),v.iconOpacity,v.numberOpacity);
+                if(timerGeneration==generation)timers.paint(draw,v.circle,v.parent.getId(),config,System.nanoTime());
             } finally {draw.dispose();}
             net.runelite.api.Point mouse = client.getMouseCanvasPosition();
             if (mouse == null || !CircularOrbArtwork.contains(v.circle, mouse.getX(), mouse.getY()))

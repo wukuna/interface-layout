@@ -102,6 +102,18 @@ public interface InterfaceLayoutConfig extends Config
         description="Rim color for circular orbs, the compass and the free-position minimap, including Soulreaper and shield orbs.",section=betaFeatures,position=6)
     default OrbRim orbRim() {return OrbRim.SILVER;}
 
+    @ConfigItem(keyName="orbHitpointsTimer",name="HP regeneration ring",
+        description="Show an estimated natural HP regeneration timer inside circular orbs. Accounts for Rapid Heal.",section=betaFeatures,position=7)
+    default boolean orbHitpointsTimer() {return true;}
+
+    @ConfigItem(keyName="orbSpecialTimer",name="Special regeneration ring",
+        description="Show an estimated special-attack regeneration timer inside circular orbs. Accounts for Lightbearer.",section=betaFeatures,position=8)
+    default boolean orbSpecialTimer() {return true;}
+
+    @ConfigItem(keyName="orbPrayerTimer",name="Prayer drain ring",
+        description="Count down counterclockwise to the next prayer point drained, estimated from active prayers and equipment prayer bonus. Keeps the outer potion-dose reminder separate.",section=betaFeatures,position=9)
+    default boolean orbPrayerTimer() {return true;}
+
 	enum HorizontalAnchor
 	{
 		LEFT, RIGHT;

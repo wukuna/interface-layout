@@ -136,6 +136,7 @@ public class MenuStoneControllerTest
             @Override protected void configure()
             {
                 bind(Client.class).toInstance(client);
+                bind(net.runelite.client.game.ItemManager.class).toInstance(mock(net.runelite.client.game.ItemManager.class));
                 bind(InterfaceLayoutConfig.class).toInstance(config);
                 bind(ConfigManager.class).toInstance(configs);
                 bind(net.runelite.client.ui.overlay.OverlayManager.class).toInstance(mock(net.runelite.client.ui.overlay.OverlayManager.class));
