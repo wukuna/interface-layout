@@ -2,6 +2,7 @@ package com.interfacelayout.layout.orbs;
 
 import com.interfacelayout.layout.orbs.widget.TargetWidget;
 import com.interfacelayout.layout.orbs.widget.layout.edit.EditManager;
+import com.interfacelayout.util.OverlayPlacement;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -21,6 +22,7 @@ public class FreeOrbOverlayBridge
     @Inject private OverlayManager overlays;
     @Inject private FreePositionController free;
     @Inject private OrbController manager;
+    @Inject private OverlayPlacement placement;
     private final Map<String, ElementOverlay> elements = new HashMap<>();
     private boolean running;
     private Runnable refresh = () -> {};
@@ -31,6 +33,7 @@ public class FreeOrbOverlayBridge
         running = false;
         elements.values().forEach(overlay -> { overlay.getBounds().setSize(0, 0); overlays.remove(overlay); });
         elements.clear();
+        free.resetSession();
     }
     private String name(TargetWidget target)
     {
@@ -54,7 +57,9 @@ public class FreeOrbOverlayBridge
             ElementOverlay overlay = elements.get(key);
             overlay.layoutBounds = new Rectangle(bounds);
             overlay.getBounds().setSize(bounds.getSize());
-            if (overlay.getPreferredLocation() == null && overlay.getPreferredPosition() == null)
+            if (!overlay.reset && placement.adopt(overlay, free.savedPosition(target)))
+            { free.clearPosition(target); overlay.lastApplied = null; overlay.reset = false; }
+            if (OverlayPlacement.usesLayout(overlay))
                 overlay.getBounds().setLocation(bounds.getLocation());
         });
 
@@ -62,6 +67,11 @@ public class FreeOrbOverlayBridge
             if (!overlay.name.equals(name(overlay.target)) || !current.containsKey(overlay.target))
                 overlay.getBounds().setSize(0, 0);
         });
+    }
+    public void profileChanged()
+    {
+        free.resetSession();
+        elements.values().forEach(overlay -> { overlay.lastApplied = null; overlay.reset = false; });
     }
     public void resetAll()
     {
@@ -104,15 +114,19 @@ public class FreeOrbOverlayBridge
                 actual = layoutBounds;
             }
             reset = false;
-            if (getPreferredLocation() != null || getPreferredPosition() != null)
+            if (!OverlayPlacement.usesLayout(this))
             {
                 Point canvas = getBounds().getLocation();
-                if (!canvas.equals(lastApplied))
+                if (!canvas.equals(lastApplied) || !canvas.equals(actual.getLocation()))
                 {
-                    lastApplied = new Point(canvas); free.save(target, canvas); refresh.run();
+                    lastApplied = new Point(canvas); free.applyPosition(target, canvas); refresh.run();
                 }
             }
-            else getBounds().setLocation(actual.getLocation());
+            else
+            {
+                getBounds().setLocation(actual.getLocation());
+                if (getPreferredPosition() == OverlayPosition.DYNAMIC) lastApplied = actual.getLocation();
+            }
             return actual.getSize();
         }
     }

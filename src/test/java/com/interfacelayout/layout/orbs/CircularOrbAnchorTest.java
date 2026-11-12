@@ -41,7 +41,7 @@ public class CircularOrbAnchorTest
                 f.circular.overlay.drawManager.processDrawComplete(() -> image);
                 assertEquals(new Rectangle(100, 70, 57, 34), f.circular.parent.getBounds());
             }
-            verify(f.free, times(1)).save(orbs[i], new java.awt.Point(100, 70));
+            verify(f.free, times(1)).applyPosition(orbs[i], new java.awt.Point(100, 70));
         }
     }
 
@@ -97,6 +97,8 @@ public class CircularOrbAnchorTest
                 @Override protected void configure() {
                     bind(FreePositionController.class).toProvider(() -> free);
                     bind(OverlayManager.class).toProvider(() -> overlays);
+                    bind(net.runelite.api.Client.class).toInstance(circular.overlay.client);
+                    bind(net.runelite.client.config.ConfigManager.class).toInstance(mock(net.runelite.client.config.ConfigManager.class));
                     bind(OrbController.class).toProvider(() -> circular.overlay.manager);
                 }
             }).getInstance(FreeOrbOverlayBridge.class);

@@ -1,6 +1,7 @@
 package com.interfacelayout.layout.menu;
 
 import com.interfacelayout.util.WidgetBoundsExpander;
+import com.interfacelayout.util.OverlayPlacement;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -23,6 +24,7 @@ public class MenuOverlayBridge
     @Inject private OverlayManager overlays;
     @Inject private MenuStoneController menu;
     @Inject private WidgetBoundsExpander expander;
+    @Inject private OverlayPlacement placement;
     private final Map<String, GroupOverlay> groups = new HashMap<>();
     private final List<Overlay> nativeOverlays = new ArrayList<>();
     private Runnable refresh = () -> {};
@@ -66,7 +68,9 @@ public class MenuOverlayBridge
             }
             GroupOverlay overlay = groups.get(key);
             overlay.getBounds().setSize(bounds.getSize());
-            if (overlay.getPreferredLocation() == null && overlay.getPreferredPosition() == null)
+            if (!overlay.reset && placement.adopt(overlay, menu.savedGroup(id)))
+            { menu.clearGroupPosition(id); overlay.lastApplied = null; overlay.reset = false; }
+            if (OverlayPlacement.usesLayout(overlay))
                 overlay.getBounds().setLocation(bounds.getLocation());
         });
         groups.values().forEach(overlay -> {
@@ -99,18 +103,23 @@ public class MenuOverlayBridge
         GroupOverlay overlay = groups.get(name(id));
         if (overlay == null) return;
         if (beginning) clearPreference(id);
-        overlay.setPreferredPosition(null);
-        overlay.setPreferredLocation(new Point(canvas));
+        menu.saveGroup(id, canvas);
+        overlay.getBounds().setLocation(canvas);
     }
     public void finishGroupingStone(int id)
     {
         GroupOverlay overlay = groups.get(name(id));
-        if (overlay != null) overlays.saveOverlay(overlay);
+        if (overlay != null) refresh.run();
     }
     public void clearPreference(int id)
     {
+        menu.clearGroupPosition(id);
         GroupOverlay overlay = groups.get(name(id));
         if (overlay != null) { overlays.resetOverlay(overlay); overlay.lastApplied = null; overlay.reset = false; }
+    }
+    public void profileChanged()
+    {
+        groups.values().forEach(overlay -> { overlay.lastApplied = null; overlay.reset = false; });
     }
     public void resetAll()
     {
@@ -157,17 +166,21 @@ public class MenuOverlayBridge
                 if (actual == null) return null;
             }
             reset = false;
-            if (getPreferredLocation() != null || getPreferredPosition() != null)
+            if (!OverlayPlacement.usesLayout(this))
             {
 
                 Point position = getBounds().getLocation();
-                if (!position.equals(lastApplied))
+                if (!position.equals(lastApplied) || !position.equals(actual.getLocation()))
                 {
                     lastApplied = new Point(position);
-                    menu.saveGroup(id, position); refresh.run();
+                    menu.applyGroup(id, position); refresh.run();
                 }
             }
-            else getBounds().setLocation(actual.getLocation());
+            else
+            {
+                getBounds().setLocation(actual.getLocation());
+                if (getPreferredPosition() == OverlayPosition.DYNAMIC) lastApplied = actual.getLocation();
+            }
             return actual.getSize();
         }
     }

@@ -74,6 +74,8 @@ public class CircularOrbsTest {
         com.interfacelayout.util.WidgetStateStore states=new com.interfacelayout.util.WidgetStateStore();
         FreePositionController free=mock(FreePositionController.class);
         java.util.Map<String,Object> fields=new java.util.HashMap<>();
+        when(circular.client.getCanvasWidth()).thenReturn(1000);when(circular.client.getCanvasHeight()).thenReturn(700);
+        fields.put("client",circular.client);
         fields.put("states",states);fields.put("free",free);fields.put("running",true);
         fields.put("menu",mock(com.interfacelayout.layout.menu.MenuStoneController.class));
         fields.put("minimapClicks",mock(MinimapClickProtection.class));fields.put("expander",mock(com.interfacelayout.util.WidgetBoundsExpander.class));

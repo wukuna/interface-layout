@@ -27,6 +27,27 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class FreeMinimapTest {
+    @Test public void resolvedResizePositionsDoNotReplaceSavedMapAndCompassLocations() {
+        Fixture f = new Fixture(false);
+        f.free.save(f.mapTarget, new Point(800, 500));
+        Map<String, Object> saved = new HashMap<>(f.saved);
+        when(f.client.getCanvasWidth()).thenReturn(700);
+        when(f.client.getCanvasHeight()).thenReturn(500);
+        f.free.applyPosition(f.mapTarget, new Point(500, 300));
+        f.free.applyPosition(f.compassTarget, new Point(450, 270));
+        f.free.apply();
+        assertEquals(new Rectangle(500, 300, 160, 160), f.free.bounds().get(f.mapTarget));
+        assertEquals(new Point(450, 270), WidgetGeometry.location(f.compass));
+        assertEquals(saved, f.saved);
+        f.free.resetSession(); f.restore();
+        when(f.client.getCanvasWidth()).thenReturn(1000);
+        when(f.client.getCanvasHeight()).thenReturn(700);
+        f.free.apply();
+        assertEquals(new Rectangle(800, 500, 160, 160), f.free.bounds().get(f.mapTarget));
+        assertEquals(saved, f.saved);
+        f.saved.clear(); f.free.resetSession(); f.restore(); f.free.apply();
+        assertEquals(new Rectangle(826, 26, 160, 160), f.free.bounds().get(f.mapTarget));
+    }
     @Test public void movingNativeMapCarriesUnsavedCompassAndClickAreaWithoutMovingOrbs() {
         for (boolean classic : new boolean[]{true, false}) {
             Fixture f = new Fixture(classic);
@@ -38,7 +59,7 @@ public class FreeMinimapTest {
             assertEquals(new Point(169, 279), WidgetGeometry.location(f.compass));
             assertEquals(new Point(168, 278), WidgetGeometry.location(f.options));
             assertEquals(new Point(795, 80), WidgetGeometry.location(f.hp));
-            assertEquals(1, f.saved.size());
+            assertEquals(2, f.saved.size());
             verify(f.map, never()).setContentType(anyInt());
             verify(f.map, never()).setSpriteId(anyInt());
             verify(f.compass, never()).setAction(anyInt(), anyString());
@@ -71,7 +92,7 @@ public class FreeMinimapTest {
         assertTrue(f.map.isHidden());
         assertFalse(f.free.bounds().containsKey(f.mapTarget));
         assertTrue(f.free.bounds().containsKey(f.compassTarget));
-        assertEquals(1, f.saved.size());
+        assertEquals(2, f.saved.size());
         f.restore();
         when(f.config.hideMinimap()).thenReturn(false);
         f.free.apply();

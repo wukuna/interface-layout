@@ -96,6 +96,7 @@ public class MenuStoneController
     @Inject private MenuStoneBackgrounds backgrounds;
     @Inject private MenuButtonOverlay buttons;
     @Inject private MenuOverlayState overlayState;
+    @Inject private com.interfacelayout.util.LayoutPositionStore savedPositions;
     private boolean temporarilyShown;
     private int dragSourceGroup = -1, dragStone = -1;
     private String dragMode;
@@ -103,11 +104,12 @@ public class MenuStoneController
     private Rectangle stack = new Rectangle();
     private volatile Map<Integer, Rectangle> groupBounds = Map.of(), stoneBounds = Map.of();
     private volatile Point gapInterfacePoint;
+    private final Map<String, Point> resolvedPositions = new LinkedHashMap<>();
     private volatile List<Rectangle> gapBounds = List.of(), windowBounds = List.of();
 
     public Rectangle bounds() { return new Rectangle(stack); }
     public void toggleShown() { temporarilyShown = !temporarilyShown; }
-    public void resetSession() { dragStone = -1; temporarilyShown = false; stack = new Rectangle(); groupBounds = Map.of(); stoneBounds = Map.of(); gapBounds = List.of(); windowBounds = List.of(); gapInterfacePoint = null; }
+    public void resetSession() { resolvedPositions.clear(); dragStone = -1; temporarilyShown = false; stack = new Rectangle(); groupBounds = Map.of(); stoneBounds = Map.of(); gapBounds = List.of(); windowBounds = List.of(); gapInterfacePoint = null; }
     void setGapInterfacePoint(Point point) { gapInterfacePoint = point; }
     public boolean isBlockedGap(Point point)
     {
@@ -188,7 +190,7 @@ public class MenuStoneController
             if (hidden(i) && !(modern && i == 10)) compactRow[i / 7] = true;
         if (!vertical)
             for (int row = 0; row < 2; row++)
-                compactRow[row] |= configs.getConfiguration("interfacelayout", positionKey(row), Point.class) != null;
+                compactRow[row] |= hasSavedOrigin(row);
         Map<Integer, Point> nativeOrigins = new LinkedHashMap<>();
         Map<Integer, List<Entry>> groups = new TreeMap<>();
         for (int i = 0; i < registry.length; i++)
@@ -491,7 +493,7 @@ public class MenuStoneController
 
     private boolean hasSavedOrigin(int group)
     {
-        return configs.getConfiguration("interfacelayout", positionKey(group), Point.class) != null;
+        return resolvedPositions.containsKey(positionKey(group)) || savedGroup(group) != null;
     }
 
     private boolean hidden(int index)
@@ -530,7 +532,8 @@ public class MenuStoneController
     }
     private Point loadOrigin(int group, int width, int height, Point nativeOrigin)
     {
-        Point saved = configs.getConfiguration("interfacelayout", positionKey(group), Point.class);
+        Point saved = resolvedPositions.get(positionKey(group));
+        if (saved == null) saved = savedPositions.load(positionKey(group), width, height);
         Point point = saved != null ? saved : nativeOrigin != null ? nativeOrigin : new Point(config.menuLayout() == Layout.VERTICAL_RIGHT
             || config.menuLayout() == Layout.FREE_POSITION
             ? client.getCanvasWidth() - width : 0, 0);
@@ -569,7 +572,10 @@ public class MenuStoneController
         return saved != null ? saved : config.menuLayout() == Layout.FREE_POSITION
             && config.menuDirection() == Direction.HORIZONTAL;
     }
-    public void saveGroup(int group, Point point) { configs.setConfiguration("interfacelayout", positionKey(group), point); }
+    public Point savedGroup(int group) { return configs.getConfiguration("interfacelayout", positionKey(group), Point.class); }
+    public void applyGroup(int group, Point point) { resolvedPositions.put(positionKey(group), new Point(point)); }
+    public void clearGroupPosition(int group) { resolvedPositions.remove(positionKey(group)); }
+    public void saveGroup(int group, Point point) { clearGroupPosition(group); savedPositions.save(positionKey(group), point); }
     public void detach(int index, Point point)
     {
         int currentGroup = group(index), members = 0;
@@ -639,15 +645,17 @@ public class MenuStoneController
             return;
         }
     }
-    public void resetGroup(int group) { configs.unsetConfiguration("interfacelayout", positionKey(group)); }
+    public void resetGroup(int group) { clearGroupPosition(group); savedPositions.reset(positionKey(group)); }
     public void resetCurrent() { resetMode(layoutMode()); }
     private void resetMode(String mode)
     {
+        resolvedPositions.keySet().removeIf(key -> key.equals("menuPosition_" + mode)
+            || key.startsWith("menuNativePosition_" + mode + "_") || key.startsWith("menuGroupPosition_" + mode + "_"));
         dragStone = -1;
         configs.unsetConfiguration("interfacelayout", "menuSeparateRows_" + mode);
         configs.unsetConfiguration("interfacelayout", "menuBottomGroup_" + mode);
-        configs.unsetConfiguration("interfacelayout", "menuPosition_" + mode);
-        for (int row = 0; row < 2; row++) configs.unsetConfiguration("interfacelayout", "menuNativePosition_" + mode + "_" + row);
+        savedPositions.reset("menuPosition_" + mode);
+        for (int row = 0; row < 2; row++) savedPositions.reset("menuNativePosition_" + mode + "_" + row);
         for (int i = 0; i < 14; i++)
         {
             configs.unsetConfiguration("interfacelayout", "menuGroup_" + mode + "_" + i);
@@ -655,7 +663,7 @@ public class MenuStoneController
         }
         for (int i = 0; i <= 14; i++)
         {
-            configs.unsetConfiguration("interfacelayout", "menuGroupPosition_" + mode + "_" + i);
+            savedPositions.reset("menuGroupPosition_" + mode + "_" + i);
             configs.unsetConfiguration("interfacelayout", "menuHorizontal_" + mode + "_" + i);
         }
     }

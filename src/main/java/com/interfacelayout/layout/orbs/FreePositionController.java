@@ -38,6 +38,8 @@ public class FreePositionController
     @Inject private EditManager editor;
     @Inject private WidgetStateStore states;
     @Inject private WidgetBoundsExpander expander;
+    @Inject private com.interfacelayout.util.LayoutPositionStore savedPositions;
+    private final Map<String, Point> resolvedPositions = new LinkedHashMap<>();
 
     public boolean enabled() { return config.layout() == OrbLayout.FREE_POSITION; }
     private List<TargetWidget> targets()
@@ -88,7 +90,9 @@ public class FreePositionController
         {
             Widget widget = widgets.getTargetWidget(target);
             if (widget == null || widget.isHidden()) continue;
-            Point saved = configs.getConfiguration("interfacelayout", key(target), Point.class);
+            Rectangle area = bounds(target, widget);
+            Point saved = resolvedPositions.get(key(target));
+            if (saved == null) saved = savedPositions.load(key(target), area.width, area.height);
             hasSavedPosition |= saved != null;
             if (saved != null || target == Orbs.WORLD_MAP_CONTAINER || target == Orbs.WIKI_ICON_CONTAINER)
                 positions.put(target, saved == null ? WidgetGeometry.location(widget) : saved);
@@ -118,7 +122,7 @@ public class FreePositionController
             client.getCanvasWidth(), client.getCanvasHeight());
         location.translate(original.x - bounds.x, original.y - bounds.y);
         Widget attachedCompass = isMinimap(target)
-            && configs.getConfiguration("interfacelayout", key(compassTarget()), Point.class) == null
+            && !resolvedPositions.containsKey(key(compassTarget())) && savedPosition(compassTarget()) == null
             ? widgets.getTargetWidget(compassTarget()) : null;
         Point compassLocation = attachedCompass == null || attachedCompass.isHidden() ? null
             : WidgetGeometry.location(attachedCompass);
@@ -143,15 +147,20 @@ public class FreePositionController
         states.capture(widget);
         widget.setNoClickThrough(config.enableNoClickthrough());
     }
-    public void save(TargetWidget target, Point point) { configs.setConfiguration("interfacelayout", key(target), point); }
-    public void reset(TargetWidget target) { configs.unsetConfiguration("interfacelayout", key(target)); }
+    public Point savedPosition(TargetWidget target) { return configs.getConfiguration("interfacelayout", key(target), Point.class); }
+    public void applyPosition(TargetWidget target, Point point) { resolvedPositions.put(key(target), new Point(point)); }
+    public void clearPosition(TargetWidget target) { resolvedPositions.remove(key(target)); }
+    public void resetSession() { resolvedPositions.clear(); }
+    public void save(TargetWidget target, Point point) { resolvedPositions.remove(key(target)); savedPositions.save(key(target), point); }
+    public void reset(TargetWidget target) { resolvedPositions.remove(key(target)); savedPositions.reset(key(target)); }
     public void resetAll()
     {
+        resetSession();
         for (TargetWidget[] choices : EditManager.EDIT_TARGETS)
             for (String mode : new String[]{"fixed", "classic", "modern"})
-                configs.unsetConfiguration("interfacelayout", "free_" + mode + "_" + choices[0].getComponentId() + "_" + choices[0].getArrayId());
+                savedPositions.reset("free_" + mode + "_" + choices[0].getComponentId() + "_" + choices[0].getArrayId());
         for (TargetWidget target : EXTRA_TARGETS)
             for (String mode : new String[]{"fixed", "classic", "modern"})
-                configs.unsetConfiguration("interfacelayout", "free_" + mode + "_" + target.getComponentId() + "_" + target.getArrayId());
+                savedPositions.reset("free_" + mode + "_" + target.getComponentId() + "_" + target.getArrayId());
     }
 }

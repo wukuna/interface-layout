@@ -20,6 +20,46 @@ import static org.mockito.Mockito.*;
 
 public class MenuOverlayBridgeTest
 {
+    @Test public void responsiveGroupOnlyResetsWhenItsOwnNativePreferenceIsReset()
+    {
+        MenuStoneController menu = mock(MenuStoneController.class);
+        when(menu.mode()).thenReturn("modern"); when(menu.layoutMode()).thenReturn("modern");
+        when(menu.individualDragging()).thenReturn(true);
+        when(menu.groups()).thenReturn(Map.of(0, new Rectangle(1500, 700, 33, 36)));
+        when(menu.savedGroup(0)).thenReturn(new Point(1500, 700));
+        OverlayManager overlays = mock(OverlayManager.class);
+        List<Overlay> added = new ArrayList<>();
+        when(overlays.add(any())).thenAnswer(i -> added.add(i.getArgument(0)));
+        doAnswer(i -> {
+            Overlay overlay = i.getArgument(0);
+            overlay.setPreferredLocation(null); overlay.setPreferredPosition(null); overlay.revalidate(); return null;
+        }).when(overlays).resetOverlay(any());
+        MenuOverlayBridge bridge = Guice.createInjector(new AbstractModule() {
+            @Override protected void configure() {
+                bind(MenuStoneController.class).toProvider(() -> menu);
+                bind(OverlayManager.class).toProvider(() -> overlays);
+                bind(net.runelite.api.Client.class).toInstance(client());
+                bind(net.runelite.client.config.ConfigManager.class).toInstance(mock(net.runelite.client.config.ConfigManager.class));
+                bind(WidgetBoundsExpander.class).toProvider(() -> mock(WidgetBoundsExpander.class));
+            }
+        }).getInstance(MenuOverlayBridge.class);
+        bridge.start(() -> {});
+        Overlay group = added.get(0);
+        assertEquals(OverlayPosition.DYNAMIC, group.getPreferredPosition());
+        group.render(null); group.revalidate(); group.render(null);
+        verify(menu, never()).resetGroup(anyInt());
+        overlays.resetOverlay(group); group.render(null);
+        verify(menu).resetGroup(0);
+        bridge.profileChanged(); group.render(null);
+        verify(menu, times(1)).resetGroup(0);
+    }
+    private static net.runelite.api.Client client()
+    {
+        net.runelite.api.Client client = mock(net.runelite.api.Client.class);
+        when(client.getRealDimensions()).thenReturn(new java.awt.Dimension(2000, 2000));
+        return client;
+    }
+
     @Test public void newGroupIdentityRetiresOldOverlayAndGroupingSetsNativePreference()
     {
         MenuStoneController menu = mock(MenuStoneController.class);
@@ -36,14 +76,17 @@ public class MenuOverlayBridgeTest
             @Override protected void configure() {
                 bind(MenuStoneController.class).toProvider(() -> menu);
                 bind(OverlayManager.class).toProvider(() -> overlays);
+                bind(net.runelite.api.Client.class).toInstance(client());
+                bind(net.runelite.client.config.ConfigManager.class).toInstance(mock(net.runelite.client.config.ConfigManager.class));
                 bind(WidgetBoundsExpander.class).toProvider(() -> mock(WidgetBoundsExpander.class));
             }
         }).getInstance(MenuOverlayBridge.class);
         bridge.start(() -> {});
         Overlay retired = added.get(0);
         bridge.moveGroupingStone(1, new Point(700, 400), true);
-        assertEquals(new Point(700, 400), retired.getPreferredLocation());
-        bridge.finishGroupingStone(1); verify(overlays).saveOverlay(retired);
+        assertNull(retired.getPreferredLocation());
+        verify(menu).saveGroup(1, new Point(700, 400));
+        bridge.finishGroupingStone(1); verify(overlays, never()).saveOverlay(retired);
         when(menu.groupGeneration(1)).thenReturn(2); bridge.sync();
         assertEquals(1, added.size()); assertNotEquals(retired.getName(), added.get(0).getName());
         assertTrue(retired.getBounds().isEmpty()); assertNull(added.get(0).getPreferredLocation());
@@ -59,7 +102,7 @@ public class MenuOverlayBridgeTest
         when(menu.mode()).thenReturn("modern"); when(menu.layoutMode()).thenReturn("modern"); when(menu.individualDragging()).thenReturn(individual);
         Rectangle actual = new Rectangle(400, 200, 33, 76);
         when(menu.groups()).thenAnswer(i -> Map.of(0, new Rectangle(actual)));
-        doAnswer(i -> { actual.setLocation((Point)i.getArgument(1)); return null; }).when(menu).saveGroup(anyInt(), any(Point.class));
+        doAnswer(i -> { actual.setLocation((Point)i.getArgument(1)); return null; }).when(menu).applyGroup(anyInt(), any(Point.class));
         OverlayManager overlays = mock(OverlayManager.class);
         Overlay nativeTop = mock(Overlay.class), nativeBottom = mock(Overlay.class), unrelated = mock(Overlay.class);
         when(nativeTop.getName()).thenReturn("RESIZABLE_VIEWPORT_BOTTOM_LINE_TABS1");
@@ -75,6 +118,8 @@ public class MenuOverlayBridgeTest
             @Override protected void configure() {
                 bind(MenuStoneController.class).toProvider(() -> menu);
                 bind(OverlayManager.class).toProvider(() -> overlays);
+                bind(net.runelite.api.Client.class).toInstance(client());
+                bind(net.runelite.client.config.ConfigManager.class).toInstance(mock(net.runelite.client.config.ConfigManager.class));
                 bind(WidgetBoundsExpander.class).toProvider(() -> mock(WidgetBoundsExpander.class));
             }
         }).getInstance(MenuOverlayBridge.class);
@@ -86,22 +131,22 @@ public class MenuOverlayBridgeTest
         group.setPreferredLocation(new Point(500, 300));
 
         group.getBounds().setLocation(500, 300); group.render(null);
-        verify(menu).saveGroup(0, new Point(500, 300)); verify(refresh).run();
+        verify(menu).applyGroup(0, new Point(500, 300)); verify(refresh).run();
         group.render(null); verify(refresh, times(1)).run();
         actual.setSize(33, 112); group.revalidate();
         group.getBounds().setLocation(500, 264);
         group.render(null);
         verify(menu, never()).resetGroup(anyInt());
-        verify(menu).saveGroup(0, new Point(500, 264));
+        verify(menu).applyGroup(0, new Point(500, 264));
 
         group.setPreferredLocation(null); group.revalidate();
 
         group.setPreferredLocation(new Point(-180, -160));
         group.getBounds().setLocation(800, 600); group.render(null);
-        verify(menu).saveGroup(0, new Point(800, 600));
+        verify(menu).applyGroup(0, new Point(800, 600));
 
         group.getBounds().setLocation(1000, 700); group.render(null);
-        verify(menu).saveGroup(0, new Point(1000, 700));
+        verify(menu).applyGroup(0, new Point(1000, 700));
         verify(menu, never()).resetGroup(anyInt());
         bridge.stop();
         assertTrue(registered.contains(nativeTop)); assertTrue(registered.contains(nativeBottom));
@@ -121,6 +166,8 @@ public class MenuOverlayBridgeTest
             @Override protected void configure() {
                 bind(MenuStoneController.class).toProvider(() -> menu);
                 bind(OverlayManager.class).toProvider(() -> overlays);
+                bind(net.runelite.api.Client.class).toInstance(client());
+                bind(net.runelite.client.config.ConfigManager.class).toInstance(mock(net.runelite.client.config.ConfigManager.class));
                 bind(WidgetBoundsExpander.class).toProvider(() -> mock(WidgetBoundsExpander.class));
             }
         }).getInstance(MenuOverlayBridge.class);
@@ -153,6 +200,8 @@ public class MenuOverlayBridgeTest
                 @Override protected void configure() {
                     bind(MenuStoneController.class).toProvider(() -> menu);
                     bind(OverlayManager.class).toProvider(() -> overlays);
+                bind(net.runelite.api.Client.class).toInstance(client());
+                bind(net.runelite.client.config.ConfigManager.class).toInstance(mock(net.runelite.client.config.ConfigManager.class));
                     bind(WidgetBoundsExpander.class).toProvider(() -> expander);
                 }
             }).getInstance(MenuOverlayBridge.class);
@@ -182,6 +231,8 @@ public class MenuOverlayBridgeTest
                 @Override protected void configure() {
                     bind(MenuStoneController.class).toProvider(() -> menu);
                     bind(OverlayManager.class).toProvider(() -> overlays);
+                bind(net.runelite.api.Client.class).toInstance(client());
+                bind(net.runelite.client.config.ConfigManager.class).toInstance(mock(net.runelite.client.config.ConfigManager.class));
                     bind(WidgetBoundsExpander.class).toProvider(() -> mock(WidgetBoundsExpander.class));
                 }
             }).getInstance(MenuOverlayBridge.class);
@@ -192,11 +243,11 @@ public class MenuOverlayBridgeTest
             {
                 group.setPreferredLocation(new Point(canvas.x > 500 ? -100 : 50, canvas.y > 300 ? -100 : 50));
                 group.getBounds().setLocation(canvas); group.render(null);
-                verify(menu).saveGroup(7, canvas);
+                verify(menu).applyGroup(7, canvas);
             }
             group.setPreferredLocation(null); group.setPreferredPosition(OverlayPosition.BOTTOM_RIGHT);
             group.getBounds().setLocation(800, 500); group.render(null);
-            verify(menu).saveGroup(7, new Point(800, 500));
+            verify(menu).applyGroup(7, new Point(800, 500));
             verify(menu, never()).resetGroup(anyInt());
         }
     }

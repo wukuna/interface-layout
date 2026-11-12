@@ -69,6 +69,8 @@ Hiding and showing the map retains its position. Resetting the element clears it
 
 If you changed RuneLite’s overlay movement hotkey, use that modifier instead of Alt. Free-position overlays work with Custom UI Anchors. Ordinary inventory interaction remains protected; settings for clicks through map areas or gaps between menu stones do not turn inventory items into click-through space.
 
+Free-position controls and menu groups follow their saved screen edge or center when the game canvas changes size. Explicit RuneLite origins and Custom UI Anchors keep controlling attached elements. Controls are kept within the available canvas; returning to the larger size restores their placement without saving the temporary clamped position. Changing monitors alone does not move the layout if the game canvas stays the same size. Existing absolute layouts learn their reference size when first loaded within the visible canvas, so open the update at your usual size before moving to a smaller display.
+
 ## Beta appearance features
 
 **Beta features** contains circular-orb presentation, the supported shield special orb and equipment presentation controls. The current **Beta equipment panel** adds compact bonuses, weight and spellbook information to the in-game Equipment tab. It is separate from RuneLite’s toolbar side panel and does not change the expanded equipment window.

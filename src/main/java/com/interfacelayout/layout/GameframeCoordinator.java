@@ -45,6 +45,7 @@ public class GameframeCoordinator
     private int layoutDepth;
     private int visibilityDepth;
     private volatile boolean refreshPending;
+    private int canvasWidth, canvasHeight;
 
     public void start() { running = true; editor.setRefresh(this::refresh); refresh(); menuOverlays.start(this::refresh); freeOverlays.start(this::refresh); }
     public void stop() { running = false; layoutDepth = 0; visibilityDepth = 0; editor.cancel(); freeOverlays.stop(); menuOverlays.stop(); restore(); menu.resetSession(); }
@@ -57,6 +58,8 @@ public class GameframeCoordinator
     public void refresh()
     {
         if (!running || layoutDepth > 0) return;
+        canvasWidth = client.getCanvasWidth(); canvasHeight = client.getCanvasHeight();
+        if (canvasWidth <= 0 || canvasHeight <= 0) return;
         restore(); menu.apply(); free.apply(); minimapClicks.apply(); menuOverlays.sync(); freeOverlays.sync();
         if(circular!=null)circular.get().refreshAfterLayout();
     }
@@ -65,7 +68,9 @@ public class GameframeCoordinator
     {
 
         if (running && layoutDepth == 0 && visibilityDepth == 0
-            && client.getGameState() == GameState.LOGGED_IN && menu.windowBoundsChanged()) refresh();
+            && client.getGameState() == GameState.LOGGED_IN
+            && (canvasWidth != client.getCanvasWidth() || canvasHeight != client.getCanvasHeight()
+                || menu.windowBoundsChanged())) refresh();
     }
     private synchronized void scheduleRefresh()
     {
@@ -157,6 +162,7 @@ public class GameframeCoordinator
     @Subscribe(priority = -2) public void onProfileChanged(ProfileChanged event)
     {
         editor.cancel(); menu.resetSession();
+        menuOverlays.profileChanged(); freeOverlays.profileChanged();
         scheduleRefresh();
     }
 }

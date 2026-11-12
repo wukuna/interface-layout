@@ -87,7 +87,7 @@ public class FreePositionControllerTest
             assertEquals(new Point(820, 30), WidgetGeometry.location(map));
             assertEquals(new Point(940, 150), WidgetGeometry.location(world));
             assertEquals(new Point(910, 180), WidgetGeometry.location(wiki));
-            assertEquals("Untouched controls must not create saved positions",1,saved.size());
+            assertEquals("Untouched controls must not create saved positions",2,saved.size());
             states.restore(); free.apply();
             assertEquals(new Point(100, 200), WidgetGeometry.location(compass));
             assertEquals(new Point(99, 199), WidgetGeometry.location(options));
