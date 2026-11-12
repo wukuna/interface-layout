@@ -275,6 +275,35 @@ public class ShieldSpecialOrbTest
         }
     }
 
+    @Test public void coveredShieldReleasesInputEvenWhenBankOpensBetweenPaintingAndClicking()
+    {
+        when(config.showShieldSpecialOrb()).thenReturn(true);
+        when(config.hideOrbTabs()).thenReturn(true);
+        overlay.setPreferredLocation(new java.awt.Point(300, 100));
+        overlay.getBounds().setLocation(300, 100);
+        Graphics2D draw = new BufferedImage(765, 503, BufferedImage.TYPE_INT_ARGB).createGraphics();
+        try
+        {
+            assertEquals(new java.awt.Dimension(34, 34), overlay.render(draw));
+            when(client.getMouseCanvasPosition()).thenReturn(new Point(317, 117));
+            overlay.onPostMenuSort(new PostMenuSort());
+            verify(menu).createMenuEntry(-1);
+            Widget bank = CircularOrbInputTest.widget(client, InterfaceID.Bankmain.UNIVERSE, null, 310, 110, 20, 20);
+            clearInvocations(menu, tooltips);
+            overlay.onPostMenuSort(new PostMenuSort());
+            verify(menu, never()).createMenuEntry(anyInt());
+            MenuOptionClicked event = new MenuOptionClicked(entry);
+            overlay.onMenuOptionClicked(event);
+            assertTrue(event.isConsumed());
+            assertNull(overlay.render(draw));
+            verifyNoInteractions(tooltips);
+            when(bank.isHidden()).thenReturn(true);
+            assertEquals(new java.awt.Dimension(34, 34), overlay.render(draw));
+            assertEquals(new java.awt.Point(300, 100), overlay.getBounds().getLocation());
+        }
+        finally { draw.dispose(); }
+    }
+
     private void paint()
     {
         when(config.showShieldSpecialOrb()).thenReturn(true);

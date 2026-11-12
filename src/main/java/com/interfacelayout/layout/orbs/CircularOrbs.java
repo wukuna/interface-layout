@@ -5,6 +5,7 @@ import com.interfacelayout.InterfaceLayoutConfig.OrbContent;
 import com.interfacelayout.layout.menu.MenuButtonSprites;
 import com.interfacelayout.layout.orbs.widget.elements.Orbs;
 import com.interfacelayout.util.WidgetGeometry;
+import com.interfacelayout.util.InterfaceWindows;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
@@ -47,6 +48,7 @@ public final class CircularOrbs extends Overlay {
     @Inject net.runelite.client.game.ItemManager itemManager;
     final OrbTimers timers = new OrbTimers();
     private final Map<Widget,Integer> opacities=new IdentityHashMap<>();
+    private final Set<Widget> coveredWidgets=Collections.newSetFromMap(new IdentityHashMap<>());
     private final CircularOrbInput input = new CircularOrbInput();
     private final Runnable afterFrame = () -> input.restoreRenderBounds(client);
     private final CircularOrbArtwork artwork = new CircularOrbArtwork();
@@ -74,6 +76,9 @@ public final class CircularOrbs extends Overlay {
     public void releaseForLayout() {restore();}
     public void refreshAfterLayout() {refresh();}
     private void restore() {
+        for (Widget widget : coveredWidgets)
+            if (CircularOrbInput.current(client, widget) && widget.isSelfHidden()) widget.setHidden(false);
+        coveredWidgets.clear();
         minimap.restore(client);
         compass.restore(manager);
         input.restore(client);
@@ -130,6 +135,7 @@ public final class CircularOrbs extends Overlay {
         if(soulreaper!=null)soulreaper.refresh(enabled && visible(spec) && visible(specBacking)
             && !WidgetGeometry.bounds(spec).isEmpty() && !WidgetGeometry.bounds(specBacking).isEmpty());
         if(!enabled)return;
+        List<Rectangle> windows = InterfaceWindows.bounds(client);
         if (!framedMap) compass.refresh(client,manager);
         for(int i=0;i<ORBS.length;i++) {
             Orbs orb=ORBS[i];Widget parent=client.getWidget(orb.getComponentId()),backing=client.getWidget(orb.getBackingId());
@@ -144,9 +150,16 @@ public final class CircularOrbs extends Overlay {
             CircularOrbLayers layers=CircularOrbLayers.capture(parent,backing,button,icon,sprites,this::hide);
             View v=new View(parent,sprites.get(icon),circle,WidgetGeometry.bounds(parent),layers,
                 number==null?"":Text.removeTags(number.getText()),number==null?Color.WHITE:new Color(number.getTextColor()),
-                backing.getOpacity(),visible(icon)?icon.getOpacity():255,visible(number)?number.getOpacity():255);
+                backing.getOpacity(),visible(icon)?icon.getOpacity():255,visible(number)?number.getOpacity():255,
+                windows.stream().anyMatch(window -> window.intersects(circle)));
             views.add(v);hide(backing);hide(number);hide(icon);
             net.runelite.api.Point mouse=client.getMouseCanvasPosition();
+            if (v.covered) {
+                coveredWidgets.add(parent); parent.setHidden(true);
+                if (mouse != null && v.original.contains(mouse.getX(), mouse.getY()))
+                    hideTree(client.getWidget(InterfaceID.Orbs.TOOLTIP),Collections.newSetFromMap(new IdentityHashMap<>()));
+                continue;
+            }
             boolean hovered=mouse!=null && CircularOrbArtwork.contains(circle,mouse.getX(),mouse.getY());
             input.apply(parent,backing,button,number,circle,hovered);
             if(mouse!=null && v.original.contains(mouse.getX(),mouse.getY()) && !hovered)
@@ -159,7 +172,7 @@ public final class CircularOrbs extends Overlay {
 
         net.runelite.api.MenuEntry[] entries=client.getMenu().getMenuEntries();
         net.runelite.api.MenuEntry[] kept=java.util.Arrays.stream(entries).filter(e->{
-            for(View view:views)if(!CircularOrbArtwork.contains(view.circle,mouse.getX(),mouse.getY())) {
+            for(View view:views)if(view.covered || !CircularOrbArtwork.contains(view.circle,mouse.getX(),mouse.getY())) {
                 if(e.getParam1()==view.parent.getId())return false;
                 for(Orbs orb:ORBS)if(orb.getComponentId()==view.parent.getId()
                     && (e.getParam1()==orb.getButtonId() || e.getParam1()==orb.getBackingId()))return false;
@@ -179,7 +192,7 @@ public final class CircularOrbs extends Overlay {
         for(Widget child:CircularOrbLayers.children(widget))hideTree(child,visited);
     }
     @Override public Dimension render(Graphics2D g) {
-        if(running && config.hideOrbTabs())for(View v:views)if(!v.parent.isHidden()) {
+        if(running && config.hideOrbTabs())for(View v:views)if(!v.covered && !v.parent.isHidden()) {
             Graphics2D draw=(Graphics2D)g.create();
             try {
                 draw.setComposite(AlphaComposite.SrcOver.derive((255-v.frameOpacity)/255f));
@@ -223,8 +236,9 @@ public final class CircularOrbs extends Overlay {
     private static final class View {
         final Widget parent;final BufferedImage icon;final Rectangle circle,original;final CircularOrbLayers layers;
         final String number;final Color color;final int frameOpacity,iconOpacity,numberOpacity;
-        View(Widget p,BufferedImage i,Rectangle c,Rectangle original,CircularOrbLayers layers,String n,Color col,int fo,int io,int no) {
-            parent=p;icon=i;circle=c;this.original=original;this.layers=layers;number=n;color=col;frameOpacity=fo;iconOpacity=io;numberOpacity=no;
+        final boolean covered;
+        View(Widget p,BufferedImage i,Rectangle c,Rectangle original,CircularOrbLayers layers,String n,Color col,int fo,int io,int no,boolean covered) {
+            parent=p;icon=i;circle=c;this.original=original;this.layers=layers;number=n;color=col;frameOpacity=fo;iconOpacity=io;numberOpacity=no;this.covered=covered;
         }
     }
 }

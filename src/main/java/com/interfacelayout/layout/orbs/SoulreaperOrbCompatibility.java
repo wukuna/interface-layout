@@ -1,6 +1,7 @@
 package com.interfacelayout.layout.orbs;
 
 import com.interfacelayout.InterfaceLayoutConfig;
+import com.interfacelayout.util.InterfaceWindows;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
@@ -116,6 +117,7 @@ public final class SoulreaperOrbCompatibility extends Overlay
         int maximum = worn ? 100 : 5;
         Rectangle circle = new Rectangle(anchor);
         circle.translate(number("offsetX",22), number("offsetY",25));
+        if (InterfaceWindows.covered(client, circle)) return null;
         Color fill = color(worn ? "specOrbColour" : "soulreaperOrbColour", worn ? 0x2798bd : 0x8d4bd3);
         Graphics2D draw = (Graphics2D) graphics.create();
         try {

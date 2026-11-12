@@ -27,6 +27,7 @@ final class ReleaseNotesNotice
         "The compass follows the minimap until positioned separately; hidden controls retain their saved positions.",
         "Circular orbs now offer HP and special regeneration rings and a counterclockwise prayer drain ring.",
         "Free layouts adapt to window resizing and retain their original positions when returning to a larger window.",
+        "Circular orbs stay behind overlapping bank and other interface windows, matching the menu tabs.",
     };
 
     @Inject private Client client;

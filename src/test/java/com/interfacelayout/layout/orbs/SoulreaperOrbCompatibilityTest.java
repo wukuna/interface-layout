@@ -73,6 +73,13 @@ public class SoulreaperOrbCompatibilityTest {
         when(f.parent.isHidden()).thenReturn(true);assertEquals(0,countVisible(f.render()));
         verify(f.adapter.configs,never()).setConfiguration(anyString(),anyString(),any(Object.class));
     }
+    @Test public void coveredExtraOrbUsesItsOwnOffsetAndReturnsWhenTheWindowCloses() throws Exception {
+        Fixture f=new Fixture();f.refresh();assertTrue(countVisible(f.render())>0);
+        Widget bank=CircularOrbInputTest.widget(f.adapter.client,InterfaceID.Bankmain.UNIVERSE,null,125,40,20,20);
+        assertEquals(0,countVisible(f.render()));
+        when(bank.isHidden()).thenReturn(true);assertTrue(countVisible(f.render())>0);
+        verify(f.adapter.configs,never()).setConfiguration(anyString(),anyString(),any(Object.class));
+    }
     @Test public void residualStacksStayVisibleAfterSwitchingWeaponAndZeroStacksDisappear() throws Exception {
         Fixture f=new Fixture();when(f.adapter.client.getItemContainer(net.runelite.api.gameval.InventoryID.WORN)).thenReturn(null);
         when(f.adapter.client.getVarpValue(VarPlayerID.SOULREAPER_STACKS)).thenReturn(3);f.refresh();assertTrue(countVisible(f.render())>0);

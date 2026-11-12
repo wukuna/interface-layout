@@ -33,6 +33,7 @@ package com.interfacelayout.layout.menu;
 import com.interfacelayout.layout.orbs.OrbController;
 import com.interfacelayout.InterfaceLayoutConfig;
 import com.interfacelayout.util.LayoutGeometry;
+import com.interfacelayout.util.InterfaceWindows;
 import com.interfacelayout.util.WidgetBoundsExpander;
 import com.interfacelayout.util.WidgetStateStore;
 import com.interfacelayout.util.WidgetGeometry;
@@ -56,16 +57,6 @@ import net.runelite.client.config.ConfigManager;
 public class MenuStoneController
 {
     private static final int GAP_EDGE_PADDING = 8;
-    private static final int[] WINDOW_ROOTS = {
-        InterfaceID.Bankmain.UNIVERSE, InterfaceID.BankpinKeypad.UNIVERSE,
-        InterfaceID.Collection.FRAME, InterfaceID.CollectionOverview.UNIVERSE,
-        InterfaceID.SkillGuide.WINDOW, InterfaceID.SkillGuideV2.UNIVERSE, InterfaceID.Settings.UNIVERSE,
-        InterfaceID.CaOverview.UNIVERSE, InterfaceID.CaTasks.UNIVERSE, InterfaceID.CaBosses.UNIVERSE,
-        InterfaceID.CaBoss.UNIVERSE, InterfaceID.CaRewards.UNIVERSE,
-        InterfaceID.Questjournal.UNIVERSE, InterfaceID.QuestjournalOverview.UNIVERSE,
-        InterfaceID.AreaTask.UNIVERSE, InterfaceID.Journalscroll.UNIVERSE,
-        InterfaceID.Questdisplay.UNIVERSE, InterfaceID.Questscroll.UNIVERSE, InterfaceID.QuestscrollSpeedrun.UNIVERSE
-    };
     public enum Layout
     {
         VANILLA_HORIZONTAL("Native rows"), FREE_POSITION("Free position"),
@@ -166,7 +157,7 @@ public class MenuStoneController
         gapInterfacePoint = null;
         windowBounds = List.of();
         if (!orbs.isLoggedIn() || temporarilyShown) return;
-        windowBounds = modalBounds();
+        windowBounds = InterfaceWindows.bounds(client);
         hideDecoration(InterfaceID.ToplevelOsrsStretch.SIDE_MENU_GRAPHIC1, config.hideLeftBar());
         hideDecoration(InterfaceID.ToplevelOsrsStretch.SIDE_MENU_GRAPHIC2, config.hideRightBar());
         hideDecoration(InterfaceID.ToplevelOsrsStretch.SIDE_MENU_GRAPHIC5, config.hideTopMenu());
@@ -473,22 +464,9 @@ public class MenuStoneController
         }
     }
 
-    private List<Rectangle> modalBounds()
-    {
-        List<Rectangle> result = new ArrayList<>();
-
-        for (int id : WINDOW_ROOTS)
-        {
-            Widget window = client.getWidget(id);
-            if (window == null || window.isHidden()) continue;
-            Rectangle bounds = WidgetGeometry.bounds(window);
-            if (!bounds.isEmpty()) result.add(bounds);
-        }
-        return List.copyOf(result);
-    }
     public boolean windowBoundsChanged()
     {
-        return orbs.isLoggedIn() && !temporarilyShown && !windowBounds.equals(modalBounds());
+        return orbs.isLoggedIn() && !temporarilyShown && !windowBounds.equals(InterfaceWindows.bounds(client));
     }
 
     private boolean hasSavedOrigin(int group)

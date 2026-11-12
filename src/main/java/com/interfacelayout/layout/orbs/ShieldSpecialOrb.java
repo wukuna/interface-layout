@@ -29,6 +29,7 @@ package com.interfacelayout.layout.orbs;
 import com.interfacelayout.InterfaceLayoutConfig;
 import com.interfacelayout.layout.menu.MenuButtonSprites;
 import com.interfacelayout.util.WidgetGeometry;
+import com.interfacelayout.util.InterfaceWindows;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -171,6 +172,7 @@ public final class ShieldSpecialOrb extends Overlay
             getBounds().setLocation(Math.max(0, Math.min(client.getCanvasWidth() - width, x)),
                 Math.max(0, Math.min(client.getCanvasHeight() - HEIGHT, y)));
         }
+        if (InterfaceWindows.covered(client, new Rectangle(getBounds().x, getBounds().y, width, HEIGHT))) return null;
         Graphics2D draw = (Graphics2D) graphics.create();
         try
         {
@@ -224,7 +226,8 @@ public final class ShieldSpecialOrb extends Overlay
         if (client.isMenuOpen()) return;
         State current = resolve();
         net.runelite.api.Point mouse = client.getMouseCanvasPosition();
-        if (!sameControl(painted, current) || mouse == null || !contains(mouse.getX(), mouse.getY())) return;
+        if (!sameControl(painted, current) || mouse == null || !contains(mouse.getX(), mouse.getY())
+            || InterfaceWindows.covered(client, hitbox)) return;
         Menu menu = client.getMenu();
         if (menu == null) return;
 
@@ -242,7 +245,8 @@ public final class ShieldSpecialOrb extends Overlay
     @Subscribe(priority = 20)
     public void onMenuOptionClicked(MenuOptionClicked event)
     {
-        if (event.getMenuEntry() == projected && !sameControl(projectedState, resolve())) event.consume();
+        if (event.getMenuEntry() == projected
+            && (!sameControl(projectedState, resolve()) || InterfaceWindows.covered(client, hitbox))) event.consume();
     }
 
     private static boolean sameControl(State a, State b)
