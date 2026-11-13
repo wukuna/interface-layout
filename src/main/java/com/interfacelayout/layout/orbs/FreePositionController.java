@@ -131,7 +131,19 @@ public class FreePositionController
             : target == Compass.CLASSIC_COMPASS ? widgets.getTargetWidget(Compass.CLASSIC_COMPASS_OPTIONS) : null;
         Point delta = related == null ? new Point() : new Point(WidgetGeometry.location(related).x - WidgetGeometry.location(widget).x,
             WidgetGeometry.location(related).y - WidgetGeometry.location(widget).y);
+        Map<Widget, Point> surround = new LinkedHashMap<>();
+        if (isMinimap(target) && config.minimapFrame() == InterfaceLayoutConfig.MinimapFrame.NATIVE)
+            for (TargetWidget part : Minimap.COMPONENTS)
+            {
+                if (isMinimap(part) || (part.getComponentId() >>> 16) != (target.getComponentId() >>> 16)) continue;
+                Widget decoration = widgets.getTargetWidget(part);
+                if (decoration == null || decoration.isHidden()) continue;
+                Point point = WidgetGeometry.location(decoration);
+                point.translate(location.x - original.x, location.y - original.y);
+                surround.put(decoration, point);
+            }
         moveWidget(widget, location);
+        surround.forEach(this::positionWidget);
         if (related != null) moveWidget(related, new Point(location.x + delta.x, location.y + delta.y));
         if (compassLocation != null)
         {
@@ -141,11 +153,14 @@ public class FreePositionController
     }
     private void moveWidget(Widget widget, Point location)
     {
+        positionWidget(widget, location);
+        widget.setNoClickThrough(true);
+    }
+    private void positionWidget(Widget widget, Point location)
+    {
         expander.allowCanvasPosition(widget);
         Point relative = LayoutGeometry.relative(location, WidgetGeometry.bounds(widget.getParent()));
         states.position(widget, relative.x, relative.y);
-        states.capture(widget);
-        widget.setNoClickThrough(config.enableNoClickthrough());
     }
     public Point savedPosition(TargetWidget target) { return configs.getConfiguration("interfacelayout", key(target), Point.class); }
     public void applyPosition(TargetWidget target, Point point) { resolvedPositions.put(key(target), new Point(point)); }

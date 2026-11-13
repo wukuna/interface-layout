@@ -1,6 +1,5 @@
 package com.interfacelayout.layout.orbs;
 
-import com.interfacelayout.InterfaceLayoutConfig;
 import com.interfacelayout.layout.orbs.widget.WidgetManager;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -11,14 +10,13 @@ import net.runelite.api.widgets.Widget;
 @Singleton
 public class MinimapClickProtection
 {
-    @Inject private InterfaceLayoutConfig config;
     @Inject private WidgetManager widgets;
     private final Map<Widget, Boolean> original = new IdentityHashMap<>();
 
     public void apply()
     {
         Widget minimap = widgets.getMinimapMask();
-        if (!config.enableNoClickthrough() || minimap == null || minimap.isHidden()
+        if (minimap == null || minimap.isHidden()
             || minimap.getContentType() != OrbConstants.Layout.MinimapOverlay.MINIMAP_CONTENT) return;
 
         original.putIfAbsent(minimap, minimap.getNoClickThrough());

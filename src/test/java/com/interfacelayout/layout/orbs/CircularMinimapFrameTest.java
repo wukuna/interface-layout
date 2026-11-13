@@ -48,13 +48,14 @@ public class CircularMinimapFrameTest {
         }
     }
 
-    @Test public void freePositionUsesNewRingsEvenWithNativeOrbsAndDuringEditing() {
+    @Test public void freePositionUsesSelectedCustomRingsEvenWithNativeOrbsAndDuringEditing() {
         CircularOrbs overlay = new CircularOrbs();
         overlay.client = mock(Client.class);
         overlay.manager = mock(OrbController.class);
         overlay.config = mock(InterfaceLayoutConfig.class, CALLS_REAL_METHODS);
         when(overlay.client.getGameState()).thenReturn(GameState.LOGGED_IN);
         when(overlay.config.layout()).thenReturn(OrbLayout.FREE_POSITION);
+        when(overlay.config.minimapFrame()).thenReturn(InterfaceLayoutConfig.MinimapFrame.CIRCULAR);
         when(overlay.config.hideOrbTabs()).thenReturn(false);
         when(overlay.config.editInterface()).thenReturn(true);
         Widget map = widget(overlay.client, OrbConstants.Widgets.Modern.MINIMAP_MASK, 80, 50, 152, 152);
@@ -74,6 +75,47 @@ public class CircularMinimapFrameTest {
         when(overlay.config.layout()).thenReturn(OrbLayout.VERTICAL);
         overlay.onBeforeRender(new BeforeRender());
         assertFalse(frame.isHidden());
+    }
+
+    @Test public void nativeFrameDefaultAndStyleChangesPreserveResourcePackArtwork() {
+        CircularOrbs overlay = new CircularOrbs();
+        overlay.client = mock(Client.class);
+        overlay.manager = mock(OrbController.class);
+        overlay.config = mock(InterfaceLayoutConfig.class, CALLS_REAL_METHODS);
+        when(overlay.client.getGameState()).thenReturn(GameState.LOGGED_IN);
+        when(overlay.config.layout()).thenReturn(OrbLayout.FREE_POSITION);
+        Widget map = widget(overlay.client, OrbConstants.Widgets.Modern.MINIMAP_MASK, 80, 50, 152, 152);
+        when(map.getContentType()).thenReturn(1338);
+        Widget compass = widget(overlay.client, OrbConstants.Widgets.Modern.COMPASS, 50, 30, 33, 33);
+        when(compass.getContentType()).thenReturn(1339);
+        Widget frame = widget(overlay.client, OrbConstants.Widgets.Modern.MINIMAP, 45, 25, 182, 166);
+        overlay.start();
+        overlay.onBeforeRender(new BeforeRender());
+        assertFalse(frame.isHidden());
+        assertEquals(0, render(overlay).getRGB(77, 126));
+        when(overlay.config.minimapFrame()).thenReturn(InterfaceLayoutConfig.MinimapFrame.CIRCULAR);
+        overlay.onBeforeRender(new BeforeRender());
+        assertTrue(frame.isHidden());
+        assertNotEquals(0, render(overlay).getRGB(77, 126));
+        when(overlay.config.orbRim()).thenReturn(InterfaceLayoutConfig.OrbRim.NONE);
+        overlay.onBeforeRender(new BeforeRender());
+        assertTrue(frame.isHidden());
+        assertEquals(0, render(overlay).getRGB(77, 126));
+        when(overlay.config.minimapFrame()).thenReturn(InterfaceLayoutConfig.MinimapFrame.NATIVE);
+        overlay.onBeforeRender(new BeforeRender());
+        assertFalse(frame.isHidden());
+        verify(frame, never()).setSpriteId(anyInt());
+        verify(map, never()).setContentType(anyInt());
+        overlay.releaseForLayout();
+        assertFalse(frame.isHidden());
+    }
+
+    private static BufferedImage render(CircularOrbs overlay) {
+        BufferedImage image = new BufferedImage(300, 250, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = image.createGraphics();
+        overlay.frames().render(graphics);
+        graphics.dispose();
+        return image;
     }
 
     @Test public void respectsGameHiddenMinimizedAndReplacedWidgets() {

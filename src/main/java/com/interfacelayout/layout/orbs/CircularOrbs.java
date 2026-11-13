@@ -129,14 +129,19 @@ public final class CircularOrbs extends Overlay {
         restore();
         boolean visible=running && client.getGameState()==GameState.LOGGED_IN;
         boolean enabled=visible && config.hideOrbTabs() && !config.editInterface();
-        boolean framedMap = visible && freeMinimap() && !config.hideMinimap() && minimap.refresh(client, manager);
-        if (framedMap) compass.refresh(client, manager);
+        Widget nativeMap = visible && freeMinimap() ? client.getWidget(manager.isClassicResizable()
+            ? OrbConstants.Widgets.Classic.MINIMAP_MASK : OrbConstants.Widgets.Modern.MINIMAP_MASK) : null;
+        boolean freeMap = visible(nativeMap) && !config.hideMinimap()
+            && nativeMap.getContentType() == OrbConstants.Layout.MinimapOverlay.MINIMAP_CONTENT;
+        boolean customMap = freeMap && config.minimapFrame() == InterfaceLayoutConfig.MinimapFrame.CIRCULAR;
+        if (freeMap && customMap) minimap.refresh(client, manager);
+        if (freeMap) compass.refresh(client, manager, customMap);
         Widget spec=client.getWidget(InterfaceID.Orbs.ORB_SPECENERGY),specBacking=client.getWidget(InterfaceID.Orbs.SPECENERGY_BACKING);
         if(soulreaper!=null)soulreaper.refresh(enabled && visible(spec) && visible(specBacking)
             && !WidgetGeometry.bounds(spec).isEmpty() && !WidgetGeometry.bounds(specBacking).isEmpty());
         if(!enabled)return;
         List<Rectangle> windows = InterfaceWindows.bounds(client);
-        if (!framedMap) compass.refresh(client,manager);
+        if (!freeMap) compass.refresh(client,manager);
         for(int i=0;i<ORBS.length;i++) {
             Orbs orb=ORBS[i];Widget parent=client.getWidget(orb.getComponentId()),backing=client.getWidget(orb.getBackingId());
             Widget indicator=client.getWidget(orb.getIndicatorId()),icon=client.getWidget(orb.getIconId()),number=client.getWidget(NUMBERS[i]);

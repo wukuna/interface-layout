@@ -2,15 +2,15 @@
 
 Arrange RuneLite around the way you play. Move menu bars, detach tabs into rows or columns, position orbs and the compass, and choose which controls stay visible. Scale overlay menu buttons while keeping your resource-pack icons.
 
-**Pending Hub update:** moving and anchoring the visible native minimap in Free Position is included in [the submitted update](https://github.com/runelite/plugin-hub/pull/20479).
+**Pending Hub update:** frame choices and always-on orb/minimap click protection are included in [the submitted update](https://github.com/runelite/plugin-hub/pull/20615).
 
 ## What you can do
 
 - **Build menu layouts:** keep native rows, start with vertical bars, or create custom groups and detached buttons.
 - **Scale overlay buttons:** adjust all menu buttons together from **25–200%**.
 - **Keep your artwork:** **Resource pack** is the default icon source, including custom spellbooks. **Faithful contours** is an optional style and a fallback for missing pack replacements.
-- **Position map controls:** move free orbs and the compass in resizable modes; the pending update adds native-minimap movement and anchoring.
-- **Use circular rims:** Silver or Dark grey frames, with optional number-only, icon-only or combined circular-orb contents.
+- **Position map controls:** move and anchor the native minimap, free orbs and compass in resizable modes.
+- **Use circular rims:** Silver or Dark grey frames, or no custom rim, with optional number-only, icon-only or combined circular-orb contents.
 - **Track orb timers:** Optional inner rings for HP regeneration, special energy and prayer drain, including Rapid Heal, Lightbearer and equipment prayer bonus. The outer prayer potion-dose reminder stays separate.
 - **Save each display mode:** Fixed, Resizable Classic and Resizable Modern keep separate menu layouts.
 - **Control visibility:** hide individual tabs, map controls and decorative borders, with shortcuts and resets.
@@ -43,7 +43,7 @@ Example from a local TEST build with Resource pack selected. The displayed artwo
 
 ## Free-position native minimap
 
-This section describes the pending minimap update.
+The frame choices below are part of the pending update.
 
 In **Classic or Modern resizable**, choose **Free Position** and leave **Hide minimap** off. Alt-drag the native minimap, or place it through **Custom UI Anchors** using the normal overlay placement system.
 
@@ -51,7 +51,7 @@ In **Classic or Modern resizable**, choose **Free Position** and leave **Hide mi
 
 [Watch the 26-second demonstration](docs/media/free-minimap-and-orb-controls.mp4): circular-orb display choices, visibility toggles and native-minimap movement with anchor guides. Recorded in a local TEST build; the documentation copy has no audio.
 
-The native map keeps its content and navigation. Its old surround and compass ring are replaced by the selected **Circular orb rim**. The compass follows the map until moved independently; other orbs keep their own positions. The minimap frame does not require enabling circular-orb number-tab removal.
+The native map keeps its content and navigation. Choose **Map and orb visibility → Free minimap frame** to keep the **Native / resource pack** surround (the default), or use the selected **Circular orb rim**. Choose **None** for the rim to remove the custom border. The native surround moves with the map and retains its combined compass socket. The compass follows the map until moved independently; other orbs keep their own positions. The minimap frame does not require enabling circular-orb number-tab removal.
 
 Hiding and showing the map retains its position. Resetting the element clears its custom position. Resetting the layout or disabling the plugin restores native layout behavior. Fixed mode retains its native constraints, and game-hidden controls remain hidden.
 

@@ -79,7 +79,7 @@ final class CircularOrbArtwork {
     }
 
     void paint(Graphics2D g, Rectangle circle, OrbRim style) {
-        if (circle.width < 10 || circle.width != circle.height) return;
+        if (style == OrbRim.NONE || circle.width < 10 || circle.width != circle.height) return;
         if (rim != style) {
             rim = style;
             frames.clear();

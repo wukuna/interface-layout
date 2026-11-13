@@ -175,7 +175,6 @@ public class OrbEventHandler implements KeyListener
 		manager.isEditingLayout = false;
 		manager.hideWorldMap = config.hideWorld();
 		manager.hideLogoutX = config.hideLogout();
-		manager.enableNoClickThrough = config.enableNoClickthrough();
 		manager.enableOrbSwapping = config.layout() != OrbLayout.FREE_POSITION && config.enableOrbSwapping();
 		manager.snapCornerRepositioned = manager.isSnapCornerRepositioned();
 
@@ -569,26 +568,13 @@ if (!group.equals(GROUP_NAME))
 				break;
 
 			case ConfigKeys.ENABLE_ORB_SWAPPING:
-			case ConfigKeys.ENABLE_NO_CLICKTHROUGH:
 				later(() ->
 				{
-					if (key.equals(ConfigKeys.ENABLE_NO_CLICKTHROUGH))
-					{
-						manager.enableNoClickThrough = config.enableNoClickthrough();
-					}
-					else
-					{
-						manager.enableOrbSwapping = config.layout() != OrbLayout.FREE_POSITION && config.enableOrbSwapping();
-						slotManager.update();
-						manager.rebuildLayout();
-					}
-
+					manager.enableOrbSwapping = config.layout() != OrbLayout.FREE_POSITION && config.enableOrbSwapping();
+					slotManager.update();
+					manager.rebuildLayout();
 					manager.updateNoClickThrough();
-
-					if (!manager.isCompactLayout())
-					{
-						widgetManager.remapTargets(Orbs.XP_DROPS_CONTAINER);
-					}
+					if (!manager.isCompactLayout()) widgetManager.remapTargets(Orbs.XP_DROPS_CONTAINER);
 				});
 				break;
 

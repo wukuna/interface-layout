@@ -127,7 +127,6 @@ public class OrbController
 	public volatile boolean isEditingLayout;
 	public boolean hideWorldMap;
 	public boolean hideLogoutX;
-	public boolean enableNoClickThrough;
 	public boolean enableOrbSwapping;
 	public boolean hasSeenWikiWarning;
 	public boolean isLoggingIn;
@@ -221,7 +220,6 @@ public class OrbController
 		hasSeenWikiWarning = false;
 		hideWorldMap = false;
 		hideLogoutX = false;
-		enableNoClickThrough = false;
 		isUpdatingProfile = false;
 		enableOrbSwapping = false;
 
@@ -249,7 +247,6 @@ public class OrbController
 		hasSeenWikiWarning = false;
 		hideWorldMap = config.hideWorld();
 		hideLogoutX = config.hideLogout();
-		enableNoClickThrough = config.enableNoClickthrough();
 		enableOrbSwapping = getCurrentLayout() != OrbLayout.FREE_POSITION && config.enableOrbSwapping();
 		isUpdatingProfile = false;
 
@@ -381,22 +378,15 @@ public class OrbController
 
 	public void updateNoClickThrough()
 	{
-		if (overlayMinimap != null) overlayMinimap.setNoClickThrough(config.enableNoClickthrough());
-		if (isFixedMode())
-		{
-			return;
-		}
-
-		boolean noClick = enableNoClickThrough ||
-			(enableOrbSwapping && isCompactLayout() && !getCurrentLayout().isCustom());
+		if (overlayMinimap != null) overlayMinimap.setNoClickThrough(true);
 
 		for (TargetWidget orb : Orbs.SWAPPABLE_ORBS)
 		{
-			widgetManager.setNoClickThrough(orb.getComponentId(), noClick && isCompactLayout());
+			widgetManager.setNoClickThrough(orb.getComponentId(), isCompactLayout());
 
 			if (!isCompactLayout())
 			{
-				handleVanillaNoClickThrough(orb, noClick);
+				handleVanillaNoClickThrough(orb, true);
 			}
 			else
 			{
@@ -418,7 +408,7 @@ public class OrbController
 		widgetManager.setNoClickThrough(backing.getId(), !noClickThrough);
 		widgetManager.setNoClickThrough(button.getId(), noClickThrough);
 
-		if (!config.enableNoClickthrough() || !button.isHidden())
+		if (!noClickThrough || !button.isHidden())
 		{
 			widgetManager.clearChild(noClickThroughChildren.remove(target));
 			return;
@@ -933,7 +923,7 @@ public class OrbController
 
 	public boolean shouldOffsetXpOrb()
 	{
-		return !isFixedMode() && (enableNoClickThrough || enableOrbSwapping);
+		return !isFixedMode();
 	}
 
 	public boolean hideMinimapToggle()

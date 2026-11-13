@@ -123,10 +123,61 @@ public class FreeMinimapTest {
         assertTrue(f.free.bounds().isEmpty());
     }
 
+    @Test public void freeMapAndOrbsAlwaysProtectClicksAndRestoreNativeFlags() {
+        for (boolean classic : new boolean[]{true, false}) {
+            for (boolean original : new boolean[]{true, false}) {
+                Fixture f = new Fixture(classic);
+                for (Widget widget : new Widget[]{f.map, f.compass, f.hp}) {
+                    java.util.concurrent.atomic.AtomicBoolean flag = new java.util.concurrent.atomic.AtomicBoolean(original);
+                    when(widget.getNoClickThrough()).thenAnswer(call -> flag.get());
+                    doAnswer(call -> {flag.set(call.getArgument(0));return widget;}).when(widget).setNoClickThrough(anyBoolean());
+                }
+                f.free.move(f.mapTarget, new Point(200, 300));
+                f.free.move(Orbs.HP_ORB_CONTAINER, new Point(100, 100));
+                assertTrue(f.map.getNoClickThrough());
+                assertTrue(f.compass.getNoClickThrough());
+                assertTrue(f.hp.getNoClickThrough());
+                f.restore();
+                assertEquals(original, f.map.getNoClickThrough());
+                assertEquals(original, f.compass.getNoClickThrough());
+                assertEquals(original, f.hp.getNoClickThrough());
+            }
+        }
+    }
+
+    @Test public void nativeSurroundAndBlockersTravelWithMapWithoutChangingSpritesOrSavedCoordinates() {
+        for (boolean classic : new boolean[]{true, false}) {
+            Fixture f = new Fixture(classic);
+            Widget frame = widget(5, 5, 182, 166), blocker = widget(5, 5, 178, 40);
+            for (Widget decoration : new Widget[]{frame, blocker}) when(decoration.getParent()).thenReturn(f.parent);
+            when(f.parent.getStaticChildren()).thenReturn(new Widget[]{f.map, f.compass, f.options, f.hp, frame, blocker});
+            when(f.widgets.getTargetWidget(classic ? Minimap.CLASSIC_MINIMAP : Minimap.MODERN_MINIMAP)).thenReturn(frame);
+            when(f.widgets.getTargetWidget(classic ? Minimap.CLASSIC_NO_CLICK_0 : Minimap.MODERN_NO_CLICK_0)).thenReturn(blocker);
+            f.free.save(f.mapTarget, new Point(200, 300));
+            f.free.apply();
+            assertEquals(new Point(169, 279), WidgetGeometry.location(frame));
+            assertEquals(new Point(169, 279), WidgetGeometry.location(blocker));
+            assertEquals(new Point(200, 300), f.free.savedPosition(f.mapTarget));
+            verify(frame, never()).setSpriteId(anyInt());
+            verify(frame, never()).setNoClickThrough(true);
+            f.restore();
+            assertEquals(new Point(795, 5), WidgetGeometry.location(frame));
+            when(f.config.minimapFrame()).thenReturn(InterfaceLayoutConfig.MinimapFrame.CIRCULAR);
+            f.free.apply();
+            assertEquals(new Point(795, 5), WidgetGeometry.location(frame));
+            assertEquals(new Point(204, 304), WidgetGeometry.location(f.map));
+            f.restore();
+            when(f.config.minimapFrame()).thenReturn(InterfaceLayoutConfig.MinimapFrame.NATIVE);
+            f.free.apply();
+            assertEquals(new Point(169, 279), WidgetGeometry.location(frame));
+        }
+    }
+
     private static final class Fixture {
         final Client client = mock(Client.class);
         final InterfaceLayoutConfig config = mock(InterfaceLayoutConfig.class, CALLS_REAL_METHODS);
         final OrbController manager = mock(OrbController.class);
+        final WidgetManager widgets = mock(WidgetManager.class);
         final WidgetStateStore states = new WidgetStateStore();
         final Map<String, Object> saved = new HashMap<>();
         final Widget root = widget(0, 0, 1000, 700), parent = widget(790, 0, 210, 207);
@@ -146,7 +197,6 @@ public class FreeMinimapTest {
             when(parent.getParent()).thenReturn(root);
             for (Widget child : new Widget[]{map, compass, options, hp}) when(child.getParent()).thenReturn(parent);
             when(parent.getStaticChildren()).thenReturn(new Widget[]{map, compass, options, hp});
-            WidgetManager widgets = mock(WidgetManager.class);
             when(widgets.getTargetWidget(mapTarget)).thenReturn(map);
             when(widgets.getTargetWidget(compassTarget)).thenReturn(compass);
             when(widgets.getTargetWidget(classic ? Compass.CLASSIC_COMPASS_OPTIONS : Compass.MODERN_COMPASS_OPTIONS)).thenReturn(options);

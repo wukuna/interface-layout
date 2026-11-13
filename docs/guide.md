@@ -2,14 +2,14 @@
 
 Arrange menu tabs, orbs, the compass and minimap around the way you play. Build movable rows or columns, choose what stays visible, and scale overlay menu buttons from **25–200%**. Resource-pack icons are the default; bundled **Faithful contours** are an optional style and fallback. Menu layouts are saved separately for Fixed, Resizable Classic and Resizable Modern.
 
-**Pending Hub update:** moving and anchoring the visible native minimap in Free Position is included in [the submitted update](https://github.com/runelite/plugin-hub/pull/20479). The existing separate-minimap option is a different feature.
+**Pending Hub update:** frame choices and always-on orb/minimap click protection are included in [the submitted update](https://github.com/runelite/plugin-hub/pull/20615). The existing separate-minimap option is a different feature.
 
 [Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Inspiration and recipe](#inspiration-and-recipe) · [Support](#support) · [License and attribution](#license-and-attribution)
 
 ## Features
 
-- **Free-position controls** — move orbs and the compass in resizable modes. The pending update also makes the visible native minimap movable and anchorable.
-- **Circular orbs** — under Beta features, hide the number tabs beside HP, Prayer, Run and Special (including the optional shield orb). Choose number only, icon only, or a small icon and number inside the circle. The button and click-blocking area fit the circle; the removed tab no longer intercepts clicks. Use **Circular orb rim** to choose a smooth Silver or Dark grey edge for all circular orbs and the compass. Native fill/availability/actions and saved positions remain. Turning the option off restores the native background, number tab and full click area. Off by default; Edit interface temporarily uses native artwork.
+- **Free-position controls** — move and anchor the native minimap, orbs and compass in resizable modes.
+- **Circular orbs** — under Beta features, hide the number tabs beside HP, Prayer, Run and Special (including the optional shield orb). Choose number only, icon only, or a small icon and number inside the circle. The button and click-blocking area fit the circle; the removed tab no longer intercepts clicks. Use **Circular orb rim** to choose a smooth Silver or Dark grey edge, or None to remove the custom rim for all circular orbs and the compass. Native fill/availability/actions and saved positions remain. Turning the option off restores the native background, number tab and full click area. Off by default; Edit interface temporarily uses native artwork.
 - **Compact orb layouts** — arrange orbs vertically, horizontally, in a wider row, or with a custom preset.
 - **Movable menu bars** — keep native rows or start with vertical bars, then drag each bar wherever you want.
 - **Menu icon style** — Resource pack is the default and uses your active icon replacements, including custom spellbooks. Missing pack icons fall back to bundled Faithful contours. Choose Faithful contours to use the bundled dark artwork and original accents instead. Both styles scale with your buttons and keep active resource-pack backgrounds.
@@ -174,9 +174,9 @@ Choose **Orb arrangement → Free Position**, then **Alt-drag** an orb or the co
 
 Use RuneLite's **Alt-right-click** to reset an element's position. Disable **Edit interface** or press **Escape** to hide editing guidance when you are finished.
 
-**Native minimap movement — pending Hub update:** in Classic or Modern resizable mode, select **Map and orb visibility → Orb arrangement → Free Position** and leave **Hide minimap** off. Alt-drag the minimap using RuneLite’s overlay movement controls. It is available to **Custom UI Anchors** through the same overlay placement system as free orbs.
+**Native minimap movement:** in Classic or Modern resizable mode, select **Map and orb visibility → Orb arrangement → Free Position** and leave **Hide minimap** off. Alt-drag the minimap using RuneLite’s overlay movement controls. It is available to **Custom UI Anchors** through the same overlay placement system as free orbs.
 
-The native minimap keeps its map content and navigation. Its old surround is replaced by the selected **Circular orb rim** (Silver or Dark grey), including a matching compass rim. The compass follows the minimap until you position it independently. Other orbs keep their own saved positions. This minimap frame does not require enabling the separate circular-orb number-tab option.
+The native minimap keeps its map content and navigation. Choose **Map and orb visibility → Free minimap frame**: **Native / resource pack** preserves the original surround and is the default; **Circular rim** uses the selected **Circular orb rim** for the map and compass. Set the rim to **None** for no custom border. The native surround moves with the map and retains its combined compass socket. The compass follows the minimap until you position it independently. Other orbs keep their own saved positions. This minimap frame does not require enabling the separate circular-orb number-tab option.
 
 Hiding and showing the map retains its saved position. Resetting the element clears its custom position; resetting the layout or disabling the plugin restores native layout behavior. Controls hidden by the game remain hidden. Fixed mode keeps its native constraints.
 
@@ -198,7 +198,7 @@ Open **Orb layout options** to adjust the preset:
 
 Preset anchoring, gap handling and slot swapping apply to compact arrangements. Free Position uses each element's saved location.
 
-**Prevent orb and minimap clickthrough** stops clicks on orbs and the minimap from reaching the game behind them. Minimap navigation still works, including the detached minimap in compact layouts. This applies to every orb arrangement and uses the existing clickthrough setting.
+Orb and minimap click protection is always enabled. Visible controls block clicks from reaching the world behind them, while normal minimap navigation and orb actions keep working. This also applies to the separate minimap and does not require a checkbox. Circular-orb protection follows the visible circle; empty space outside it remains usable.
 
 ### Separate minimap and shortcuts
 
@@ -218,7 +218,7 @@ The **Minimap toggle button** section controls the optional eye button, its loca
 - **Stone grouping grid** aligns Shift-dragged stones to a grid measured in pixels. Set it to **1** to disable snapping. RuneLite handles snapping for Alt-drag movement.
 - **Reset positions and groups** asks for confirmation before clearing saved positions and menu groups in every display mode. Choose No or close the dialog to cancel. Your visibility choices are kept.
 
-Menu positions and groups are saved separately for **Fixed**, **Resizable Classic** and **Resizable Modern**. Independent orb and compass positioning, native-minimap movement in the pending update, hiding the native minimap, and the separate minimap are features for resizable modes; Fixed keeps its native gameframe constraints.
+Menu positions and groups are saved separately for **Fixed**, **Resizable Classic** and **Resizable Modern**. Independent orb and compass positioning, native-minimap movement, hiding the native minimap, and the separate minimap are features for resizable modes; Fixed keeps its native gameframe constraints.
 
 Legacy Compact Orbs and Menu Stones Hider settings are imported once per RuneLite profile. The original plugins do not need to remain installed.
 

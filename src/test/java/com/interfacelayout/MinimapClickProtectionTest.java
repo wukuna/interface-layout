@@ -36,7 +36,6 @@ public class MinimapClickProtectionTest
                         () -> mock(com.interfacelayout.layout.orbs.widget.layout.slot.SlotRegistry.class));
                 }
             }).getInstance(MinimapClickProtection.class);
-            when(config.enableNoClickthrough()).thenReturn(true);
         }
         Widget map(int id, boolean initial)
         {
@@ -79,9 +78,6 @@ public class MinimapClickProtectionTest
             Fixture f = new Fixture();
             Widget map = f.map(OrbConstants.Widgets.Modern.MINIMAP_MASK, initial);
             f.guard.apply(); f.guard.restore();
-            when(f.config.enableNoClickthrough()).thenReturn(false);
-            f.guard.apply(); assertEquals(initial, map.getNoClickThrough());
-            when(f.config.enableNoClickthrough()).thenReturn(true);
             f.guard.apply(); assertTrue(map.getNoClickThrough());
             f.guard.restore(); f.guard.restore();
             assertEquals(initial, map.getNoClickThrough());
@@ -111,17 +107,13 @@ public class MinimapClickProtectionTest
         assertFalse(old.getNoClickThrough()); assertTrue(replacement.getNoClickThrough());
     }
 
-    @Test public void detachedMinimapUsesSameSettingAndKeepsNativeContent()
+    @Test public void detachedMinimapAlwaysProtectsNativeNavigation()
     {
         Fixture f = new Fixture();
-        for (boolean enabled : new boolean[]{true, false})
-        {
-            when(f.config.enableNoClickthrough()).thenReturn(enabled);
-            Widget parent = mock(Widget.class), map = mock(Widget.class, Answers.RETURNS_SELF);
-            when(parent.createChild(anyInt(), anyInt())).thenReturn(map);
-            assertSame(map, f.widgets.createOverlayMinimap(parent));
-            verify(map).setNoClickThrough(enabled);
-            verify(map).setContentType(1338);
-        }
+        Widget parent = mock(Widget.class), map = mock(Widget.class, Answers.RETURNS_SELF);
+        when(parent.createChild(anyInt(), anyInt())).thenReturn(map);
+        assertSame(map, f.widgets.createOverlayMinimap(parent));
+        verify(map).setNoClickThrough(true);
+        verify(map).setContentType(1338);
     }
 }

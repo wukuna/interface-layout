@@ -44,7 +44,7 @@ public class ReleaseNotesNoticeTest
         verify(chat,times(1)).queue(messages.capture());
         String message=messages.getValue().getRuneLiteFormattedMessage();
         assertTrue(message.contains("Updates:<br>* "));
-        assertEquals(1,message.split("<br>\\* ",-1).length-1);
+        assertEquals(3,message.split("<br>\\* ",-1).length-1);
         assertTrue(message.contains("compass and its click area"));
         assertFalse(message.contains("Recent updates"));
         assertFalse(message.contains("1. "));

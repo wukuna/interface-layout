@@ -79,7 +79,7 @@ public interface InterfaceLayoutConfig extends Config
 	}
 
     @ConfigItem(keyName="hideOrbTabs",name="Circular orbs (hide number tabs)",
-        description="Hide the number tabs beside HP, Prayer, Run and Special, with a clean circular rim and matching click areas. Adds the same rim to the compass. Keeps native fill, icons and actions. Temporarily shows native artwork while editing the layout.",section=betaFeatures,position=4)
+        description="Hide the number tabs beside HP, Prayer, Run and Special, with a clean circular rim and matching click areas. The free-position minimap frame setting controls the map and compass surround. Keeps native fill, icons and actions. Temporarily shows native artwork while editing the layout.",section=betaFeatures,position=4)
     default boolean hideOrbTabs() {return false;}
 
     enum OrbContent {
@@ -93,13 +93,13 @@ public interface InterfaceLayoutConfig extends Config
     default OrbContent orbContent() {return OrbContent.ICON_AND_NUMBER;}
 
     enum OrbRim {
-        SILVER("Silver"), DARK_GREY("Dark grey");
+        SILVER("Silver"), DARK_GREY("Dark grey"), NONE("None");
         private final String label;
         OrbRim(String label) {this.label=label;}
         @Override public String toString() {return label;}
     }
     @ConfigItem(keyName="orbRim",name="Circular orb rim",
-        description="Rim color for circular orbs, the compass and the free-position minimap, including Soulreaper and shield orbs.",section=betaFeatures,position=6)
+        description="Rim color for circular frames, including Soulreaper and shield orbs. None removes the custom rim without changing the contents or actions.",section=betaFeatures,position=6)
     default OrbRim orbRim() {return OrbRim.SILVER;}
 
     @ConfigItem(keyName="orbHitpointsTimer",name="HP regeneration ring",
@@ -178,6 +178,17 @@ public interface InterfaceLayoutConfig extends Config
 		return OrbLayout.FREE_POSITION;
 	}
 
+    enum MinimapFrame {
+        NATIVE("Native / resource pack"), CIRCULAR("Circular rim");
+        private final String label;
+        MinimapFrame(String label) {this.label=label;}
+        @Override public String toString() {return label;}
+    }
+    @ConfigItem(keyName="minimapFrame",name="Free minimap frame",
+        description="Keep the native or resource-pack surround, or use the Circular orb rim for the free-position minimap and compass. The native surround moves with the minimap; its combined compass socket stays part of that artwork.",
+        section=hideAndSwapUpdate,position=13)
+    default MinimapFrame minimapFrame() {return MinimapFrame.NATIVE;}
+
 	@ConfigSection(
 		name = "Orb layout options",
 		description = "Orb interaction, preset anchoring and gap handling. Preset options do not change Free Position.",
@@ -185,18 +196,6 @@ public interface InterfaceLayoutConfig extends Config
 		position = 7
 	)
 	String layout = "layout";
-
-	@ConfigItem(
-		keyName = ConfigKeys.ENABLE_NO_CLICKTHROUGH,
-		name = "Prevent orb and minimap clickthrough",
-		description = "Stop orb and minimap clicks from reaching the game behind them while keeping minimap navigation. Applies to every orb arrangement.",
-		section = layout,
-		position = 20
-	)
-	default boolean enableNoClickthrough()
-	{
-		return false;
-	}
 
 	@Range(min = 0, max = 200)
 	@ConfigItem(

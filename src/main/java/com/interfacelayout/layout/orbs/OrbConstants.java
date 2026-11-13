@@ -65,7 +65,6 @@ public class OrbConstants
 		public static final String VERTICAL_Y_ADJUSTMENT = "verticalYAdjustment";
 		public static final String DISABLE_REORDERING = "disableReordering";
 		public static final String LEAVE_EMPTY_SPACE = "leaveEmptySpace";
-		public static final String ENABLE_NO_CLICKTHROUGH = "enableNoClickthrough";
 		public static final String ENABLE_ORB_SWAPPING = "enableOrbSwapping";
 		public static final String HIDE_MINIMAP_WITH_SIDE_PANEL = "hideMinimapWithSidePanel";
 		public static final String HP_ORB_SLOT = "hpOrbSlot";

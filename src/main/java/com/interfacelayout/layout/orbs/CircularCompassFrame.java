@@ -15,6 +15,7 @@ final class CircularCompassFrame {
     private Widget compass, replacedFrame;
     private Rectangle circle;
     private int originalOpacity, compassOpacity;
+    private boolean customFrame;
     private final java.util.Set<Widget> covered=java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
 
     void restore(Client client, OrbController manager) {
@@ -30,7 +31,10 @@ final class CircularCompassFrame {
         circle = null;
     }
 
-    void refresh(Client client, OrbController manager) {
+    void refresh(Client client, OrbController manager) {refresh(client, manager, true);}
+
+    void refresh(Client client, OrbController manager, boolean customFrame) {
+        this.customFrame = customFrame;
         if (manager.isCompassHidden() || manager.isMinimapMinimized()) return;
         int id = manager.isFixedMode() ? InterfaceID.Toplevel.MAPCONTAINER_GRAPHIC5
             : manager.isClassicResizable() ? OrbConstants.Widgets.Classic.COMPASS
@@ -51,6 +55,7 @@ final class CircularCompassFrame {
             }
             compass=null;circle=null;return;
         }
+        if (!customFrame) return;
         Widget frame = manager.compassFrame;
         if (frame != null && !frame.isHidden() && frame.getOpacity() < 255) {
             replacedFrame = frame;
@@ -70,7 +75,7 @@ final class CircularCompassFrame {
     }
 
     void paint(Graphics2D g, CircularOrbArtwork artwork, OrbRim style) {
-        if (compass == null || circle == null || compass.isHidden()) return;
+        if (!customFrame || compass == null || circle == null || compass.isHidden()) return;
         Graphics2D draw = (Graphics2D) g.create();
         try {
             draw.setComposite(AlphaComposite.SrcOver.derive((255 - compassOpacity) / 255f));

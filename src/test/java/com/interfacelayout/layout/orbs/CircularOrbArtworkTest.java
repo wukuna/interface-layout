@@ -21,7 +21,7 @@ public class CircularOrbArtworkTest {
     }
     @Test public void rimIsContinuousAtEveryAngleWithClearCenterAndCorners() {
         CircularOrbArtwork art=new CircularOrbArtwork();
-        for(OrbRim style:OrbRim.values())for(int diameter:new int[]{33,34,41,43,68}) {
+        for(OrbRim style:new OrbRim[]{OrbRim.SILVER,OrbRim.DARK_GREY})for(int diameter:new int[]{33,34,41,43,68}) {
             BufferedImage image=new BufferedImage(diameter,diameter,BufferedImage.TYPE_INT_ARGB);
             Graphics2D g=image.createGraphics();art.paint(g,new Rectangle(0,0,diameter,diameter),style);g.dispose();
             for(int angle=0;angle<360;angle++) {
@@ -38,6 +38,21 @@ public class CircularOrbArtworkTest {
             }
             assertTrue("Small curved edges have partial coverage",soft>20);
         }
+    }
+
+    @Test public void noRimLeavesExistingArtworkUntouchedAfterCachedStyles() {
+        CircularOrbArtwork art=new CircularOrbArtwork();
+        BufferedImage image=new BufferedImage(34,34,BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics=image.createGraphics();
+        art.paint(graphics,new Rectangle(0,0,34,34),OrbRim.SILVER);
+        graphics.setComposite(AlphaComposite.Clear);graphics.fillRect(0,0,34,34);
+        graphics.setComposite(AlphaComposite.SrcOver);graphics.setColor(Color.GREEN);graphics.fillRect(15,15,3,3);
+        int[] before=image.getRGB(0,0,34,34,null,0,34);
+        art.paint(graphics,new Rectangle(0,0,34,34),OrbRim.NONE);
+        assertArrayEquals(before,image.getRGB(0,0,34,34,null,0,34));
+        art.paint(graphics,new Rectangle(0,0,34,34),OrbRim.DARK_GREY);
+        assertNotEquals(0,image.getRGB(17,1));
+        graphics.dispose();
     }
 
     @Test public void switchingRimColorPreservesCoverageAndRestoresCachedSilver() {

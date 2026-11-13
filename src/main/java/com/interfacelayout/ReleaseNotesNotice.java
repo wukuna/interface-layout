@@ -23,6 +23,8 @@ final class ReleaseNotesNotice
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] UPDATES = {
         "The free circular compass and its click area now stay behind overlapping bank and other interface windows.",
+        "Orb and minimap click protection is always enabled, with normal minimap navigation.",
+        "Choose the native/resource-pack minimap frame or circular rims, with a None option for custom rims.",
     };
 
     @Inject private Client client;
