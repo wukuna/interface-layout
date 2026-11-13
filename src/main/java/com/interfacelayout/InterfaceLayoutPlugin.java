@@ -50,6 +50,7 @@ public class InterfaceLayoutPlugin extends Plugin
     @Inject private com.interfacelayout.layout.equipment.BetaEquipmentPanel equipmentPanel;
     @Inject private com.interfacelayout.layout.orbs.CircularOrbs circularOrbs;
     @Inject private com.interfacelayout.layout.orbs.SoulreaperOrbCompatibility soulreaperOrbs;
+    @Inject private com.interfacelayout.ui.InterfaceLayoutSidebar sidebar;
 
     @Override public void configure(Binder binder)
     {
@@ -58,6 +59,7 @@ public class InterfaceLayoutPlugin extends Plugin
 
     @Override protected void startUp() throws Exception
     {
+        sidebar.start();eventBus.register(sidebar);
         OrbEventHandler handler = events.get();
         eventBus.register(handler);
         handler.startUp();
@@ -73,6 +75,7 @@ public class InterfaceLayoutPlugin extends Plugin
     }
     @Override protected void shutDown() throws Exception
     {
+        eventBus.unregister(sidebar);sidebar.stop();
         circularOrbs.stop();overlayManager.remove(soulreaperOrbs);overlayManager.remove(circularOrbs);overlayManager.remove(circularOrbs.frames());eventBus.unregister(circularOrbs);
         equipmentPanel.stop();overlayManager.remove(equipmentPanel);eventBus.unregister(equipmentPanel);
         shieldOrb.stop();

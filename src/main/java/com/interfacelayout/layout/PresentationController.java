@@ -15,7 +15,6 @@ import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetType;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -28,8 +27,6 @@ public class PresentationController
     @Inject private ClientThread clientThread;
     @Inject private InterfaceLayoutConfig config;
 
-    private static final int METER_WIDTH = 33;
-    private static final int METER_HEIGHT = 4;
     private final Map<Widget, Boolean> originalVisibility = new IdentityHashMap<>();
     private volatile boolean running;
     private volatile int generation;
@@ -87,10 +84,7 @@ public class PresentationController
         if (children == null) return;
         for (Widget child : children)
         {
-            if (child == null || child.getParentId() != orb.getId()
-                || child.getType() != WidgetType.LAYER || child.getIndex() < 0
-                || child.getOriginalWidth() != METER_WIDTH || child.getOriginalHeight() != METER_HEIGHT)
-                continue;
+            if (!com.interfacelayout.layout.orbs.CircularSpecialMeter.matches(orb,child)) continue;
             originalVisibility.putIfAbsent(child, child.isSelfHidden());
             if (!child.isSelfHidden()) child.setHidden(true);
         }

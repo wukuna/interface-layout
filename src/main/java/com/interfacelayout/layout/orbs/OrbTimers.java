@@ -156,12 +156,18 @@ final class OrbTimers
 
     void paint(Graphics2D graphics, Rectangle circle, int component, InterfaceLayoutConfig config, long now)
     {
-        Color color;
-        if (component == InterfaceID.Orbs.ORB_HEALTH && config.orbHitpointsTimer()) color = HITPOINTS_COLOR;
-        else if (component == InterfaceID.Orbs.ORB_SPECENERGY && config.orbSpecialTimer()) color = SPECIAL_COLOR;
-        else if (component == InterfaceID.Orbs.ORB_PRAYER && config.orbPrayerTimer()) color = PRAYER_COLOR;
-        else return;
+        paint(graphics,circle,component,config,now,0,0);
+    }
+
+    void paint(Graphics2D graphics,Rectangle circle,int component,InterfaceLayoutConfig config,long now,int currentPrayer,int maximumPrayer)
+    {
+        Color color = color(component, config);
+        if (color == null) return;
         double progress = progress(component, now);
+        if(OrbTimerStyles.resolve(config,component)!=InterfaceLayoutConfig.NativeTimerStyle.QUIET_RIMS) {
+            NativeOrbTimers.paintCircular(graphics,circle,component,config,color,progress,currentPrayer,maximumPrayer);
+            return;
+        }
         if (progress <= 0 || circle.width <= 10 || circle.height <= 10) return;
         Graphics2D draw = (Graphics2D) graphics.create();
         try
@@ -173,6 +179,50 @@ final class OrbTimers
             int inset = component == InterfaceID.Orbs.ORB_SPECENERGY ? 3 : 4;
             draw.draw(new Arc2D.Double(circle.x + inset, circle.y + inset, circle.width - 2 * inset,
                 circle.height - 2 * inset, 90, -360 * progress, Arc2D.OPEN));
+        }
+        finally
+        {
+            draw.dispose();
+        }
+    }
+
+    void paintInset(Graphics2D graphics, Rectangle inset, Rectangle number, int component,
+        InterfaceLayoutConfig config, long now, int currentPrayer, int maximumPrayer)
+    {
+        Color color = color(component, config);
+        if (color != null) NativeOrbTimers.paint(graphics,inset,number,component,config,color,
+            progress(component,now),currentPrayer,maximumPrayer);
+    }
+
+    private static Color color(int component, InterfaceLayoutConfig config)
+    {
+        if (config.disableOrbTimers()) return null;
+        if (component == InterfaceID.Orbs.ORB_HEALTH && config.orbHitpointsTimer()) return HITPOINTS_COLOR;
+        if (component == InterfaceID.Orbs.ORB_SPECENERGY && config.orbSpecialTimer()) return SPECIAL_COLOR;
+        if (component == InterfaceID.Orbs.ORB_PRAYER && config.orbPrayerTimer()) return PRAYER_COLOR;
+        return null;
+    }
+
+    static void paintWedge(Graphics2D graphics, Rectangle inset, Color color, double progress)
+    {
+        if (!Double.isFinite(progress) || progress <= 0 || inset.width < 8 || inset.height < 8) return;
+        progress = Math.min(1, progress);
+        Graphics2D draw = (Graphics2D) graphics.create();
+        try
+        {
+            draw.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            draw.clip(new java.awt.geom.Ellipse2D.Double(inset.x, inset.y, inset.width, inset.height));
+            draw.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 52));
+            draw.fill(new Arc2D.Double(inset.x, inset.y, inset.width, inset.height, 90, -360 * progress, Arc2D.PIE));
+            if (progress < 1)
+            {
+                double angle = 2 * Math.PI * progress;
+                draw.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 112));
+                draw.setStroke(new BasicStroke(.8f));
+                draw.draw(new java.awt.geom.Line2D.Double(inset.getCenterX(), inset.getCenterY(),
+                    inset.getCenterX() + Math.sin(angle) * inset.width / 2,
+                    inset.getCenterY() - Math.cos(angle) * inset.height / 2));
+            }
         }
         finally
         {

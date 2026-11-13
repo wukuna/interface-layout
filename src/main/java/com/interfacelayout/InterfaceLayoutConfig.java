@@ -43,17 +43,59 @@ import net.runelite.client.config.Range;
 @ConfigGroup(GROUP_NAME)
 public interface InterfaceLayoutConfig extends Config
 {
-    @ConfigSection(name="Beta features",description="Optional equipment and appearance features undergoing testing.",closedByDefault=true,position=11)
+    @ConfigSection(name="<html>Settings have been moved<br>to the side panel</html>",description="Enable the sidebar icon below to open Layout, Appearance, Visibility and Beta Timers.",position=-5,closedByDefault=false)
+    String editorInfo="editorInfo";
+
+    @ConfigItem(keyName="showSidePanel",name="Show side panel icon",description="Show the Interface Layout editor in the sidebar.",section=editorInfo,position=-3)
+    default boolean showSidePanel() {return true;}
+
+
+    enum NativeTimerStyle {
+        INSET_SWEEP("Inset sweep"), TAG_METERS("Tag meters"), QUIET_RIMS("Quiet rims"), EIGHT_SLICES("Eight slices");
+        private final String label;
+        NativeTimerStyle(String label) {this.label=label;}
+        @Override public String toString() {return label;}
+    }
+
+    enum PrayerDisplay {
+        DRAIN("Drain only"), AMOUNT("Amount only"), BOTH("Amount + drain");
+        private final String label;
+        PrayerDisplay(String label) {this.label=label;}
+        @Override public String toString() {return label;}
+    }
+
+    enum OrbTimerStyle { CURRENT, INSET_SWEEP, TAG_METERS, QUIET_RIMS, EIGHT_SLICES }
+
+    @ConfigItem(keyName="hitpointsTimerStyle",name="HP timer style",description="Beta timer style for the hitpoints orb.",hidden=true)
+    default OrbTimerStyle hitpointsTimerStyle() {return OrbTimerStyle.CURRENT;}
+
+    @ConfigItem(keyName="prayerTimerStyle",name="Prayer timer style",description="Beta timer style for the prayer orb.",hidden=true)
+    default OrbTimerStyle prayerTimerStyle() {return OrbTimerStyle.CURRENT;}
+
+    @ConfigItem(keyName="specialTimerStyle",name="Special timer style",description="Beta timer style for the special-attack orb.",hidden=true)
+    default OrbTimerStyle specialTimerStyle() {return OrbTimerStyle.CURRENT;}
+
+    @ConfigItem(keyName="disableOrbTimers",name="Disable orb timers",description="Pause custom orb timers without changing individual timer choices.",hidden=true)
+    default boolean disableOrbTimers() {return false;}
+
+    @ConfigItem(keyName="nativeOrbTimerStyle",name="Native orb timer style",description="Beta timer appearance for native orbs with number tabs.",hidden=true)
+    default NativeTimerStyle nativeOrbTimerStyle() {return NativeTimerStyle.INSET_SWEEP;}
+
+    @ConfigItem(keyName="prayerOrbDisplay",name="Prayer display",description="Prayer amount, next-point countdown, or both for Tag meters and Eight slices.",hidden=true)
+    default PrayerDisplay prayerOrbDisplay() {return PrayerDisplay.BOTH;}
+
+    @ConfigItem(keyName="editorLastCompactLayout",name="Last compact layout",description="Remember the chosen compact preset when returning to the normal map.",hidden=true)
+    default OrbLayout editorLastCompactLayout() {return OrbLayout.VERTICAL;}
     String betaFeatures="betaFeatures";
 
     @ConfigItem(keyName="betaEquipmentPanel",name="Beta equipment panel",
         description="Compact equipment bonuses and current spellbook on the equipment sidebar card. The top-left question mark explains set effects, target conditions and weapon speed adjusted for style and gear. Off by default.",
-        section=betaFeatures,position=0)
+        section=betaFeatures,position=0, hidden = true)
     default boolean betaEquipmentPanel() {return false;}
 
     @ConfigItem(keyName="betaEquipmentReducedTooltips",name="Reduced tooltips",
         description="Shorten the numeric card and control tooltips. The question mark still shows equipment-effect details.",
-        section=betaFeatures,position=1)
+        section=betaFeatures,position=1, hidden = true)
     default boolean betaEquipmentReducedTooltips() {return false;}
 
 	@ConfigItem(
@@ -61,7 +103,7 @@ public interface InterfaceLayoutConfig extends Config
 		name = "Hide extra special-attack bar",
 		description = "Hide the small secondary meter beneath the special-attack orb. Keeps the orb, its number and normal special-attack controls.",
 		section=betaFeatures,position=2
-	)
+	, hidden = true)
 	default boolean hideExtraSpecialAttackBar()
 	{
 		return false;
@@ -72,14 +114,14 @@ public interface InterfaceLayoutConfig extends Config
 		name = "Show shield special orb",
 		description = "Show a movable shield-charge orb using the game's existing shield special action. The native special orb must remain visible. Uses the current resource pack; off by default.",
 		section=betaFeatures,position=3
-	)
+	, hidden = true)
 	default boolean showShieldSpecialOrb()
 	{
 		return false;
 	}
 
     @ConfigItem(keyName="hideOrbTabs",name="Circular orbs (hide number tabs)",
-        description="Hide the number tabs beside HP, Prayer, Run and Special, with a clean circular rim and matching click areas. The free-position minimap frame setting controls the map and compass surround. Keeps native fill, icons and actions. Temporarily shows native artwork while editing the layout.",section=betaFeatures,position=4)
+        description="Hide the number tabs beside HP, Prayer, Run and Special, with a clean circular rim and matching click areas. The free-position minimap frame setting controls the map and compass surround. Keeps native fill, icons and actions. Temporarily shows native artwork while editing the layout.",section=betaFeatures,position=4, hidden = true)
     default boolean hideOrbTabs() {return false;}
 
     enum OrbContent {
@@ -89,7 +131,7 @@ public interface InterfaceLayoutConfig extends Config
         @Override public String toString() {return label;}
     }
     @ConfigItem(keyName="orbContent",name="Circular orb contents",
-        description="Contents inside circular orbs: the native number, the icon, or a small icon above the number. Used with Circular orbs enabled.",section=betaFeatures,position=5)
+        description="Contents inside circular orbs: the native number, the icon, or a small icon above the number. Used with Circular orbs enabled.",section=betaFeatures,position=5, hidden = true)
     default OrbContent orbContent() {return OrbContent.ICON_AND_NUMBER;}
 
     enum OrbRim {
@@ -99,19 +141,19 @@ public interface InterfaceLayoutConfig extends Config
         @Override public String toString() {return label;}
     }
     @ConfigItem(keyName="orbRim",name="Circular orb rim",
-        description="Rim color for circular frames, including Soulreaper and shield orbs. None removes the custom rim without changing the contents or actions.",section=betaFeatures,position=6)
+        description="Rim color for circular frames, including Soulreaper and shield orbs. None removes the custom rim without changing the contents or actions.",section=betaFeatures,position=6, hidden = true)
     default OrbRim orbRim() {return OrbRim.SILVER;}
 
-    @ConfigItem(keyName="orbHitpointsTimer",name="HP regeneration ring",
-        description="Show an estimated natural HP regeneration timer inside circular orbs. Accounts for Rapid Heal.",section=betaFeatures,position=7)
+    @ConfigItem(keyName="orbHitpointsTimer",name="HP regeneration timer",
+        description="Estimate the next natural HP change, accounting for Rapid Heal. Uses a translucent inset wedge on native orbs and an inner ring on circular orbs.",section=betaFeatures,position=7, hidden = true)
     default boolean orbHitpointsTimer() {return true;}
 
-    @ConfigItem(keyName="orbSpecialTimer",name="Special regeneration ring",
-        description="Show an estimated special-attack regeneration timer inside circular orbs. Accounts for Lightbearer.",section=betaFeatures,position=8)
+    @ConfigItem(keyName="orbSpecialTimer",name="Special regeneration timer",
+        description="Estimate the next special-energy regeneration, accounting for Lightbearer. Uses a translucent inset wedge on native orbs and an inner ring on circular orbs.",section=betaFeatures,position=8, hidden = true)
     default boolean orbSpecialTimer() {return true;}
 
-    @ConfigItem(keyName="orbPrayerTimer",name="Prayer drain ring",
-        description="Count down counterclockwise to the next prayer point drained, estimated from active prayers and equipment prayer bonus. Keeps the outer potion-dose reminder separate.",section=betaFeatures,position=9)
+    @ConfigItem(keyName="orbPrayerTimer",name="Prayer drain timer",
+        description="Count down counterclockwise to the next prayer point drained, using active prayers and equipment prayer bonus. Uses the selected Beta timer style on native orbs and an inner ring on circular orbs; keeps the outer potion-dose reminder separate.",section=betaFeatures,position=9, hidden = true)
     default boolean orbPrayerTimer() {return true;}
 
 	enum HorizontalAnchor
@@ -172,7 +214,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Free Position lets you Alt-drag and anchor the native minimap, individual orbs and compass in resizable modes. The compass follows the minimap until positioned separately. Preset arrangements apply when Hide minimap is enabled.",
 		section = hideAndSwapUpdate,
 		position = 0
-	)
+	, hidden = true)
 	default OrbLayout layout()
 	{
 		return OrbLayout.FREE_POSITION;
@@ -186,15 +228,9 @@ public interface InterfaceLayoutConfig extends Config
     }
     @ConfigItem(keyName="minimapFrame",name="Free minimap frame",
         description="Keep the native or resource-pack surround, or use the Circular orb rim for the free-position minimap and compass. The native surround moves with the minimap; its combined compass socket stays part of that artwork.",
-        section=hideAndSwapUpdate,position=13)
+        section=hideAndSwapUpdate,position=13, hidden = true)
     default MinimapFrame minimapFrame() {return MinimapFrame.NATIVE;}
 
-	@ConfigSection(
-		name = "Orb layout options",
-		description = "Orb interaction, preset anchoring and gap handling. Preset options do not change Free Position.",
-		closedByDefault = true,
-		position = 7
-	)
 	String layout = "layout";
 
 	@Range(min = 0, max = 200)
@@ -204,7 +240,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Move a compact preset upward by this many pixels. Does not change Free Position.",
 		section = layout,
 		position = 1
-	)
+	, hidden = true)
 	default int verticalYAdjustment()
 	{
 		return 0;
@@ -216,7 +252,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Top or bottom edge used by compact presets. Does not change Free Position.",
 		section = layout,
 		position = 2
-	)
+	, hidden = true)
 	default VerticalAnchor verticalAnchor()
 	{
 		return VerticalAnchor.BOTTOM;
@@ -228,7 +264,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Left or right edge used by compact presets. Does not change Free Position.",
 		section = layout,
 		position = 3
-	)
+	, hidden = true)
 	default HorizontalAnchor horizontalAnchor()
 	{
 		return HorizontalAnchor.RIGHT;
@@ -240,7 +276,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Keep preset orb slots in place when an orb is hidden. Free-position orbs always keep their saved positions.",
 		section = layout,
 		position = 4
-	)
+	, hidden = true)
 	default boolean disableReordering()
 	{
 		return false;
@@ -252,7 +288,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Keep the preset container's empty space after hiding orbs. Does not change Free Position.",
 		section = layout,
 		position = 5
-	)
+	, hidden = true)
 	default boolean leaveEmptySpace()
 	{
 		return false;
@@ -264,7 +300,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "In preset arrangements, enable Edit interface and drag HP, Prayer, Run or Special onto another orb to swap slots. Free Position uses RuneLite Alt-drag instead.",
 		section = layout,
 		position = 6
-	)
+	, hidden = true)
 	default boolean enableOrbSwapping()
 	{
 		return false;
@@ -276,15 +312,9 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Hide the minimap, compass and orbs with the side panel, with or without Hide minimap enabled (resizable-modern only).",
 		section = layout,
 		position = 7
-	)
+	, hidden = true)
 	default boolean hideMinimapWithSidePanel() { return false; }
 
-	@ConfigSection(
-		name = "Minimap toggle button",
-		description = "Optional eye button for hiding the minimap and toggling editing.",
-		closedByDefault = true,
-		position = 8
-	)
 	String button = "button";
 
 	@ConfigItem(
@@ -293,7 +323,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Hide/show the minimap toggle button",
 		section = button,
 		position = 0
-	)
+	, hidden = true)
 	default boolean hideMinimapToggle()
 	{
 		return false;
@@ -305,7 +335,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Deprioritizes the toggle menu so it requires a right-click to interact with",
 		section = button,
 		position = 1
-	)
+	, hidden = true)
 	default boolean rightClickToggleButtons()
 	{
 		return false;
@@ -317,7 +347,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Select the desired location of the toggle button while the minimap is visible",
 		section = button,
 		position = 2
-	)
+	, hidden = true)
 	default TogglePlacement minimapTogglePlacement()
 	{
 		return TogglePlacement.DEFAULT;
@@ -362,7 +392,7 @@ public interface InterfaceLayoutConfig extends Config
 			"Warning: this minimap is not supported by plugins that display overlays on the minimap (names, marker tiles, lines, etc.)",
 		section = layout,
 		position = 30
-	)
+	, hidden = true)
 	default boolean showMinimapInCompactView()
 	{
 		return false;
@@ -374,7 +404,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Display an option on the minimap button to hide/show the separate minimap",
 		section = layout,
 		position = 31
-	)
+	, hidden = true)
 	default boolean showToggleOnMinimapButton()
 	{
 		return true;
@@ -386,18 +416,12 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Show a functional Logout-X on the separate minimap (only works in resizable-modern) <br>",
 		section = layout,
 		position = 32
-	)
+	, hidden = true)
 	default boolean showOverlayLogoutX()
 	{
 		return false;
 	}
 
-	@ConfigSection(
-		name = "Map and orb visibility",
-		description = "Choose an orb arrangement and hide or show the minimap, compass and orbs. Preset details are under Orb layout options.",
-		closedByDefault = true,
-		position = 6
-	)
 	String hideAndSwapUpdate = "hideAndSwapUpdate";
 
 	@ConfigItem(
@@ -406,7 +430,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Hide the native minimap in resizable modes. Preset arrangements also compact the orbs; Free Position retains saved minimap, orb and compass positions when hidden.",
 		section = hideAndSwapUpdate,
 		position = 1
-	)
+	, hidden = true)
 	default boolean hideMinimap()
 	{
 		return false;
@@ -418,7 +442,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Hide the compass. Show it again here; Free Position keeps its saved location.",
 		section = hideAndSwapUpdate,
 		position = 2
-	)
+	, hidden = true)
 	default boolean hideCompass()
 	{
 		return false;
@@ -518,7 +542,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Hide this control. Show it again here; Free Position keeps the saved location.",
 		section = hideAndSwapUpdate,
 		position = 3
-	)
+	, hidden = true)
 	default boolean hideHp()
 	{
 		return false;
@@ -530,7 +554,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Hide this control. Show it again here; Free Position keeps the saved location.",
 		section = hideAndSwapUpdate,
 		position = 4
-	)
+	, hidden = true)
 	default boolean hidePray()
 	{
 		return false;
@@ -542,7 +566,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Hide this control. Show it again here; Free Position keeps the saved location.",
 		section = hideAndSwapUpdate,
 		position = 5
-	)
+	, hidden = true)
 	default boolean hideRun()
 	{
 		return false;
@@ -554,7 +578,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Hide this control. Show it again here; Free Position keeps the saved location.",
 		section = hideAndSwapUpdate,
 		position = 6
-	)
+	, hidden = true)
 	default boolean hideSpec()
 	{
 		return false;
@@ -566,7 +590,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Hide this control. Show it again here; Free Position keeps the saved location.",
 		section = hideAndSwapUpdate,
 		position = 7
-	)
+	, hidden = true)
 	default boolean hideXp()
 	{
 		return false;
@@ -578,7 +602,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Hide the World Map button. Show it again here if you need to open the map with the button.",
 		section = hideAndSwapUpdate,
 		position = 8
-	)
+	, hidden = true)
 	default boolean hideWorld()
 	{
 		return false;
@@ -590,7 +614,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Hide this control. Show it again here; Free Position keeps the saved location.",
 		section = hideAndSwapUpdate,
 		position = 9
-	)
+	, hidden = true)
 	default boolean hideStore()
 	{
 		return false;
@@ -602,7 +626,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Hide this control. Show it again here; Free Position keeps the saved location.",
 		section = hideAndSwapUpdate,
 		position = 10
-	)
+	, hidden = true)
 	default boolean hideActivity()
 	{
 		return false;
@@ -614,7 +638,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Hide this control. Show it again here; Free Position keeps the saved location.",
 		section = hideAndSwapUpdate,
 		position = 11
-	)
+	, hidden = true)
 	default boolean hideWiki()
 	{
 		return false;
@@ -626,7 +650,7 @@ public interface InterfaceLayoutConfig extends Config
 		description = "Hide the X beside the minimap in Resizable Modern. Fixed and Resizable Classic use the Logout menu tab instead.",
 		section = hideAndSwapUpdate,
 		position = 12
-	)
+	, hidden = true)
 	default boolean hideLogout()
 	{
 		return false;
@@ -643,19 +667,18 @@ public interface InterfaceLayoutConfig extends Config
 		return false;
 	}
 
-    @ConfigSection(name = "Menu bars", description = "Arrange and move the menu tabs independently of the orbs", position = 4)
     String menu = "menu";
-    @ConfigItem(keyName = "menuLayout", name = "Menu arrangement", description = "Alt-drag bars in any arrangement. Vertical left/right are initial positions, not locks. Use Shift-drag to detach or join stones in vertical or Free position groups.", section = menu, position = 0)
+    @ConfigItem(keyName = "menuLayout", name = "Menu arrangement", description = "Alt-drag bars in any arrangement. Vertical left/right are initial positions, not locks. Use Shift-drag to detach or join stones in vertical or Free position groups.", section = menu, position = 0, hidden = true)
     default com.interfacelayout.layout.menu.MenuStoneController.Layout menuLayout() { return com.interfacelayout.layout.menu.MenuStoneController.Layout.VANILLA_HORIZONTAL; }
-    @ConfigItem(keyName = "menuDirection", name = "Initial bar direction", description = "Initial direction in Free position. Existing bars keep their direction. Joining two separate stones side-by-side makes a row; above or below makes a column.", section = menu, position = 1)
+    @ConfigItem(keyName = "menuDirection", name = "Initial bar direction", description = "Initial direction in Free position. Existing bars keep their direction. Joining two separate stones side-by-side makes a row; above or below makes a column.", section = menu, position = 1, hidden = true)
     default com.interfacelayout.layout.menu.MenuStoneController.Direction menuDirection() { return com.interfacelayout.layout.menu.MenuStoneController.Direction.VERTICAL; }
-    @ConfigItem(keyName = "menuOverlayButtons", name = "Use overlay menu buttons", description = "Replace visible menu tabs with scalable overlay buttons using your resource-pack icons by default, with optional Faithful contours artwork and active game/resource-pack backgrounds. Works in Fixed, Classic and Modern. Existing bars, hiding and grouping are retained; native interface contents are unchanged.", section = menu, position = 9)
+    @ConfigItem(keyName = "menuOverlayButtons", name = "Use overlay menu buttons", description = "Replace visible menu tabs with scalable overlay buttons using your resource-pack icons by default, with optional Faithful contours artwork and active game/resource-pack backgrounds. Works in Fixed, Classic and Modern. Existing bars, hiding and grouping are retained; native interface contents are unchanged.", section = menu, position = 9, hidden = true)
     default boolean menuOverlayButtons() { return false; }
     @Range(min = 25, max = 200)
     @net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
-    @ConfigItem(keyName = "menuGroupSize", name = "Resize menu tabs (%)", description = "Scale all replacement menu buttons and their click areas together. Only applies with Use overlay menu buttons enabled. 100% follows the native tab size. Orbs and interface contents are unchanged.", section = menu, position = 10)
+    @ConfigItem(keyName = "menuGroupSize", name = "Resize menu tabs (%)", description = "Scale all replacement menu buttons and their click areas together. Only applies with Use overlay menu buttons enabled. 100% follows the native tab size. Orbs and interface contents are unchanged.", section = menu, position = 10, hidden = true)
     default int menuGroupSize() { return 100; }
-    @ConfigItem(keyName = "menuKeepNativeIcons", name = "Keep icons at native size", description = "Keep overlay menu icons centred at their native size when buttons are enlarged. Below 100%, icons shrink with the buttons. Off scales the icons with the buttons at every size.", section = menu, position = 11)
+    @ConfigItem(keyName = "menuKeepNativeIcons", name = "Keep icons at native size", description = "Keep overlay menu icons centred at their native size when buttons are enlarged. Below 100%, icons shrink with the buttons. Off scales the icons with the buttons at every size.", section = menu, position = 11, hidden = true)
     default boolean menuKeepNativeIcons() { return false; }
 
     enum MenuIconStyle
@@ -667,66 +690,64 @@ public interface InterfaceLayoutConfig extends Config
         @Override public String toString() { return label; }
     }
 
-    @ConfigItem(keyName = "menuOverlayIconStyle", name = "Overlay icon style", description = "Resource pack uses active icon replacements, with Faithful contours for missing icons. Faithful contours always uses the bundled artwork where available. Tab backgrounds follow your active resource pack in both styles.", section = menu, position = 12)
+    @ConfigItem(keyName = "menuOverlayIconStyle", name = "Overlay icon style", description = "Resource pack uses active icon replacements, with Faithful contours for missing icons. Faithful contours always uses the bundled artwork where available. Tab backgrounds follow your active resource pack in both styles.", section = menu, position = 12, hidden = true)
     default MenuIconStyle menuOverlayIconStyle() { return MenuIconStyle.RESOURCE_PACK; }
 
     @Range(min = 0, max = 20)
-    @ConfigItem(keyName = "menuSpacing", name = "Stone spacing", description = "Pixels between visible stones. Hidden stones close the gap without changing the group's saved position.", section = menu, position = 2)
+    @ConfigItem(keyName = "menuSpacing", name = "Stone spacing", description = "Pixels between visible stones. Hidden stones close the gap without changing the group's saved position.", section = menu, position = 2, hidden = true)
     default int menuSpacing() { return 0; }
-    @ConfigItem(keyName = "menuRestoreLogoutTab", name = "Restore logout stone (Modern)", description = "Move Modern's existing logout X onto a menu-tab background. Off uses the bare X. Both can join custom menu groups; Native rows leaves the bare X at the minimap. Native buttons retain the original click area; overlay buttons use the configured size. Hide Logout-X is retained. Fixed and Classic already have logout tabs.", section = menu, position = 8)
+    @ConfigItem(keyName = "menuRestoreLogoutTab", name = "Restore logout stone (Modern)", description = "Move Modern's existing logout X onto a menu-tab background. Off uses the bare X. Both can join custom menu groups; Native rows leaves the bare X at the minimap. Native buttons retain the original click area; overlay buttons use the configured size. Hide Logout-X is retained. Fixed and Classic already have logout tabs.", section = menu, position = 8, hidden = true)
     default boolean restoreLogoutTab() { return false; }
-    @ConfigItem(keyName = "allowClicksThroughGaps", name = "Allow clicks through gaps", description = "Allow game clicks between and immediately around visible menu stones. Disable to block these gaps without selecting a tab. Stone buttons are unchanged.", section = menu, position = 7)
+    @ConfigItem(keyName = "allowClicksThroughGaps", name = "Allow clicks through gaps", description = "Allow game clicks between and immediately around visible menu stones. Disable to block these gaps without selecting a tab. Stone buttons are unchanged.", section = menu, position = 7, hidden = true)
     default boolean allowClicksThroughGaps() { return true; }
-    @ConfigItem(keyName = "hideTopMenu", name = "Hide combat–spellbook tabs", description = "Hide Combat, Skills, Quests, Inventory, Equipment, Prayer and Spellbook wherever they are placed.", section = menu, position = 3)
+    @ConfigItem(keyName = "hideTopMenu", name = "Hide combat–spellbook tabs", description = "Hide Combat, Skills, Quests, Inventory, Equipment, Prayer and Spellbook wherever they are placed.", section = menu, position = 3, hidden = true)
     default boolean hideTopMenu() { return false; }
-    @ConfigItem(keyName = "hideBottomMenu", name = "Hide clan–music tabs", description = "Hide Clan, Account Management, Friends, Logout, Settings, Emotes and Music wherever they are placed.", section = menu, position = 4)
+    @ConfigItem(keyName = "hideBottomMenu", name = "Hide clan–music tabs", description = "Hide Clan, Account Management, Friends, Logout, Settings, Emotes and Music wherever they are placed.", section = menu, position = 4, hidden = true)
     default boolean hideBottomMenu() { return false; }
-    @ConfigItem(keyName = "hideLeftBar", name = "Hide classic left border", description = "Hide the decorative left border in resizable Classic mode.", section = menu, position = 5)
+    @ConfigItem(keyName = "hideLeftBar", name = "Hide classic left border", description = "Hide the decorative left border in resizable Classic mode.", section = menu, position = 5, hidden = true)
     default boolean hideLeftBar() { return false; }
-    @ConfigItem(keyName = "hideRightBar", name = "Hide classic right border", description = "Hide the decorative right border in resizable Classic mode.", section = menu, position = 6)
+    @ConfigItem(keyName = "hideRightBar", name = "Hide classic right border", description = "Hide the decorative right border in resizable Classic mode.", section = menu, position = 6, hidden = true)
     default boolean hideRightBar() { return false; }
     @Range(min = 0, max = 16383)
     @ConfigItem(keyName = "hiddenStones", hidden = true, name = "Hidden stone mask", description = "Optional individual visibility: bit 0 through bit 13 correspond to native stone order.", section = menu, position = 6)
     default int hiddenStones() { return 0; }
-    @ConfigItem(keyName = "showMenuToggle", name = "Restore native menu shortcut", description = "Toggle a temporary view of the original menu tabs. Press again to return to your saved layout.", section = menu, position = 8)
+    @ConfigItem(keyName = "showMenuToggle", name = "Restore native menu shortcut", description = "Toggle a temporary view of the original menu tabs. Press again to return to your saved layout.", section = hotkey, position = 8)
     default Keybind showMenuToggle() { return Keybind.NOT_SET; }
-    @ConfigSection(name = "Editing controls", description = "RuneLite Alt-drag moves bars, detached stones and free orbs. Shift-drag detaches or joins stones. Edit interface shows guidance and enables preset orb swapping.", position = 3)
     String editor = "interfaceEditor";
     @ConfigItem(keyName = "editInterface", name = "Edit interface", description = "Show editing outlines and guidance; enable Shift-drag stone grouping and preset orb slot swapping. Alt-drag bar positioning remains available with this off. Stone grouping is saved on release and cancelled by layout transitions.", position = 0)
     default boolean editInterface() { return false; }
     @Range(min = 1, max = 32)
-    @ConfigItem(keyName = "editGrid", name = "Stone grouping grid", description = "Snap Shift-dragged stones to this pixel grid; 1 disables snapping. RuneLite controls Alt-drag positioning.", section = editor, position = 1)
+    @ConfigItem(keyName = "editGrid", name = "Stone grouping grid", description = "Snap Shift-dragged stones to this pixel grid; 1 disables snapping. RuneLite controls Alt-drag positioning.", section = editor, position = 1, hidden = true)
     default int editGrid() { return 1; }
-    @ConfigItem(keyName = "resetLayoutPositions", name = "Reset positions and groups", description = "Ask for confirmation before clearing saved positions and menu groups in every display mode. Cancel keeps the layout. Visibility choices are kept.", section = editor, position = 2)
+    @ConfigItem(keyName = "resetLayoutPositions", name = "Reset positions and groups", description = "Ask for confirmation before clearing saved positions and menu groups in every display mode. Cancel keeps the layout. Visibility choices are kept.", section = editor, position = 2, hidden = true)
     default boolean resetLayoutPositions() { return false; }
-    @ConfigSection(name = "Hide menu tabs", description = "Hide a tab, its icon and background; remaining tabs close the gap", closedByDefault = true, position = 5)
     String individualStones = "individualStones";
-    @ConfigItem(keyName = "hideStone0", name = "Combat options", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 0)
+    @ConfigItem(keyName = "hideStone0", name = "Combat options", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 0, hidden = true)
     default boolean hideCombatStone() { return false; }
-    @ConfigItem(keyName = "hideStone1", name = "Skills", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 1)
+    @ConfigItem(keyName = "hideStone1", name = "Skills", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 1, hidden = true)
     default boolean hideSkillsStone() { return false; }
-    @ConfigItem(keyName = "hideStone2", name = "Quests", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 2)
+    @ConfigItem(keyName = "hideStone2", name = "Quests", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 2, hidden = true)
     default boolean hideQuestsStone() { return false; }
-    @ConfigItem(keyName = "hideStone3", name = "Inventory", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 3)
+    @ConfigItem(keyName = "hideStone3", name = "Inventory", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 3, hidden = true)
     default boolean hideInventoryStone() { return false; }
-    @ConfigItem(keyName = "hideStone4", name = "Equipment", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 4)
+    @ConfigItem(keyName = "hideStone4", name = "Equipment", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 4, hidden = true)
     default boolean hideEquipmentStone() { return false; }
-    @ConfigItem(keyName = "hideStone5", name = "Prayer", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 5)
+    @ConfigItem(keyName = "hideStone5", name = "Prayer", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 5, hidden = true)
     default boolean hidePrayerStone() { return false; }
-    @ConfigItem(keyName = "hideStone6", name = "Spellbook", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 6)
+    @ConfigItem(keyName = "hideStone6", name = "Spellbook", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 6, hidden = true)
     default boolean hideSpellbookStone() { return false; }
-    @ConfigItem(keyName = "hideStone7", name = "Clan", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 7)
+    @ConfigItem(keyName = "hideStone7", name = "Clan", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 7, hidden = true)
     default boolean hideClanStone() { return false; }
-    @ConfigItem(keyName = "hideStone8", name = "Account Management", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 8)
+    @ConfigItem(keyName = "hideStone8", name = "Account Management", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 8, hidden = true)
     default boolean hideAccountManagementStone() { return false; }
-    @ConfigItem(keyName = "hideStone9", name = "Friends", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 9)
+    @ConfigItem(keyName = "hideStone9", name = "Friends", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 9, hidden = true)
     default boolean hideFriendsStone() { return false; }
-    @ConfigItem(keyName = "hideStone10", name = "Logout tab / Logout-X", description = "Fixed and Resizable Classic: hide the Logout tab in the bottom row. Resizable Modern: hide the Logout-X beside the minimap; that mode has no separate Logout tab in its native bottom row.", section = individualStones, position = 10)
+    @ConfigItem(keyName = "hideStone10", name = "Logout tab / Logout-X", description = "Fixed and Resizable Classic: hide the Logout tab in the bottom row. Resizable Modern: hide the Logout-X beside the minimap; that mode has no separate Logout tab in its native bottom row.", section = individualStones, position = 10, hidden = true)
     default boolean hideLogoutStone() { return false; }
-    @ConfigItem(keyName = "hideStone11", name = "Settings", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 11)
+    @ConfigItem(keyName = "hideStone11", name = "Settings", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 11, hidden = true)
     default boolean hideSettingsStone() { return false; }
-    @ConfigItem(keyName = "hideStone12", name = "Emotes", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 12)
+    @ConfigItem(keyName = "hideStone12", name = "Emotes", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 12, hidden = true)
     default boolean hideEmotesStone() { return false; }
-    @ConfigItem(keyName = "hideStone13", name = "Music", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 13)
+    @ConfigItem(keyName = "hideStone13", name = "Music", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 13, hidden = true)
     default boolean hideMusicStone() { return false; }
 }

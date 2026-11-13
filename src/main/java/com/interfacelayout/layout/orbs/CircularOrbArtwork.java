@@ -48,7 +48,28 @@ final class CircularOrbArtwork {
     Rectangle aroundFill(Rectangle content, BufferedImage image) {
         Rectangle circle = around(content);
         if (image == null || image.getWidth() > 512 || image.getHeight() > 512) return circle;
-        Rectangle visible = fillBounds.computeIfAbsent(image, source -> {
+        Rectangle visible = visibleFill(image);
+        circle.x = (int)Math.round(content.x + visible.getCenterX() * content.width / image.getWidth() - circle.width / 2.0);
+        circle.y = (int)Math.round(content.y + visible.getCenterY() * content.height / image.getHeight() - circle.height / 2.0);
+        return circle;
+    }
+
+    Rectangle insetFill(Rectangle content, BufferedImage image) {
+        double cx = content.getCenterX(), cy = content.getCenterY();
+        double width = content.width, height = content.height;
+        if (image != null && image.getWidth() <= 512 && image.getHeight() <= 512) {
+            Rectangle visible = visibleFill(image);
+            cx = content.x + visible.getCenterX() * content.width / image.getWidth();
+            cy = content.y + visible.getCenterY() * content.height / image.getHeight();
+            width = (double)visible.width * content.width / image.getWidth();
+            height = (double)visible.height * content.height / image.getHeight();
+        }
+        int diameter = Math.max(0, (int)Math.floor(Math.min(width, height)) - 2);
+        return new Rectangle((int)Math.round(cx - diameter / 2.0), (int)Math.round(cy - diameter / 2.0), diameter, diameter);
+    }
+
+    private Rectangle visibleFill(BufferedImage image) {
+        return fillBounds.computeIfAbsent(image, source -> {
             int left=source.getWidth(),top=source.getHeight(),right=-1,bottom=-1;
             for(int y=0;y<source.getHeight();y++)for(int x=0;x<source.getWidth();x++)
                 if((source.getRGB(x,y)>>>24)!=0) {
@@ -57,9 +78,6 @@ final class CircularOrbArtwork {
             return right<left ? new Rectangle(0,0,source.getWidth(),source.getHeight())
                 : new Rectangle(left,top,right-left+1,bottom-top+1);
         });
-        circle.x = (int)Math.round(content.x + visible.getCenterX() * content.width / image.getWidth() - circle.width / 2.0);
-        circle.y = (int)Math.round(content.y + visible.getCenterY() * content.height / image.getHeight() - circle.height / 2.0);
-        return circle;
     }
 
     static boolean contains(Rectangle circle, int x, int y) {

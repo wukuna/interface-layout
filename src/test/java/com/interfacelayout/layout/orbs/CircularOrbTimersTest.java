@@ -83,7 +83,9 @@ public class CircularOrbTimersTest
         when(f.overlay.config.editInterface()).thenReturn(false); f.refresh();
         assertTrue(pixels(f.render(), OrbTimers.PRAYER_COLOR) > 0);
         when(f.overlay.config.hideOrbTabs()).thenReturn(false); f.refresh();
-        assertEquals(0, pixels(f.render(), OrbTimers.PRAYER_COLOR));
+        assertTrue(pixels(f.render(), OrbTimers.PRAYER_COLOR)>0);
+        when(f.overlay.config.disableOrbTimers()).thenReturn(true);
+        assertEquals(0,pixels(f.render(),OrbTimers.PRAYER_COLOR));
         assertEquals(57, f.parent.getOriginalWidth());
     }
 

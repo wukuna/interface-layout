@@ -27,13 +27,13 @@ public class SettingsPanelTest
         }
         verifyNoInteractions(thread, editor);
     }
-    @Test public void orbVisibilityCheckboxesAreVisibleInOneSection() throws Exception
+    @Test public void orbVisibilityKeepsItsKeysAndMovesOutOfTheNativeSettings() throws Exception
     {
         for (String method : new String[]{"hideCompass", "hideHp", "hidePray", "hideRun", "hideSpec", "hideXp", "hideWorld",
             "hideStore", "hideActivity", "hideWiki", "hideLogout"})
         {
             ConfigItem item = InterfaceLayoutConfig.class.getMethod(method).getAnnotation(ConfigItem.class);
-            assertFalse(method, item.hidden()); assertEquals("hideAndSwapUpdate", item.section());
+            assertTrue(method, item.hidden()); assertEquals("hideAndSwapUpdate", item.section());
         }
     }
     @Test public void editingControlIsAtTopAndOldMovedToEditModeNoticeIsGone() throws Exception

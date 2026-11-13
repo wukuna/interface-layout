@@ -6,6 +6,23 @@ Arrange menu tabs, orbs, the compass and minimap around the way you play. Build 
 
 [Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Inspiration and recipe](#inspiration-and-recipe) · [Support](#support) · [License and attribution](#license-and-attribution)
 
+## Current side panel controls
+
+Open Interface Layout's minimap icon in RuneLite's toolbar. **Show side panel icon**, **Edit interface** and keyboard shortcuts remain in regular plugin settings. The editor preserves existing settings and reveals related controls only when relevant.
+
+| Tab | Controls |
+| --- | --- |
+| Layout | Normal, Free placement or Compact orbs; compact presets; menu-tab arrangement; editing and position resets. |
+| Appearance | Overlay menu buttons, artwork and size; Number tabs or Circles only; native/resource-pack or circular minimap frame; Beta equipment presentation. |
+| Visibility | Individual map controls and menu tabs; group visibility; extra special-attack meter; shield orb; classic borders. Checked means visible. |
+| Timers | Beta HP, Prayer and Special timers, each with its own style selection. |
+
+**Normal** restores native positioning while retaining the saved free layout. **Free placement** uses the plugin's own anchor points or Custom UI Anchors. For a movable native minimap, select Free placement and keep **Visibility → Minimap** checked. **Appearance → Minimap → Frame → Circular rim** reveals **Shared circular rim**; Native / resource pack retains the attached compass socket even when the compass is moved separately.
+
+Choose **Inset sweep**, **Tag meters**, **Quiet rims** or **Eight slices** independently for each timer with Number tabs or Circles only. Prayer Tag meters and Eight slices support **Amount only**, **Drain only** or **Amount + drain**. Amount tracks actual current/max prayer; the countdown shows the next point drained. The existing circular prayer ring remains the default for existing circular layouts. Native low-prayer flashes and potion-dose reminders are preserved. In Circles only, the extra special-attack meter appears below the orb, clear of its timer; closely packed orbs can clip the extra meter.
+
+The screenshots and recordings below use the earlier settings layout. Earlier references to Menu bars map to Layout or Appearance, map/orb hiding controls map to Visibility, and Beta equipment appearance maps to Appearance. In the current Visibility tab, uncheck a control to hide it; older screenshots use inverse Hide checkboxes.
+
 ## Features
 
 - **Free-position controls** — move and anchor the native minimap, orbs and compass in resizable modes.

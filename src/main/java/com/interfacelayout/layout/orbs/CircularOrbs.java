@@ -55,6 +55,8 @@ public final class CircularOrbs extends Overlay {
     private final CircularCompassFrame compass = new CircularCompassFrame();
     private final CircularMinimapFrame minimap = new CircularMinimapFrame();
     private final List<View> views=new ArrayList<>();
+    private final List<NativeTimerView> nativeTimers=new ArrayList<>();
+    private final List<CircularSpecialMeter> specialMeters=new ArrayList<>();
     private volatile boolean running;
     private volatile int generation;
     private int timerGeneration = -1;
@@ -83,7 +85,7 @@ public final class CircularOrbs extends Overlay {
         compass.restore(client,manager);
         input.restore(client);
         opacities.forEach((widget,opacity)->{if(CircularOrbInput.current(client,widget) && widget.getOpacity()==255)widget.setOpacity(opacity);});
-        opacities.clear();views.clear();
+        opacities.clear();views.clear();nativeTimers.clear();specialMeters.clear();
     }
     @Subscribe(priority=4) public void onScriptPreFired(ScriptPreFired event) {
         if(running && scriptDepth++==0)restore();
@@ -139,7 +141,10 @@ public final class CircularOrbs extends Overlay {
         Widget spec=client.getWidget(InterfaceID.Orbs.ORB_SPECENERGY),specBacking=client.getWidget(InterfaceID.Orbs.SPECENERGY_BACKING);
         if(soulreaper!=null)soulreaper.refresh(enabled && visible(spec) && visible(specBacking)
             && !WidgetGeometry.bounds(spec).isEmpty() && !WidgetGeometry.bounds(specBacking).isEmpty());
-        if(!enabled)return;
+        if(!enabled) {
+            if(visible && !config.hideOrbTabs() && !config.editInterface())refreshNativeTimers();
+            return;
+        }
         List<Rectangle> windows = InterfaceWindows.bounds(client);
         if (!freeMap) compass.refresh(client,manager);
         for(int i=0;i<ORBS.length;i++) {
@@ -152,11 +157,23 @@ public final class CircularOrbs extends Overlay {
             Rectangle circle=artwork.aroundFill(fill,sprites.getPadded(indicator));
             if(soulreaper!=null && orb==Orbs.SPEC_ORB_CONTAINER)soulreaper.anchor(circle);
             Widget button=client.getWidget(orb.getButtonId());
+            boolean tagTimer=!config.disableOrbTimers() && OrbTimerStyles.resolve(config,parent.getId())==InterfaceLayoutConfig.NativeTimerStyle.TAG_METERS
+                && (orb==Orbs.HP_ORB_CONTAINER && config.orbHitpointsTimer() || orb==Orbs.PRAYER_ORB_CONTAINER && config.orbPrayerTimer()
+                || orb==Orbs.SPEC_ORB_CONTAINER && config.orbSpecialTimer());
+            Rectangle footprint=new Rectangle(circle);if(tagTimer)footprint.height+=4;
+            if(orb==Orbs.SPEC_ORB_CONTAINER && !config.hideExtraSpecialAttackBar()) {
+                CircularSpecialMeter meter=CircularSpecialMeter.capture(parent,circle,tagTimer?7:3,sprites);
+                if(meter!=null) {
+                    coveredWidgets.add(meter.source);meter.source.setHidden(true);
+                    if(windows.stream().noneMatch(window->window.intersects(circle) || window.intersects(meter.bounds)))specialMeters.add(meter);
+                }
+            }
             CircularOrbLayers layers=CircularOrbLayers.capture(parent,backing,button,icon,sprites,this::hide);
             View v=new View(parent,sprites.get(icon),circle,WidgetGeometry.bounds(parent),layers,
                 number==null?"":Text.removeTags(number.getText()),number==null?Color.WHITE:new Color(number.getTextColor()),
                 backing.getOpacity(),visible(icon)?icon.getOpacity():255,visible(number)?number.getOpacity():255,
-                windows.stream().anyMatch(window -> window.intersects(circle)));
+                windows.stream().anyMatch(window -> window.intersects(footprint)),
+                client.getBoostedSkillLevel(net.runelite.api.Skill.PRAYER),client.getRealSkillLevel(net.runelite.api.Skill.PRAYER));
             views.add(v);hide(backing);hide(number);hide(icon);
             net.runelite.api.Point mouse=client.getMouseCanvasPosition();
             if (v.covered) {
@@ -169,6 +186,27 @@ public final class CircularOrbs extends Overlay {
             input.apply(parent,backing,button,number,circle,hovered);
             if(mouse!=null && v.original.contains(mouse.getX(),mouse.getY()) && !hovered)
                 hideTree(client.getWidget(InterfaceID.Orbs.TOOLTIP),Collections.newSetFromMap(new IdentityHashMap<>()));
+        }
+    }
+
+    private void refreshNativeTimers() {
+        List<Rectangle> windows=InterfaceWindows.bounds(client);
+        for(int i=0;i<ORBS.length;i++) {
+            Orbs orb=ORBS[i];
+            if(orb!=Orbs.HP_ORB_CONTAINER && orb!=Orbs.PRAYER_ORB_CONTAINER && orb!=Orbs.SPEC_ORB_CONTAINER)continue;
+            Widget parent=client.getWidget(orb.getComponentId()),backing=client.getWidget(orb.getBackingId());
+            Widget indicator=client.getWidget(orb.getIndicatorId());
+            if(!visible(parent) || !visible(backing) || !visible(indicator))continue;
+            Rectangle fill=WidgetGeometry.bounds(indicator);
+            if(fill.isEmpty() || WidgetGeometry.bounds(parent).isEmpty())continue;
+            Rectangle inset=artwork.insetFill(fill,sprites.getPadded(indicator));
+            Rectangle area=new Rectangle(inset);area.grow(5,5);
+            Rectangle number=WidgetGeometry.bounds(client.getWidget(NUMBERS[i]));
+            area=area.union(number);
+            final Rectangle painted=area;
+            if(inset.isEmpty() || windows.stream().anyMatch(window -> window.intersects(painted)))continue;
+            nativeTimers.add(new NativeTimerView(parent,backing,indicator,inset,number,
+                client.getBoostedSkillLevel(net.runelite.api.Skill.PRAYER),client.getRealSkillLevel(net.runelite.api.Skill.PRAYER)));
         }
     }
     @Subscribe(priority=-30) public void onPostMenuSort(PostMenuSort event) {
@@ -198,6 +236,15 @@ public final class CircularOrbs extends Overlay {
         for(Widget child:CircularOrbLayers.children(widget))hideTree(child,visited);
     }
     @Override public Dimension render(Graphics2D g) {
+        if(running && !config.hideOrbTabs() && !config.editInterface() && timerGeneration==generation)
+            for(NativeTimerView view:nativeTimers)if(visible(view.parent) && visible(view.backing) && visible(view.indicator)) {
+                Graphics2D draw=(Graphics2D)g.create();
+                try {
+                    int opacity=Math.max(view.parent.getOpacity(),Math.max(view.backing.getOpacity(),view.indicator.getOpacity()));
+                    draw.setComposite(AlphaComposite.SrcOver.derive((255-opacity)/255f));
+                    timers.paintInset(draw,view.inset,view.number,view.parent.getId(),config,System.nanoTime(),view.currentPrayer,view.maximumPrayer);
+                } finally {draw.dispose();}
+            }
         if(running && config.hideOrbTabs())for(View v:views)if(!v.covered && !v.parent.isHidden()) {
             Graphics2D draw=(Graphics2D)g.create();
             try {
@@ -207,13 +254,31 @@ public final class CircularOrbs extends Overlay {
                 if(soulreaper!=null && v.parent.getId()==InterfaceID.Orbs.ORB_SPECENERGY)soulreaper.paintNativeTimer(draw,v.circle);
                 artwork.paint(draw,v.circle,config.orbRim());
                 paintContent(draw,v.circle,v.icon,v.number,v.color,config.orbContent(),v.iconOpacity,v.numberOpacity);
-                if(timerGeneration==generation)timers.paint(draw,v.circle,v.parent.getId(),config,System.nanoTime());
+                if(timerGeneration==generation)timers.paint(draw,v.circle,v.parent.getId(),config,System.nanoTime(),v.currentPrayer,v.maximumPrayer);
             } finally {draw.dispose();}
             net.runelite.api.Point mouse = client.getMouseCanvasPosition();
             if (mouse == null || !CircularOrbArtwork.contains(v.circle, mouse.getX(), mouse.getY()))
                 input.maskOutsideHover(v.parent);
         }
+        if(running && config.hideOrbTabs() && !config.editInterface())for(CircularSpecialMeter meter:specialMeters) {
+            Graphics2D draw=(Graphics2D)g.create();
+            try {
+                java.awt.geom.Area area=new java.awt.geom.Area(meter.bounds);
+                for(View view:views)area.subtract(new java.awt.geom.Area(new Ellipse2D.Double(view.circle.x,view.circle.y,view.circle.width,view.circle.height)));
+                draw.clip(area);meter.paint(draw);
+            } finally {draw.dispose();}
+        }
         return null;
+    }
+
+    private static final class NativeTimerView {
+        final Widget parent,backing,indicator;
+        final Rectangle inset,number;
+        final int currentPrayer,maximumPrayer;
+        NativeTimerView(Widget parent,Widget backing,Widget indicator,Rectangle inset,Rectangle number,int currentPrayer,int maximumPrayer) {
+            this.parent=parent;this.backing=backing;this.indicator=indicator;this.inset=inset;this.number=number;
+            this.currentPrayer=currentPrayer;this.maximumPrayer=maximumPrayer;
+        }
     }
     static void paintContent(Graphics2D g,Rectangle circle,BufferedImage icon,String number,Color color,OrbContent mode,int iconOpacity,int numberOpacity) {
         Graphics2D draw=(Graphics2D)g.create();
@@ -243,8 +308,10 @@ public final class CircularOrbs extends Overlay {
         final Widget parent;final BufferedImage icon;final Rectangle circle,original;final CircularOrbLayers layers;
         final String number;final Color color;final int frameOpacity,iconOpacity,numberOpacity;
         final boolean covered;
-        View(Widget p,BufferedImage i,Rectangle c,Rectangle original,CircularOrbLayers layers,String n,Color col,int fo,int io,int no,boolean covered) {
+        final int currentPrayer,maximumPrayer;
+        View(Widget p,BufferedImage i,Rectangle c,Rectangle original,CircularOrbLayers layers,String n,Color col,int fo,int io,int no,boolean covered,int currentPrayer,int maximumPrayer) {
             parent=p;icon=i;circle=c;this.original=original;this.layers=layers;number=n;color=col;frameOpacity=fo;iconOpacity=io;numberOpacity=no;this.covered=covered;
+            this.currentPrayer=currentPrayer;this.maximumPrayer=maximumPrayer;
         }
     }
 }

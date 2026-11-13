@@ -499,6 +499,9 @@ public class OrbEventHandler implements KeyListener
             });
             return;
         }
+if (group.equals(GROUP_NAME) && (key.equals("showSidePanel") || key.equals("editorLastCompactLayout")
+    || key.equals("disableOrbTimers") || key.equals("nativeOrbTimerStyle") || key.equals("hitpointsTimerStyle") || key.equals("prayerTimerStyle") || key.equals("specialTimerStyle") || key.equals("prayerOrbDisplay")
+    || key.equals("orbHitpointsTimer") || key.equals("orbPrayerTimer") || key.equals("orbSpecialTimer"))) return;
 if (group.equals(GROUP_NAME) && (key.startsWith("free_") || key.startsWith("menu") || key.startsWith("hideStone")
     || key.equals("hiddenStones") || key.equals("hideTopMenu") || key.equals("hideBottomMenu")
     || key.equals("hideLeftBar") || key.equals("hideRightBar") || key.equals("showMenuToggle") || key.equals("editGrid"))) return;

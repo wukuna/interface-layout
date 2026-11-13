@@ -11,6 +11,27 @@ import static org.mockito.Mockito.*;
 
 public class OrbViewTest
 {
+    @Test public void perOrbChoicesLoadThroughRuneLiteConfigProxy()
+    {
+        for(InterfaceLayoutConfig.OrbTimerStyle style:InterfaceLayoutConfig.OrbTimerStyle.values()) {
+            ConfigManager configs=mock(ConfigManager.class);
+            for(String key:new String[]{"hitpointsTimerStyle","prayerTimerStyle","specialTimerStyle"})
+                when(configs.getConfiguration("interfacelayout",key)).thenReturn(style.name());
+            InterfaceLayoutConfig config=RealConfigProxy.create(InterfaceLayoutConfig.class,configs);
+            assertEquals(style,config.hitpointsTimerStyle());assertEquals(style,config.prayerTimerStyle());assertEquals(style,config.specialTimerStyle());
+        }
+    }
+    @Test public void betaTimerChoicesLoadThroughRuneLiteConfigProxy()
+    {
+        for(InterfaceLayoutConfig.NativeTimerStyle style:InterfaceLayoutConfig.NativeTimerStyle.values())
+            for(InterfaceLayoutConfig.PrayerDisplay display:InterfaceLayoutConfig.PrayerDisplay.values()) {
+                ConfigManager configs=mock(ConfigManager.class);
+                when(configs.getConfiguration("interfacelayout","nativeOrbTimerStyle")).thenReturn(style.name());
+                when(configs.getConfiguration("interfacelayout","prayerOrbDisplay")).thenReturn(display.name());
+                InterfaceLayoutConfig config=RealConfigProxy.create(InterfaceLayoutConfig.class,configs);
+                assertEquals(style,config.nativeOrbTimerStyle());assertEquals(display,config.prayerOrbDisplay());
+            }
+    }
     private OrbController controller(OrbLayout layout, boolean compact) throws Exception
     {
         ConfigManager configs = mock(ConfigManager.class);
@@ -53,10 +74,10 @@ public class OrbViewTest
             assertEquals(compact, controller.isMinimapHidden());
         }
     }
-    @Test public void compactToggleIsVisibleAndUsesExistingMinimapKey() throws Exception
+    @Test public void compactToggleUsesExistingMinimapKeyBehindSidePanel() throws Exception
     {
         ConfigItem item = InterfaceLayoutConfig.class.getMethod("hideMinimap").getAnnotation(ConfigItem.class);
-        assertFalse(item.hidden());
+        assertTrue(item.hidden());
         assertEquals("Hide minimap", item.name());
         assertEquals("hideAndSwapUpdate", item.section());
         assertEquals("hideMinimap", item.keyName());
