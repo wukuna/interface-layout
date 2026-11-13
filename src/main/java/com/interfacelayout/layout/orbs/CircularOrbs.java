@@ -80,7 +80,7 @@ public final class CircularOrbs extends Overlay {
             if (CircularOrbInput.current(client, widget) && widget.isSelfHidden()) widget.setHidden(false);
         coveredWidgets.clear();
         minimap.restore(client);
-        compass.restore(manager);
+        compass.restore(client,manager);
         input.restore(client);
         opacities.forEach((widget,opacity)->{if(CircularOrbInput.current(client,widget) && widget.getOpacity()==255)widget.setOpacity(opacity);});
         opacities.clear();views.clear();
@@ -167,11 +167,12 @@ public final class CircularOrbs extends Overlay {
         }
     }
     @Subscribe(priority=-30) public void onPostMenuSort(PostMenuSort event) {
-        if(!running || !config.hideOrbTabs() || config.editInterface() || client.isMenuOpen() || client.getMenu()==null)return;
+        if(!running || !config.hideOrbTabs() && !freeMinimap() || config.editInterface() || client.isMenuOpen() || client.getMenu()==null)return;
         net.runelite.api.Point mouse=client.getMouseCanvasPosition();if(mouse==null)return;
 
         net.runelite.api.MenuEntry[] entries=client.getMenu().getMenuEntries();
         net.runelite.api.MenuEntry[] kept=java.util.Arrays.stream(entries).filter(e->{
+            if(compass.coveredMenu(e))return false;
             for(View view:views)if(view.covered || !CircularOrbArtwork.contains(view.circle,mouse.getX(),mouse.getY())) {
                 if(e.getParam1()==view.parent.getId())return false;
                 for(Orbs orb:ORBS)if(orb.getComponentId()==view.parent.getId()

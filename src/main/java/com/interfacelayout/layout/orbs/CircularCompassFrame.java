@@ -2,6 +2,8 @@ package com.interfacelayout.layout.orbs;
 
 import com.interfacelayout.InterfaceLayoutConfig.OrbRim;
 import com.interfacelayout.util.WidgetGeometry;
+import com.interfacelayout.util.InterfaceWindows;
+import com.interfacelayout.layout.orbs.widget.elements.Compass;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -13,8 +15,13 @@ final class CircularCompassFrame {
     private Widget compass, replacedFrame;
     private Rectangle circle;
     private int originalOpacity, compassOpacity;
+    private final java.util.Set<Widget> covered=java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
 
-    void restore(OrbController manager) {
+    void restore(Client client, OrbController manager) {
+
+        for(Widget widget:covered)
+            if(CircularOrbInput.current(client,widget) && widget.isSelfHidden())widget.setHidden(false);
+        covered.clear();
 
         if (replacedFrame != null && manager.compassFrame == replacedFrame && replacedFrame.getOpacity() == 255)
             replacedFrame.setOpacity(originalOpacity);
@@ -36,12 +43,30 @@ final class CircularCompassFrame {
         compass = widget;
         compassOpacity = widget.getOpacity();
         circle = CircularOrbArtwork.around(bounds);
+        if(InterfaceWindows.covered(client,circle)) {
+            cover(widget);cover(manager.compassFrame);
+            for(Compass target:Compass.values()) {
+                Widget part=client.getWidget(target.getComponentId());
+                if(part!=null && WidgetGeometry.bounds(part).intersects(bounds))cover(part);
+            }
+            compass=null;circle=null;return;
+        }
         Widget frame = manager.compassFrame;
         if (frame != null && !frame.isHidden() && frame.getOpacity() < 255) {
             replacedFrame = frame;
             originalOpacity = frame.getOpacity();
             frame.setOpacity(255);
         }
+    }
+
+    private void cover(Widget widget) {
+        if(widget!=null && !widget.isHidden()) {covered.add(widget);widget.setHidden(true);}
+    }
+
+    boolean coveredMenu(net.runelite.api.MenuEntry entry) {
+        for(Widget widget:covered)
+            if(widget.getIndex()<0 && entry.getParam1()==widget.getId() || entry.getWidget()==widget)return true;
+        return false;
     }
 
     void paint(Graphics2D g, CircularOrbArtwork artwork, OrbRim style) {

@@ -79,6 +79,21 @@ public class CircularOrbInterfaceOcclusionTest
         verify(replacement, never()).setHidden(anyBoolean());
     }
 
+    @Test public void coveredCompassMenusCannotReplaceBankActions() {
+        CircularOrbOverlayTest.Fixture f=new CircularOrbOverlayTest.Fixture();
+        Widget compass=CircularOrbInputTest.widget(f.overlay.client,OrbConstants.Widgets.Modern.COMPASS,null,125,75,35,35);
+        Widget options=CircularOrbInputTest.widget(f.overlay.client,OrbConstants.Widgets.Modern.COMPASS_OPTIONS,null,125,75,35,35);
+        when(compass.getContentType()).thenReturn(OrbConstants.Layout.MinimapOverlay.COMPASS_CONTENT);
+        visibility(compass);visibility(options);modal(f,InterfaceID.Bankmain.UNIVERSE,new Rectangle(130,75,20,20));
+        Menu menu=mock(Menu.class);MenuEntry bank=mock(MenuEntry.class),north=mock(MenuEntry.class),direction=mock(MenuEntry.class);
+        when(bank.getParam1()).thenReturn(InterfaceID.Bankmain.UNIVERSE);
+        when(north.getParam1()).thenReturn(OrbConstants.Widgets.Modern.COMPASS);when(direction.getWidget()).thenReturn(options);
+        when(menu.getMenuEntries()).thenReturn(new MenuEntry[]{bank,north,direction});when(f.overlay.client.getMenu()).thenReturn(menu);
+        f.refresh();f.overlay.onPostMenuSort(new PostMenuSort());
+        assertTrue(compass.isHidden());assertTrue(options.isHidden());verify(menu).setMenuEntries(new MenuEntry[]{bank});
+        f.overlay.releaseForLayout();assertFalse(compass.isHidden());assertFalse(options.isHidden());
+    }
+
     @Test public void nativePrayerDoseReminderAlsoStaysBehindTheWindow() throws Exception
     {
         CircularOrbOverlayTest.Fixture f = new CircularOrbOverlayTest.Fixture(Orbs.PRAYER_ORB_CONTAINER, InterfaceID.Orbs.PRAYER_TEXT);

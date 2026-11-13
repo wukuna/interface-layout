@@ -19,15 +19,10 @@ import net.runelite.client.events.ProfileChanged;
 @Singleton
 final class ReleaseNotesNotice
 {
-    static final String RELEASE = "2026-11-10-free-minimap";
+    static final String RELEASE = "2026-11-12-compass-coverage";
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] UPDATES = {
-        "Alt-drag and anchor the native minimap in Free Position in Classic and Modern resizable modes.",
-        "Use matching Silver or Dark grey rings for the free minimap and compass.",
-        "The compass follows the minimap until positioned separately; hidden controls retain their saved positions.",
-        "Circular orbs now offer HP and special regeneration rings and a counterclockwise prayer drain ring.",
-        "Free layouts adapt to window resizing and retain their original positions when returning to a larger window.",
-        "Circular orbs stay behind overlapping bank and other interface windows, matching the menu tabs.",
+        "The free circular compass and its click area now stay behind overlapping bank and other interface windows.",
     };
 
     @Inject private Client client;
