@@ -85,6 +85,50 @@ public class SoulreaperOrbCompatibilityTest {
         when(f.adapter.client.getVarpValue(VarPlayerID.SOULREAPER_STACKS)).thenReturn(3);f.refresh();assertTrue(countVisible(f.render())>0);
         when(f.adapter.client.getVarpValue(VarPlayerID.SOULREAPER_STACKS)).thenReturn(0);assertEquals(0,countVisible(f.render()));
     }
+    @Test public void numberTabsFollowSpecialMirroringWithUprightSymbols() throws Exception {
+        Fixture f=new Fixture();when(f.adapter.config.hideOrbTabs()).thenReturn(false);
+        f.adapter.sprites=mock(com.interfacelayout.layout.menu.MenuButtonSprites.class);
+        Widget backing=CircularOrbInputTest.widget(f.adapter.client,InterfaceID.Orbs.SPECENERGY_BACKING,f.parent,0,0,57,34);
+        BufferedImage frame=new BufferedImage(57,34,2);frame.setRGB(0,0,Color.RED.getRGB());
+        when(f.adapter.sprites.getPadded(backing)).thenReturn(frame);
+        for(boolean mirrored:new boolean[]{false,true}) {
+            when(f.adapter.config.mirrorSpecial()).thenReturn(mirrored);f.refresh();
+            BufferedImage image=f.render();assertTrue(count(image,Color.MAGENTA)>0);assertTrue(count(image,Color.GREEN)>0);
+            assertEquals(Color.RED.getRGB(),image.getRGB(mirrored?179:100,35));
+        }
+    }
+    @Test public void energyTimerUsesSelectedStyleOnTheExtraOrbWhileStackTimerStaysNative() throws Exception {
+        for(boolean circles:new boolean[]{false,true}) {
+            Fixture f=new Fixture();when(f.adapter.config.hideOrbTabs()).thenReturn(circles);
+            when(f.adapter.config.specialTimerStyle()).thenReturn(InterfaceLayoutConfig.OrbTimerStyle.TAG_METERS);
+            f.adapter.sprites=mock(com.interfacelayout.layout.menu.MenuButtonSprites.class);
+            Widget backing=CircularOrbInputTest.widget(f.adapter.client,InterfaceID.Orbs.SPECENERGY_BACKING,f.parent,0,0,57,34);
+            when(f.adapter.sprites.getPadded(backing)).thenReturn(new BufferedImage(57,34,2));
+            when(f.adapter.client.getVarpValue(VarPlayerID.SA_ENERGY)).thenReturn(500);
+            OrbTimers timers=new OrbTimers();for(int i=0;i<25;i++)timers.tick(f.adapter.client,null,Long.MAX_VALUE/2);
+            f.adapter.timers(timers);f.refresh();assertTrue(f.adapter.replacesSpecialTimer());
+            assertTrue(count(f.render(),OrbTimers.SPECIAL_COLOR)>0);assertEquals(0,f.extra.renders);
+            when(f.adapter.client.getItemContainer(net.runelite.api.gameval.InventoryID.WORN)).thenReturn(null);
+            when(f.adapter.client.getVarpValue(VarPlayerID.SOULREAPER_STACKS)).thenReturn(3);
+            assertFalse(f.adapter.replacesSpecialTimer());f.render();assertTrue(f.extra.renders>0);
+        }
+    }
+    @Test public void addedSpecialAttackIconKeepsItsNativeSizeInEitherTagDirection() throws Exception {
+        Fixture f=new Fixture();when(f.adapter.config.hideOrbTabs()).thenReturn(false);
+        f.adapter.sprites=mock(com.interfacelayout.layout.menu.MenuButtonSprites.class);
+        Widget backing=CircularOrbInputTest.widget(f.adapter.client,InterfaceID.Orbs.SPECENERGY_BACKING,f.parent,0,0,57,34);
+        when(f.adapter.sprites.getPadded(backing)).thenReturn(new BufferedImage(57,34,2));
+        BufferedImage special=new BufferedImage(16,16,2);Graphics2D g=special.createGraphics();
+        g.setColor(Color.MAGENTA);g.fillRect(0,0,16,16);g.dispose();f.set("specialIcon",special);
+        for(boolean mirrored:new boolean[]{false,true}) {
+            when(f.adapter.config.mirrorSpecial()).thenReturn(mirrored);f.refresh();BufferedImage image=f.render();
+            assertEquals(256,count(image,Color.MAGENTA));
+            for(int y=44;y<60;y++)for(int x=132;x<148;x++)assertEquals(Color.MAGENTA.getRGB(),image.getRGB(x,y));
+        }
+        when(f.adapter.client.getItemContainer(net.runelite.api.gameval.InventoryID.WORN)).thenReturn(null);
+        when(f.adapter.client.getVarpValue(VarPlayerID.SOULREAPER_STACKS)).thenReturn(3);
+        f.refresh();assertEquals(8*14,count(f.render(),Color.MAGENTA));
+    }
     static BufferedImage icon() {BufferedImage image=new BufferedImage(26,26,2);Graphics2D g=image.createGraphics();g.setColor(Color.MAGENTA);g.fillRect(9,6,8,14);g.dispose();return image;}
     static int count(BufferedImage image,Color color) {int n=0;for(int y=0;y<image.getHeight();y++)for(int x=0;x<image.getWidth();x++)if(image.getRGB(x,y)==color.getRGB())n++;return n;}
     static int countVisible(BufferedImage image) {int n=0;for(int y=0;y<image.getHeight();y++)for(int x=0;x<image.getWidth();x++)if(image.getRGB(x,y)!=0)n++;return n;}

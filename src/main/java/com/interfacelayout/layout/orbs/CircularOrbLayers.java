@@ -54,7 +54,8 @@ final class CircularOrbLayers
     {
         List<Widget> result = new ArrayList<>();
         Set<Widget> added = Collections.newSetFromMap(new IdentityHashMap<>());
-        for (Widget[] group : new Widget[][]{widget.getStaticChildren(), widget.getChildren(), widget.getDynamicChildren(),widget.getNestedChildren()})
+        Widget[] dynamic = widget.getDynamicChildren();
+        for (Widget[] group : new Widget[][]{widget.getStaticChildren(), dynamic == null ? widget.getChildren() : dynamic,widget.getNestedChildren()})
             if (group != null) for (Widget child : group) if (child != null && added.add(child)) result.add(child);
         return result;
     }

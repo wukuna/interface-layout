@@ -22,9 +22,19 @@ final class NativeOrbTimers
     static void paint(Graphics2D graphics,Rectangle inset,Rectangle number,int component,
         InterfaceLayoutConfig config,Color color,double progress,int current,int maximum)
     {
-        Rectangle meter=new Rectangle(number.x+3,number.y+number.height-4,
-            Math.max(0,Math.min(number.width-6,inset.x-7-number.x)),number.height<6?0:2);
+        Rectangle meter=tagBounds(inset,number);
         paintStyle(graphics,inset,meter,component,config,color,progress,current,maximum);
+    }
+
+    static Rectangle tagBounds(Rectangle inset,Rectangle number)
+    {
+        if(number.getCenterX()>inset.getCenterX())
+        {
+            int x=Math.max(number.x+3,inset.x+inset.width+7);
+            return new Rectangle(x,number.y+number.height-4,Math.max(0,number.x+number.width-3-x),number.height<6?0:2);
+        }
+        return new Rectangle(number.x+3,number.y+number.height-4,
+            Math.max(0,Math.min(number.width-6,inset.x-7-number.x)),number.height<6?0:2);
     }
 
     static void paintCircular(Graphics2D graphics,Rectangle circle,int component,
@@ -53,33 +63,34 @@ final class NativeOrbTimers
             draw.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
             draw.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,RenderingHints.VALUE_STROKE_PURE);
             if(prayer) {
-                if(amount) {
-                    if(style==NativeTimerStyle.TAG_METERS)meter(draw,meter,AMOUNT,value);
-                    else {
-                        Graphics2D amountDraw=(Graphics2D)draw.create();
-                        try {
-                            amountDraw.clip(new Ellipse2D.Double(inset.getCenterX()-radius-1.8,inset.getCenterY()-radius-1.8,
-                                2*(radius+1.8),2*(radius+1.8)));
-                            segments(amountDraw,inset,radius+1.3,AMOUNT,value,true);
-                        } finally {amountDraw.dispose();}
+                draw.clip(new Ellipse2D.Double(inset.getCenterX()-radius-2.4,inset.getCenterY()-radius-2.4,
+                    2*(radius+2.4),2*(radius+2.4)));
+                if(style==NativeTimerStyle.TAG_METERS) {
+                    draw.setClip(graphics.getClip());
+                    if(amount)meter(draw,meter,AMOUNT,value);
+                    if(drain && progress>0) {
+                        Rectangle countdown=new Rectangle(meter);
+                        if(amount)countdown.y+=3;
+                        meter(draw,countdown,COUNTDOWN,progress);
                     }
-                }
-                if(drain && progress>0) {
-                    boolean split=amount && style==NativeTimerStyle.EIGHT_SLICES;
-                    if(split) {
-                        java.awt.geom.Area outside=new java.awt.geom.Area(new Rectangle(inset.x-5,inset.y-5,inset.width+10,inset.height+10));
-                        outside.subtract(new java.awt.geom.Area(new Ellipse2D.Double(inset.getCenterX()-radius-1.8,
-                            inset.getCenterY()-radius-1.8,2*(radius+1.8),2*(radius+1.8))));draw.clip(outside);
-                    }
-                    ring(draw,inset,radius+(split?2.3:2),amount?COUNTDOWN:color,progress,split?.7f:1.2f);
+                } else if(style==NativeTimerStyle.EIGHT_SLICES) {
+                    if(amount)segments(draw,inset,radius-1,AMOUNT,value);
+                    if(drain && progress>0)
+                        if(amount)ring(draw,inset,radius+.8,COUNTDOWN,progress,1f);
+                        else segments(draw,inset,radius-1,COUNTDOWN,progress);
+                } else if(progress>0) {
+                    if(style==NativeTimerStyle.INSET_SWEEP)OrbTimers.paintWedge(draw,inset,color,progress);
+                    else ring(draw,inset,radius-.5,color,progress,1f);
                 }
                 return;
             }
             if(progress<=0)return;
+            if(component==InterfaceID.Orbs.ORB_HEALTH && (style==NativeTimerStyle.INSET_SWEEP || style==NativeTimerStyle.EIGHT_SLICES))
+                color=new Color(255,216,170);
             switch(style) {
                 case TAG_METERS: meter(draw,meter,color,progress);break;
                 case QUIET_RIMS: ring(draw,inset,radius+2,color,progress,1.2f);break;
-                case EIGHT_SLICES: segments(draw,inset,radius,color,progress,false);break;
+                case EIGHT_SLICES: segments(draw,inset,radius,color,progress);break;
                 default: OrbTimers.paintWedge(draw,inset,color,progress);
             }
         } finally {draw.dispose();}
@@ -99,25 +110,22 @@ final class NativeOrbTimers
         draw.setColor(color);draw.fill(new Rectangle2D.Double(bounds.x,bounds.y,bounds.width*Math.min(1,value),bounds.height));
     }
 
-    private static void segments(Graphics2D draw,Rectangle inset,double radius,Color color,double value,boolean rim)
+    private static void segments(Graphics2D graphics,Rectangle inset,double radius,Color color,double value)
     {
-        double x=inset.getCenterX()-radius,y=inset.getCenterY()-radius,diameter=radius*2;
-        if(rim)draw.setStroke(new BasicStroke(.8f));
-        else draw.clip(new Ellipse2D.Double(x,y,diameter,diameter));
-        for(int i=0;i<8;i++) {
-            double part=Math.max(0,Math.min(1,value*8-i));
-            double angle=90-i*45-3;
-            if(rim) {
-                draw.setColor(TRACK);draw.draw(new Arc2D.Double(x,y,diameter,diameter,angle,-39,Arc2D.OPEN));
-                if(part>0) {draw.setColor(color);draw.draw(new Arc2D.Double(x,y,diameter,diameter,angle,-39*part,Arc2D.OPEN));}
-            } else {
-                draw.setColor(new Color(color.getRed(),color.getGreen(),color.getBlue(),12));
-                draw.fill(new Arc2D.Double(x,y,diameter,diameter,angle,-39,Arc2D.PIE));
+        Graphics2D draw=(Graphics2D)graphics.create();
+        try {
+            double x=inset.getCenterX()-radius,y=inset.getCenterY()-radius,diameter=radius*2;
+            draw.clip(new Ellipse2D.Double(x,y,diameter,diameter));
+            for(int i=0;i<8;i++) {
+                double part=Math.max(0,Math.min(1,value*8-i));
+                double angle=90-i*45-1.5;
+                draw.setColor(new Color(color.getRed(),color.getGreen(),color.getBlue(),5));
+                draw.fill(new Arc2D.Double(x,y,diameter,diameter,angle,-42,Arc2D.PIE));
                 if(part>0) {
                     draw.setColor(new Color(color.getRed(),color.getGreen(),color.getBlue(),52));
-                    draw.fill(new Arc2D.Double(x,y,diameter,diameter,angle,-39*part,Arc2D.PIE));
+                    draw.fill(new Arc2D.Double(x,y,diameter,diameter,angle,-42*part,Arc2D.PIE));
                 }
             }
-        }
+        } finally {draw.dispose();}
     }
 }

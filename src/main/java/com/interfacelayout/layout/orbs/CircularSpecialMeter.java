@@ -39,20 +39,24 @@ public final class CircularSpecialMeter
         if(children==null)return null;
         for(Widget child:children)if(matches(parent,child) && !child.isHidden()) {
             CircularSpecialMeter meter=new CircularSpecialMeter(child,circle,gap);
-            if(!meter.original.isEmpty() && meter.capture(child,meter.original,Math.max(0,255-parent.getOpacity())/255f,sprites,
+            if(!meter.original.isEmpty() && meter.capture(child,meter.original,meter.original,Math.max(0,255-parent.getOpacity())/255f,sprites,
                 Collections.newSetFromMap(new IdentityHashMap<>())) && !meter.parts.isEmpty())return meter;
         }
         return null;
     }
 
-    private boolean capture(Widget widget,Rectangle clip,float alpha,MenuButtonSprites sprites,Set<Widget> seen)
+    private boolean capture(Widget widget,Rectangle area,Rectangle clip,float alpha,MenuButtonSprites sprites,Set<Widget> seen)
     {
         if(widget==null || !seen.add(widget) || widget.isHidden() || widget.getOpacity()>=255)return true;
-        Rectangle area=WidgetGeometry.bounds(widget),visible=clip.intersection(area);
+        Rectangle visible=clip.intersection(area);
         if(visible.isEmpty())return true;
         alpha*=Math.max(0,255-widget.getOpacity())/255f;
         if(widget.getType()==WidgetType.LAYER) {
-            for(Widget child:CircularOrbLayers.children(widget))if(!capture(child,visible,alpha,sprites,seen))return false;
+            for(Widget child:CircularOrbLayers.children(widget)) {
+                Rectangle bounds=new Rectangle(area.x+child.getRelativeX()-widget.getScrollX(),
+                    area.y+child.getRelativeY()-widget.getScrollY(),child.getWidth(),child.getHeight());
+                if(!capture(child,bounds,visible,alpha,sprites,seen))return false;
+            }
         } else if(widget.getType()==WidgetType.RECTANGLE) {
             parts.add(new Part(area,visible,alpha,new Color(widget.getTextColor()),widget.isFilled(),null));
         } else if(widget.getType()==WidgetType.GRAPHIC) {

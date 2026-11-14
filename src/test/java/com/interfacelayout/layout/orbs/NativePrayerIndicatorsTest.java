@@ -56,6 +56,19 @@ public class NativePrayerIndicatorsTest
         }
     }
 
+    @Test public void allFourDrainStylesAreDistinctAndAnimateIndependentlyOfTheAmount() {
+        java.util.List<int[]> styles=new java.util.ArrayList<>();
+        when(config.prayerOrbDisplay()).thenReturn(PrayerDisplay.DRAIN);
+        for(NativeTimerStyle style:NativeTimerStyle.values()) {
+            when(config.nativeOrbTimerStyle()).thenReturn(style);
+            int[] current=paint(50,99,.6);
+            assertFalse(style.toString(),Arrays.equals(current,paint(50,99,.2)));
+            assertArrayEquals(current,paint(20,99,.6));
+            for(int[] previous:styles)assertFalse(style.toString(),Arrays.equals(previous,current));
+            styles.add(current);
+        }
+    }
+
     private int[] paint(int current,int maximum,double progress)
     {
         BufferedImage image=new BufferedImage(200,130,BufferedImage.TYPE_INT_ARGB);Graphics2D draw=image.createGraphics();

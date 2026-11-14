@@ -59,12 +59,50 @@ public class CircularSpecialMeterTest
         meter.setHidden(false);when(fill.getType()).thenReturn(WidgetType.TEXT);f.refresh();assertFalse(meter.isSelfHidden());assertTrue(colored(f.render()).isEmpty());
     }
 
-    @Test public void leavingCircularModeOrEditingRestoresTheNativeMeter()
+    @Test public void bothModesRelocateTheMeterAndEditingRestoresIt()
     {
         setup();f.refresh();assertTrue(meter.isSelfHidden());
-        when(f.overlay.config.hideOrbTabs()).thenReturn(false);f.refresh();assertFalse(meter.isSelfHidden());assertTrue(colored(f.render()).isEmpty());
+        when(f.overlay.config.hideOrbTabs()).thenReturn(false);f.refresh();assertTrue(meter.isSelfHidden());assertEquals(new Rectangle(124,107,20,4),colored(f.render()));
         when(f.overlay.config.hideOrbTabs()).thenReturn(true);f.refresh();assertTrue(meter.isSelfHidden());
         when(f.overlay.config.editInterface()).thenReturn(true);f.refresh();assertFalse(meter.isSelfHidden());assertTrue(colored(f.render()).isEmpty());
+    }
+
+    @Test public void checkboxAndModeChangesHaveOneVisibilityOwner() {
+        setup();
+        for(int pass=0;pass<3;pass++)for(boolean circles:new boolean[]{false,true})for(boolean hide:new boolean[]{true,false}) {
+            when(f.overlay.config.hideOrbTabs()).thenReturn(circles);
+            when(f.overlay.config.hideExtraSpecialAttackBar()).thenReturn(hide);
+            f.refresh();assertTrue(meter.isSelfHidden());assertEquals(hide,colored(f.render()).isEmpty());
+            f.overlay.onScriptPreFired(new net.runelite.api.events.ScriptPreFired(999));assertFalse(meter.isSelfHidden());
+            f.overlay.onScriptPostFired(new net.runelite.api.events.ScriptPostFired(999));
+            assertTrue(meter.isSelfHidden());assertEquals(hide,colored(f.render()).isEmpty());
+        }
+        f.overlay.releaseForLayout();assertFalse(meter.isSelfHidden());
+    }
+
+    @Test public void nativeScriptHidingAndReplacementKeepTheirOwnVisibility() {
+        setup();when(f.overlay.config.hideExtraSpecialAttackBar()).thenReturn(true);f.refresh();
+        f.overlay.onScriptPreFired(new net.runelite.api.events.ScriptPreFired(999));meter.setHidden(true);
+        f.overlay.onScriptPostFired(new net.runelite.api.events.ScriptPostFired(999));
+        f.overlay.releaseForLayout();assertTrue(meter.isSelfHidden());
+        Widget old=meter;setup();clearInvocations(old);f.refresh();assertTrue(meter.isSelfHidden());
+        f.overlay.releaseForLayout();assertFalse(meter.isSelfHidden());verify(old,never()).setHidden(anyBoolean());
+    }
+
+    @Test public void nestedDynamicPartsUseTheirRealContainerInsteadOfTheStaticParentId() {
+        setup();
+        when(fill.getParent()).thenReturn(f.parent);
+        when(meter.getDynamicChildren()).thenReturn(new Widget[]{fill});
+        when(f.parent.getChildren()).thenReturn(new Widget[]{meter,fill});
+        for(boolean circles:new boolean[]{false,true})for(boolean mirrored:new boolean[]{false,true}) {
+            when(f.overlay.config.hideOrbTabs()).thenReturn(circles);when(f.overlay.config.mirrorSpecial()).thenReturn(mirrored);
+            when(f.overlay.sprites.getPadded(f.backing)).thenReturn(new BufferedImage(57,34,2));
+            f.refresh();
+            Rectangle expected=new Rectangle(!circles && mirrored?101:124,107,20,4);
+            assertEquals(expected,colored(f.render()));
+            assertTrue(meter.isSelfHidden());
+            f.overlay.releaseForLayout();assertFalse(meter.isSelfHidden());
+        }
     }
 
     private Rectangle colored(BufferedImage image)

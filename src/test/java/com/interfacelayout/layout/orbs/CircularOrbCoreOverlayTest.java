@@ -21,6 +21,23 @@ import static org.mockito.Mockito.*;
 
 public class CircularOrbCoreOverlayTest
 {
+    @Test public void minimapHouseIconsAreDrawnBeforeTheOrbArtwork() throws Exception
+    {
+        Core house=new Core(mock(Client.class),"poh.PohOverlay");
+        Field order=net.runelite.client.ui.overlay.OverlayManager.class.getDeclaredField("OVERLAY_COMPARATOR");
+        order.setAccessible(true);
+        @SuppressWarnings("unchecked") java.util.Comparator<Overlay> comparator=(java.util.Comparator<Overlay>)order.get(null);
+        CircularOrbOverlayTest.Fixture f=new CircularOrbOverlayTest.Fixture();
+        assertEquals(house.overlay.getLayer(),f.overlay.getLayer());
+        assertTrue(comparator.compare(house.overlay,f.overlay)<0);
+        assertTrue(comparator.compare(house.overlay,new SoulreaperOrbCompatibility())<0);
+        assertTrue(comparator.compare(house.overlay,new ShieldSpecialOrb())<0);
+        f.refresh();BufferedImage expected=f.render(),actual=new BufferedImage(200,130,BufferedImage.TYPE_INT_ARGB);
+        Graphics2D draw=actual.createGraphics();draw.setColor(Color.MAGENTA);draw.fillRect(130,80,20,15);
+        f.overlay.render(draw);draw.dispose();
+        assertEquals(expected.getRGB(140,90),actual.getRGB(140,90));
+    }
+
     static final class Core
     {
         final Map<String,Object> dependencies=new HashMap<>();

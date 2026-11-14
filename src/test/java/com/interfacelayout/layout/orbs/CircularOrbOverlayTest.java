@@ -194,7 +194,7 @@ public class CircularOrbOverlayTest
         assertEquals(new Rectangle(100, 70, 57, 34), f.hover.getBounds());
     }
 
-    @Test public void cornerMenusAreRemovedWithoutRemovingWorldActionsOrChangingNativeOperations()
+    @Test public void cornersKeepWorldActionsAndVisibleOrbFacesBlockThem()
     {
         Fixture f = new Fixture();
         Menu menu = mock(Menu.class);
@@ -211,7 +211,7 @@ public class CircularOrbOverlayTest
         clearInvocations(menu);
         when(f.overlay.client.getMouseCanvasPosition()).thenReturn(new Point(140, 87));
         f.refresh(); f.overlay.onPostMenuSort(new PostMenuSort());
-        verify(menu, never()).setMenuEntries(any());
+        verify(menu).setMenuEntries(new MenuEntry[]{special, hover});
     }
 
     @Test public void gameHiddenParentAndEditModeUseNativeState()

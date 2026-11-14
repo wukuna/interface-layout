@@ -69,8 +69,7 @@ public class GameframeCoordinator
 
         if (running && layoutDepth == 0 && visibilityDepth == 0
             && client.getGameState() == GameState.LOGGED_IN
-            && (canvasWidth != client.getCanvasWidth() || canvasHeight != client.getCanvasHeight()
-                || menu.windowBoundsChanged())) refresh();
+            ) refresh();
     }
     private synchronized void scheduleRefresh()
     {

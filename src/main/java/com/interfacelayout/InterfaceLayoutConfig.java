@@ -153,7 +153,7 @@ public interface InterfaceLayoutConfig extends Config
     default boolean orbSpecialTimer() {return true;}
 
     @ConfigItem(keyName="orbPrayerTimer",name="Prayer drain timer",
-        description="Count down counterclockwise to the next prayer point drained, using active prayers and equipment prayer bonus. Uses the selected Beta timer style on native orbs and an inner ring on circular orbs; keeps the outer potion-dose reminder separate.",section=betaFeatures,position=9, hidden = true)
+        description="Count down counterclockwise to the next prayer point drained, using active prayers and equipment prayer bonus. Uses the selected Beta timer style with Number tabs or Circles only; keeps the outer potion-dose reminder separate.",section=betaFeatures,position=9, hidden = true)
     default boolean orbPrayerTimer() {return true;}
 
 	enum HorizontalAnchor
@@ -750,4 +750,16 @@ public interface InterfaceLayoutConfig extends Config
     default boolean hideEmotesStone() { return false; }
     @ConfigItem(keyName = "hideStone13", name = "Music", description = "Hide this tab, its icon and background. Remaining tabs close the gap and keep their saved position.", section = individualStones, position = 13, hidden = true)
     default boolean hideMusicStone() { return false; }
+    @ConfigItem(keyName="hideGravestone", name="Hide grave indicator", description="Hide the native active-grave indicator.", hidden=true)
+    default boolean hideGravestone() { return false; }
+    @ConfigItem(keyName="mirrorHitpoints", name="Mirror hitpoints", description="Put the number tab on the other side of the orb.", hidden=true)
+    default boolean mirrorHitpoints() { return false; }
+    @ConfigItem(keyName="mirrorPrayer", name="Mirror prayer", description="Put the number tab on the other side of the orb.", hidden=true)
+    default boolean mirrorPrayer() { return false; }
+    @ConfigItem(keyName="mirrorRun", name="Mirror run energy", description="Put the number tab on the other side of the orb.", hidden=true)
+    default boolean mirrorRun() { return false; }
+    @ConfigItem(keyName="mirrorSpecial", name="Mirror special attack", description="Put the number tab on the other side of the orb.", hidden=true)
+    default boolean mirrorSpecial() { return false; }
+    @ConfigItem(keyName="orbStackOrder", name="Orb stacking order", description="Orb order from back to front.", hidden=true)
+    default String orbStackOrder() { return "HITPOINTS,PRAYER,RUN,SPECIAL"; }
 }

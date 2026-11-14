@@ -82,6 +82,35 @@ public class LayoutPanelTest
         assertTrue(pending.isEmpty());verify(settings.configs,never()).setConfiguration(anyString(),anyString(),any());
     }
 
+    @Test public void helpRemainsAvailableAfterConfigRefreshWithoutWritingSettings() throws Exception
+    {
+        setup();
+        SwingUtilities.invokeAndWait(()->{
+            InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);
+            button(panel,"Appearance").doClick();
+            JComponent frame=control(panel,"minimapFrame");
+            String help=frame.getToolTipText();assertNotNull(help);assertTrue(help.contains("compass"));
+            when(config.minimapFrame()).thenReturn(InterfaceLayoutConfig.MinimapFrame.NATIVE);
+            panel.refresh();assertEquals(help,frame.getToolTipText());
+            assertTrue(frame.getAccessibleContext().getAccessibleDescription().contains("compass"));
+            button(panel,"Timers").doClick();
+            assertTrue(control(panel,"prayerTimerStyle").getToolTipText().contains("Eight slices"));
+        });
+        assertTrue(pending.isEmpty());verify(settings.configs,never()).setConfiguration(anyString(),anyString(),any());
+    }
+
+    @Test public void mirroringOnlyAppearsForNumberTabsAndGraveVisibilityIsIndependent() throws Exception
+    {
+        setup();
+        SwingUtilities.invokeAndWait(()->{
+            InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);button(panel,"Appearance").doClick();
+            when(config.hideOrbTabs()).thenReturn(false);panel.refresh();assertTrue(visible(control(panel,"mirrorPrayer")));
+            when(config.hideOrbTabs()).thenReturn(true);panel.refresh();assertFalse(visible(control(panel,"mirrorPrayer")));
+            button(panel,"Visibility").doClick();JCheckBox grave=(JCheckBox)control(panel,"hideGravestone");assertTrue(grave.isSelected());grave.doClick();
+        });
+        assertEquals(1,pending.size());pending.remove(0).run();verify(settings.configs).setConfiguration("interfacelayout","hideGravestone",true);
+    }
+
     @Test public void dependentControlsRetainTheirValuesAndVisibilityFollowsParents() throws Exception
     {
         setup();when(config.orbPrayerTimer()).thenReturn(true);when(config.prayerOrbDisplay()).thenReturn(InterfaceLayoutConfig.PrayerDisplay.BOTH);

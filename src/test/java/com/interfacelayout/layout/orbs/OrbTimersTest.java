@@ -111,23 +111,42 @@ public class OrbTimersTest
     {
         when(client.isPrayerActive(Prayer.PROTECT_FROM_MELEE)).thenReturn(true);
         when(client.isPrayerActive(Prayer.PIETY)).thenReturn(true);
-        ticks(2); progress(PRAYER, .4);
-        prayerBonus(30); ticks(1); progress(PRAYER, .4);
+        ticks(2); progress(PRAYER, .5);
+        prayerBonus(30); ticks(1); progress(PRAYER, 1);
         when(client.isPrayerActive(Prayer.PIETY)).thenReturn(false);
-        ticks(1); progress(PRAYER, .3);
+        ticks(1); progress(PRAYER, 1);
     }
 
-    @Test public void observedDrainKeepsFractionalRemainderAndPotionGainsKeepThePhase()
+    @Test public void observedDrainStartsAFullCycleAndPotionGainsKeepThePhase()
     {
         prayerBonus(5);
         when(client.isPrayerActive(Prayer.PROTECT_FROM_MELEE)).thenReturn(true);
-        ticks(6); progress(PRAYER, 10.0 / 70);
+        ticks(6); progress(PRAYER, 1.0 / 6);
         when(client.getBoostedSkillLevel(Skill.PRAYER)).thenReturn(79);
-        ticks(1); progress(PRAYER, 68.0 / 70);
+        ticks(1); progress(PRAYER, 1);
+        double afterOneTick=timers.progress(PRAYER,now+600_000_000L);
         when(client.getBoostedSkillLevel(Skill.PRAYER)).thenReturn(99);
-        ticks(1); progress(PRAYER, 56.0 / 70);
+        ticks(1); progress(PRAYER, afterOneTick);
         when(client.getBoostedSkillLevel(Skill.PRAYER)).thenReturn(70);
         ticks(1); progress(PRAYER, 1);
+    }
+
+    @Test public void rapidDrainRestartsAtFullInsteadOfKeepingHalfARing()
+    {
+        when(client.isPrayerActive(Prayer.PROTECT_FROM_MELEE)).thenReturn(true);
+        when(client.isPrayerActive(Prayer.PIETY)).thenReturn(true);
+        ticks(1);progress(PRAYER,1);
+        ticks(1);progress(PRAYER,.5);
+        when(client.getBoostedSkillLevel(Skill.PRAYER)).thenReturn(79);
+        ticks(1);progress(PRAYER,1);
+        ticks(1);progress(PRAYER,0);
+        when(client.getBoostedSkillLevel(Skill.PRAYER)).thenReturn(78);
+        ticks(1);progress(PRAYER,1);
+        assertEquals(.5,timers.progress(PRAYER,now+300_000_000L),.000001);
+        assertEquals(0,timers.progress(PRAYER,now+600_000_000L),.000001);
+        when(client.getBoostedSkillLevel(Skill.PRAYER)).thenReturn(77);
+        ticks(1);progress(PRAYER,1);
+        assertEquals(.75,timers.progress(PRAYER,now+300_000_000L),.000001);
     }
 
     @Test public void inactiveOrExhaustedPrayerHasNoDrainRing()
@@ -143,19 +162,19 @@ public class OrbTimersTest
         ticks(1); progress(PRAYER, 0);
     }
 
-    @Test public void unavailableItemStatsSuppressTheEstimateUntilTheyAreReady()
+    @Test public void unlistedEquipmentDoesNotDisableThePrayerCountdown()
     {
         prayerBonus(30);
         when(items.getItemStats(100)).thenReturn(null);
         when(client.isPrayerActive(Prayer.PROTECT_FROM_MELEE)).thenReturn(true);
-        ticks(10); progress(PRAYER, 0);
-        prayerBonus(30); ticks(2); progress(PRAYER, .9);
+        ticks(2); progress(PRAYER, .8);
+        prayerBonus(30); ticks(1); progress(PRAYER, 1);
     }
 
     @Test public void resetClearsEveryRingAndItsClock()
     {
         when(client.isPrayerActive(Prayer.PROTECT_FROM_MELEE)).thenReturn(true);
-        ticks(24);
+        ticks(3);
         for (int component : new int[]{HP, SPEC, PRAYER}) assertTrue(timers.progress(component, now) > 0);
         timers.reset();
         for (int component : new int[]{HP, SPEC, PRAYER}) progress(component, 0);

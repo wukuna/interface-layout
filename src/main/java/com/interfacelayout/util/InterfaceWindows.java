@@ -11,6 +11,7 @@ public final class InterfaceWindows
 {
     private static final int[] ROOTS = {
         InterfaceID.Bankmain.UNIVERSE, InterfaceID.BankpinKeypad.UNIVERSE,
+        InterfaceID.Trademain.UNIVERSE,InterfaceID.Tradeconfirm.UNIVERSE,InterfaceID.Shopmain.UNIVERSE,
         InterfaceID.Collection.FRAME, InterfaceID.CollectionOverview.UNIVERSE,
         InterfaceID.SkillGuide.WINDOW, InterfaceID.SkillGuideV2.UNIVERSE, InterfaceID.Settings.UNIVERSE,
         InterfaceID.CaOverview.UNIVERSE, InterfaceID.CaTasks.UNIVERSE, InterfaceID.CaBosses.UNIVERSE,

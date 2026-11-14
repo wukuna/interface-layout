@@ -43,7 +43,7 @@ public class EditorDragCancellationTest
         field.setAccessible(true); field.set(target, value);
     }
 
-    @Test public void movableWindowGeometryRefreshesOnlyWhenChangedAndActive() throws Exception
+    @Test public void nativeWidgetRebuildsAreReappliedBeforeEveryActiveFrame() throws Exception
     {
         GameframeCoordinator coordinator = spy(new GameframeCoordinator());
         net.runelite.api.Client client = mock(net.runelite.api.Client.class);
@@ -56,13 +56,13 @@ public class EditorDragCancellationTest
         verify(coordinator).refresh();
         when(menu.windowBoundsChanged()).thenReturn(false);
         coordinator.onBeforeRender(new net.runelite.api.events.BeforeRender());
-        verify(coordinator,times(1)).refresh();
+        verify(coordinator,times(2)).refresh();
         when(menu.windowBoundsChanged()).thenReturn(true);
         when(client.getGameState()).thenReturn(net.runelite.api.GameState.LOGIN_SCREEN);
         coordinator.onBeforeRender(new net.runelite.api.events.BeforeRender());
         set(coordinator,"running",false);
         when(client.getGameState()).thenReturn(net.runelite.api.GameState.LOGGED_IN);
         coordinator.onBeforeRender(new net.runelite.api.events.BeforeRender());
-        verify(coordinator,times(1)).refresh();
+        verify(coordinator,times(2)).refresh();
     }
 }

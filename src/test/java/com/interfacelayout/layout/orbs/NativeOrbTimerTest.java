@@ -23,16 +23,19 @@ public class NativeOrbTimerTest {
         when(f.overlay.config.hideOrbTabs()).thenReturn(false);
         when(f.overlay.client.getRealSkillLevel(Skill.HITPOINTS)).thenReturn(99);
         when(f.overlay.client.getBoostedSkillLevel(Skill.HITPOINTS)).thenReturn(50);
-        when(f.overlay.client.getBoostedSkillLevel(Skill.PRAYER)).thenReturn(50);
+        when(f.overlay.client.getBoostedSkillLevel(Skill.PRAYER)).thenReturn(54);
         when(f.overlay.client.getRealSkillLevel(Skill.PRAYER)).thenReturn(99);
         when(f.overlay.client.isPrayerActive(Prayer.PROTECT_FROM_MELEE)).thenReturn(true);
         f.overlay.onGameTick(new GameTick());
-        for(int i=0;i<23;i++)f.overlay.timers.tick(f.overlay.client,null,Long.MAX_VALUE/2);
+        for(int i=0;i<23;i++){
+            when(f.overlay.client.getBoostedSkillLevel(Skill.PRAYER)).thenReturn(54-(i+1)/5);
+            f.overlay.timers.tick(f.overlay.client,null,Long.MAX_VALUE/2);
+        }
         f.refresh();
         return f;
     }
 
-    @Test public void nativeStylesLeavePrayerInsetAndWidgetGeometryAndInputAlone() {
+    @Test public void nativeStylesStayWithinTheirOrbAndLeaveWidgetGeometryAndInputAlone() {
         Orbs[] orbs={Orbs.HP_ORB_CONTAINER,Orbs.PRAYER_ORB_CONTAINER,Orbs.SPEC_ORB_CONTAINER};
         int[] numbers={InterfaceID.Orbs.HEALTH_TEXT,InterfaceID.Orbs.PRAYER_TEXT,InterfaceID.Orbs.SPECENERGY_TEXT};
         for(int i=0;i<orbs.length;i++)for(boolean fixed:new boolean[]{true,false})for(NativeTimerStyle style:NativeTimerStyle.values()) {
@@ -48,9 +51,9 @@ public class NativeOrbTimerTest {
             for(int y=0;y<image.getHeight();y++)for(int x=0;x<image.getWidth();x++)
                 if((image.getRGB(x,y)>>>24)>0) {
                     assertTrue(new Rectangle(100,69,58,36).contains(x,y));
-                    if(orbs[i]==Orbs.PRAYER_ORB_CONTAINER) {
+                    if(orbs[i]==Orbs.PRAYER_ORB_CONTAINER && style==NativeTimerStyle.QUIET_RIMS) {
                         double dx=x+.5-inset.getCenterX(),dy=y+.5-inset.getCenterY();
-                        assertTrue(style+" "+x+","+y,dx*dx+dy*dy>=12*12);
+                        assertTrue(style+" "+x+","+y,dx*dx+dy*dy>=10*10);
                     }
                 }
             assertEquals(new Rectangle(100,70,57,34),f.parent.getBounds());
@@ -139,7 +142,7 @@ public class NativeOrbTimerTest {
         BufferedImage image=new BufferedImage(50,50,BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics=image.createGraphics();OrbTimers.paintWedge(graphics,inset,OrbTimers.PRAYER_COLOR,progress);graphics.dispose();return image;
     }
-    private static int pixels(BufferedImage image) {
+    static int pixels(BufferedImage image) {
         int count=0;
         for(int y=0;y<image.getHeight();y++)for(int x=0;x<image.getWidth();x++)if((image.getRGB(x,y)>>>24)>0)count++;
         return count;

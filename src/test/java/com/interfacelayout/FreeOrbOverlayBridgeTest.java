@@ -21,11 +21,40 @@ import static org.mockito.Mockito.*;
 
 public class FreeOrbOverlayBridgeTest
 {
+    @Test public void edgeMenuUsesOwnedPlacementAndLeavesCustomAnchorAssignmentsAlone()
+    {
+        TargetWidget target=Orbs.HP_ORB_CONTAINER;
+        FreePositionController free=mock(FreePositionController.class);
+        when(free.overlayBounds()).thenReturn(Map.of(target,new Rectangle(100,100,57,34)));
+        OverlayManager overlays=mock(OverlayManager.class);List<Overlay> registered=new ArrayList<>();
+        when(overlays.add(any())).thenAnswer(i->registered.add(i.getArgument(0)));
+        net.runelite.client.config.ConfigManager configs=mock(net.runelite.client.config.ConfigManager.class);
+        net.runelite.api.Client client=client();
+        FreeOrbOverlayBridge bridge=Guice.createInjector(new AbstractModule(){
+            @Override protected void configure(){
+                bind(FreePositionController.class).toProvider(()->free);bind(OverlayManager.class).toProvider(()->overlays);
+                bind(OrbController.class).toProvider(()->mock(OrbController.class));bind(net.runelite.api.Client.class).toInstance(client);
+                bind(net.runelite.client.config.ConfigManager.class).toInstance(configs);
+            }
+        }).getInstance(FreeOrbOverlayBridge.class);
+        bridge.start(()->{});Overlay overlay=registered.get(0);
+        net.runelite.client.ui.overlay.OverlayMenuEntry edge=overlay.getMenuEntries().stream().filter(e->e.getOption().equals("Align bottom right")).findFirst().orElseThrow();
+        bridge.onOverlayMenuClicked(new net.runelite.client.events.OverlayMenuClicked(edge,overlay));
+        verify(free).align(target,com.interfacelayout.layout.orbs.EdgeAlignment.BOTTOM_RIGHT);
+        assertEquals(net.runelite.client.ui.overlay.OverlayPosition.DYNAMIC,overlay.getPreferredPosition());
+        when(configs.getConfiguration("anchorcustomizer","overlayAssignments")).thenReturn("{\""+overlay.getName()+"\":\"Box 2\"}");
+        bridge.onOverlayMenuClicked(new net.runelite.client.events.OverlayMenuClicked(edge,overlay));
+        verify(free,times(1)).align(any(),any());verify(configs,never()).setConfiguration(anyString(),anyString(),any());
+        overlay.setPreferredPosition(null);overlay.setPreferredLocation(new Point(200,200));
+        when(free.alignment(target)).thenReturn(com.interfacelayout.layout.orbs.EdgeAlignment.BOTTOM_RIGHT);
+        overlay.render(null);verify(free).clearAlignment(target);bridge.stop();
+    }
+
     @Test public void responsiveOrbRemainsResettableWithoutResetsFromOtherOverlays()
     {
         TargetWidget target = Orbs.HP_ORB_CONTAINER;
         FreePositionController free = mock(FreePositionController.class);
-        when(free.bounds()).thenReturn(Map.of(target, new Rectangle(1500, 700, 56, 36)));
+        when(free.overlayBounds()).thenReturn(Map.of(target, new Rectangle(1500, 700, 56, 36)));
         when(free.savedPosition(target)).thenReturn(new Point(1500, 700));
         OverlayManager overlays = mock(OverlayManager.class);
         List<Overlay> added = new ArrayList<>();
@@ -67,7 +96,7 @@ public class FreeOrbOverlayBridgeTest
         Map<TargetWidget, Rectangle> visible = new HashMap<>();
         visible.put(map, new Rectangle(800, 20, 160, 160));
         FreePositionController free = mock(FreePositionController.class);
-        when(free.bounds()).thenAnswer(i -> new HashMap<>(visible));
+        when(free.overlayBounds()).thenAnswer(i -> new HashMap<>(visible));
         OverlayManager overlays = mock(OverlayManager.class);
         List<Overlay> registered = new ArrayList<>();
         when(overlays.add(any())).thenAnswer(i -> registered.add(i.getArgument(0)));
@@ -87,10 +116,10 @@ public class FreeOrbOverlayBridgeTest
         overlay.setPreferredPosition(net.runelite.client.ui.overlay.OverlayPosition.BOTTOM_LEFT);
         overlay.getBounds().setLocation(100, 400);
         assertEquals(new java.awt.Dimension(160, 160), overlay.render(null));
-        verify(free).applyPosition(map, new Point(100, 400));
+        verify(free).applyOverlayPosition(map, new Point(100, 400));
         overlay.getBounds().setLocation(100, 500);
         overlay.render(null);
-        verify(free).applyPosition(map, new Point(100, 500));
+        verify(free).applyOverlayPosition(map, new Point(100, 500));
         visible.clear();
         bridge.sync();
         assertTrue(overlay.getBounds().isEmpty());
@@ -114,7 +143,7 @@ public class FreeOrbOverlayBridgeTest
         visible.put(hp, new Rectangle(700, 30, 50, 34));
         visible.put(prayer, new Rectangle(700, 70, 50, 34));
         FreePositionController free = mock(FreePositionController.class);
-        when(free.bounds()).thenAnswer(i -> new HashMap<>(visible));
+        when(free.overlayBounds()).thenAnswer(i -> new HashMap<>(visible));
         OverlayManager overlays = mock(OverlayManager.class);
         List<Overlay> registered = new ArrayList<>();
         when(overlays.add(any())).thenAnswer(i -> registered.add(i.getArgument(0)));
@@ -134,8 +163,8 @@ public class FreeOrbOverlayBridgeTest
         assertTrue(hpOverlay.isMovable()); assertTrue(hpOverlay.isSnappable());
         hpOverlay.setPreferredLocation(new Point(-100, -100));
         hpOverlay.getBounds().setLocation(800, 500); hpOverlay.render(null);
-        verify(free).applyPosition(hp, new Point(800, 500));
-        verify(free, never()).applyPosition(eq(prayer), any());
+        verify(free).applyOverlayPosition(hp, new Point(800, 500));
+        verify(free, never()).applyOverlayPosition(eq(prayer), any());
         hpOverlay.setPreferredLocation(null); hpOverlay.revalidate();
         hpOverlay.setPreferredLocation(new Point(600, 300)); hpOverlay.getBounds().setLocation(600, 300); hpOverlay.render(null);
         verify(free, never()).reset(any());

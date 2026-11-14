@@ -68,7 +68,7 @@ final class CircularOrbArtwork {
         return new Rectangle((int)Math.round(cx - diameter / 2.0), (int)Math.round(cy - diameter / 2.0), diameter, diameter);
     }
 
-    private Rectangle visibleFill(BufferedImage image) {
+    Rectangle visibleFill(BufferedImage image) {
         return fillBounds.computeIfAbsent(image, source -> {
             int left=source.getWidth(),top=source.getHeight(),right=-1,bottom=-1;
             for(int y=0;y<source.getHeight();y++)for(int x=0;x<source.getWidth();x++)

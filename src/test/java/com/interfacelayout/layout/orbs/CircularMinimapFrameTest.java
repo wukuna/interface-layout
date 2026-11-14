@@ -13,6 +13,29 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class CircularMinimapFrameTest {
+    @Test public void bankOccludesMapAndItsFrameInBothStylesWithoutHidingAnUncoveredCompass() {
+        for(boolean classic:new boolean[]{false,true})for(boolean custom:new boolean[]{false,true}) {
+            Client client=mock(Client.class);OrbController manager=mock(OrbController.class);
+            when(manager.isClassicResizable()).thenReturn(classic);
+            Widget map=widget(client,classic?OrbConstants.Widgets.Classic.MINIMAP_MASK:OrbConstants.Widgets.Modern.MINIMAP_MASK,80,50,152,152);
+            Widget frame=widget(client,classic?OrbConstants.Widgets.Classic.MINIMAP:OrbConstants.Widgets.Modern.MINIMAP,45,25,182,166);
+            Widget compass=widget(client,classic?OrbConstants.Widgets.Classic.COMPASS:OrbConstants.Widgets.Modern.COMPASS,10,10,33,33);
+            when(map.getContentType()).thenReturn(1338);
+            Widget bank=widget(client,net.runelite.api.gameval.InterfaceID.Bankmain.UNIVERSE,100,100,200,150);
+            CircularMinimapFrame layer=new CircularMinimapFrame();layer.refresh(client,manager,custom);
+            assertTrue(map.isHidden());assertTrue(frame.isHidden());assertFalse(compass.isHidden());
+            assertEquals(0,NativeOrbTimerTest.pixels(render(layer)));
+            net.runelite.api.MenuEntry entry=mock(net.runelite.api.MenuEntry.class);when(entry.getWidget()).thenReturn(map);
+            assertTrue(layer.coveredMenu(entry));
+            layer.restore(client);assertFalse(map.isHidden());assertFalse(frame.isHidden());
+            bank.setHidden(true);layer.refresh(client,manager,custom);
+            assertFalse(map.isHidden());assertEquals(custom,frame.isHidden());
+            assertEquals(custom,NativeOrbTimerTest.pixels(render(layer))>0);
+            layer.restore(client);map.setHidden(true);layer.refresh(client,manager,custom);layer.restore(client);
+            assertTrue(map.isHidden());
+        }
+    }
+
     @Test public void replacesCombinedFrameAndBlockersWithoutChangingNativeMapOrCompass() {
         for (boolean classic : new boolean[]{true, false}) {
             Client client = mock(Client.class);

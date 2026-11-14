@@ -30,6 +30,12 @@ public final class LayoutSettings
 
     public void set(String key,Object value) {apply(()->configs.setConfiguration(GROUP_NAME,key,value));}
 
+    public void moveOrb(com.interfacelayout.layout.orbs.OrbOrder orb,int step)
+    {
+        apply(()->configs.setConfiguration(GROUP_NAME,"orbStackOrder",
+            com.interfacelayout.layout.orbs.OrbOrder.move(config.orbStackOrder(),orb,step)));
+    }
+
     public Mode mode()
     {
         return config.layout()==OrbLayout.FREE_POSITION?Mode.FREE:config.hideMinimap()?Mode.COMPACT:Mode.NORMAL;

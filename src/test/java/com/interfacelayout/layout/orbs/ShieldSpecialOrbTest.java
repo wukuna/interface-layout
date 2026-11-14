@@ -67,6 +67,24 @@ public class ShieldSpecialOrbTest
         overlay.start();
     }
 
+    @Test public void specialMirrorFlipsTheShieldFrameButKeepsItsSymbolUpright() {
+        when(config.showShieldSpecialOrb()).thenReturn(true);
+        overlay.setPreferredLocation(new java.awt.Point());overlay.getBounds().setLocation(0,0);
+        BufferedImage frame=new BufferedImage(57,34,BufferedImage.TYPE_INT_ARGB);
+        frame.setRGB(0,0,java.awt.Color.RED.getRGB());when(sprites.get(backing)).thenReturn(frame);
+        BufferedImage symbol=new BufferedImage(26,26,BufferedImage.TYPE_INT_ARGB);
+        symbol.setRGB(0,13,java.awt.Color.MAGENTA.getRGB());symbol.setRGB(25,13,java.awt.Color.CYAN.getRGB());
+        when(sprites.getSprite(ShieldSpecialOrb.SHIELD_SPRITE)).thenReturn(symbol);
+        for(boolean mirrored:new boolean[]{false,true}) {
+            when(config.mirrorSpecial()).thenReturn(mirrored);
+            BufferedImage image=new BufferedImage(100,50,BufferedImage.TYPE_INT_ARGB);Graphics2D g=image.createGraphics();
+            overlay.render(g);g.dispose();int x=mirrored?4:27;
+            assertEquals(java.awt.Color.RED.getRGB(),image.getRGB(mirrored?56:0,0));
+            assertEquals(java.awt.Color.MAGENTA.getRGB(),image.getRGB(x,17));
+            assertEquals(java.awt.Color.CYAN.getRGB(),image.getRGB(x+25,17));
+        }
+    }
+
     @Test public void optionalByDefaultAndInactiveAfterStop()
     {
         assertFalse(config.showShieldSpecialOrb()); assertNull(overlay.resolve());

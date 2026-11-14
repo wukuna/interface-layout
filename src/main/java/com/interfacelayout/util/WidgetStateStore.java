@@ -95,6 +95,20 @@ public class WidgetStateStore
         widget.setForcedPosition(x, y);
     }
 
+    public void positionUnclipped(Widget widget, int x, int y)
+    {
+        if (widget == null) return;
+        capture(widget);
+        if (x < 0 || y < 0)
+        {
+            if (x < 0) { widget.setXPositionMode(0); widget.setOriginalX(x); }
+            if (y < 0) { widget.setYPositionMode(0); widget.setOriginalY(y); }
+            widget.setForcedPosition(Math.max(-1, x), Math.max(-1, y));
+            widget.revalidate();
+        }
+        else widget.setForcedPosition(x, y);
+    }
+
     public void restore()
     {
 

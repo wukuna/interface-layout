@@ -76,6 +76,7 @@ public final class ShieldSpecialOrb extends Overlay
     @Inject private InterfaceLayoutConfig config;
     @Inject private MenuButtonSprites sprites;
     @Inject private TooltipManager tooltips;
+    @Inject private javax.inject.Provider<CircularOrbs> circularOrbs;
     private volatile boolean active;
     private State painted;
     private final Rectangle hitbox = new Rectangle();
@@ -87,7 +88,7 @@ public final class ShieldSpecialOrb extends Overlay
     {
         setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
-        setPriority(Overlay.PRIORITY_LOW);
+        setPriority(Overlay.PRIORITY_HIGH);
         setMovable(true);
         setSnappable(true);
     }
@@ -157,7 +158,8 @@ public final class ShieldSpecialOrb extends Overlay
         boolean wideFrame = backing != null && (backing.getSpriteId() == 5791 || backing.getSpriteId() == 5792);
         int sourceWidth = wideFrame ? 65 : WIDTH;
         int width = circular ? 34 : sourceWidth;
-        int circleX = width - 30;
+        boolean mirrored = !circular && config.mirrorSpecial();
+        int circleX = mirrored ? 4 : width - 30;
         int baseline = wideFrame ? 22 : 26;
         int previousX = getBounds().x, previousY = getBounds().y;
         if (getPreferredLocation() == null && getPreferredPosition() == null)
@@ -179,7 +181,7 @@ public final class ShieldSpecialOrb extends Overlay
             draw.translate(getBounds().x - previousX, getBounds().y - previousY);
             if (circular) {
                 artwork.paintBackground(draw, new Rectangle(0, 0, 34, 34));
-            } else draw.drawImage(frame, 0, 0, width, HEIGHT, null);
+            } else draw.drawImage(frame, mirrored ? width : 0, 0, mirrored ? -width : width, HEIGHT, null);
             if(circular)draw.clip(new java.awt.geom.Ellipse2D.Double(0,0,34,34));
             draw.drawImage(fill, circleX, 4, 26, 26, null);
             Graphics2D mask = (Graphics2D) draw.create();
@@ -198,7 +200,8 @@ public final class ShieldSpecialOrb extends Overlay
             draw.drawImage(shield, circleX, 4, 26, 26, null);
             draw.setFont(FontManager.getRunescapeSmallFont());
             String number = Integer.toString(state.charges);
-            int textX = (circleX + 3) / 2 - draw.getFontMetrics().stringWidth(number) / 2;
+            int center = mirrored ? width - (sourceWidth - 27) / 2 : (circleX + 3) / 2;
+            int textX = center - draw.getFontMetrics().stringWidth(number) / 2;
             draw.setColor(Color.BLACK); draw.drawString(number, textX + 1, baseline + 1);
             draw.setColor(chargeColor);
             draw.drawString(number, textX, baseline);
@@ -220,10 +223,17 @@ public final class ShieldSpecialOrb extends Overlay
             ? CircularOrbArtwork.contains(hitbox,x,y) : hitbox.contains(x,y);
     }
 
+    boolean hovered()
+    {
+        net.runelite.api.Point mouse=client.getMouseCanvasPosition();
+        return painted!=null && mouse!=null && contains(mouse.getX(),mouse.getY()) && !InterfaceWindows.covered(client,hitbox);
+    }
+
     @Subscribe(priority = -40)
     public void onPostMenuSort(PostMenuSort event)
     {
         if (client.isMenuOpen()) return;
+        if(circularOrbs!=null && circularOrbs.get().hoveredComponent()>=0)return;
         State current = resolve();
         net.runelite.api.Point mouse = client.getMouseCanvasPosition();
         if (!sameControl(painted, current) || mouse == null || !contains(mouse.getX(), mouse.getY())

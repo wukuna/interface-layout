@@ -15,6 +15,39 @@ final class CircularOrbInput {
     private final Map<Widget, Integer> renderWidths = new IdentityHashMap<>();
     private final Map<Widget, Boolean> blocking = new IdentityHashMap<>();
 
+    void mirror(Widget parent)
+    {
+        Rectangle axis=WidgetGeometry.bounds(parent);
+        Map<Widget,Rectangle> positions=new java.util.LinkedHashMap<>();
+        collect(parent,positions,java.util.Collections.newSetFromMap(new IdentityHashMap<>()));
+        positions.remove(parent);
+        positions.forEach((widget,bounds)->setBounds(widget,reflected(axis,bounds)));
+    }
+
+    private void collect(Widget widget,Map<Widget,Rectangle> positions,java.util.Set<Widget> visited)
+    {
+        if(widget==null || !visited.add(widget))return;
+        positions.put(widget,WidgetGeometry.bounds(widget));
+        for(Widget child:CircularOrbLayers.children(widget))
+            if(!CircularSpecialMeter.matches(widget,child))collect(child,positions,visited);
+    }
+
+    static Rectangle reflected(Rectangle axis,Rectangle bounds)
+    { return new Rectangle(axis.x+axis.width-(bounds.x-axis.x)-bounds.width,bounds.y,bounds.width,bounds.height); }
+
+    void nativeInput(Widget parent,Widget button,Rectangle bounds,boolean hovered)
+    {
+        setBounds(parent,WidgetGeometry.bounds(parent));
+        for(Widget child:CircularOrbLayers.children(parent))
+            if(child.getNoClickThrough())block(child,false);
+        block(parent,hovered);
+        if(button!=null)
+        {
+            setBounds(button,new Rectangle(bounds.x,bounds.y,hovered?bounds.width:0,bounds.height));
+            block(button,false);
+        }
+    }
+
     void apply(Widget parent, Widget backing, Widget button, Widget number, Rectangle circle, boolean hovered) {
         Rectangle active = hovered ? circle : new Rectangle(circle.x + circle.width / 2, circle.y + circle.height / 2, 1, 1);
         List<Widget> children = CircularOrbLayers.children(parent);

@@ -41,7 +41,7 @@ public class CircularOrbAnchorTest
                 f.circular.overlay.drawManager.processDrawComplete(() -> image);
                 assertEquals(new Rectangle(100, 70, 57, 34), f.circular.parent.getBounds());
             }
-            verify(f.free, times(1)).applyPosition(orbs[i], new java.awt.Point(100, 70));
+            verify(f.free, times(1)).applyOverlayPosition(orbs[i], new java.awt.Point(100, 70));
         }
     }
 
@@ -88,7 +88,7 @@ public class CircularOrbAnchorTest
         Fixture(Orbs orb, int number)
         {
             circular = new CircularOrbOverlayTest.Fixture(orb, number);
-            when(free.bounds()).thenAnswer(i -> circular.parent.isHidden() ? Collections.emptyMap()
+            when(free.overlayBounds()).thenAnswer(i -> circular.parent.isHidden() ? Collections.emptyMap()
                 : Collections.singletonMap(orb, WidgetGeometry.bounds(circular.parent)));
             OverlayManager overlays = mock(OverlayManager.class);
             List<Overlay> registered = new ArrayList<>();

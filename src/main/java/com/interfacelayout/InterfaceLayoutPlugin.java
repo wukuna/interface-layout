@@ -43,7 +43,6 @@ public class InterfaceLayoutPlugin extends Plugin
 {
     @Inject private Provider<OrbEventHandler> events;
     @Inject private EventBus eventBus;
-    @Inject private com.interfacelayout.layout.PresentationController presentation;
     @Inject private ReleaseNotesNotice releaseNotes;
     @Inject private com.interfacelayout.layout.orbs.ShieldSpecialOrb shieldOrb;
     @Inject private net.runelite.client.ui.overlay.OverlayManager overlayManager;
@@ -63,8 +62,6 @@ public class InterfaceLayoutPlugin extends Plugin
         OrbEventHandler handler = events.get();
         eventBus.register(handler);
         handler.startUp();
-        eventBus.register(presentation);
-        presentation.start();
         eventBus.register(releaseNotes);
         releaseNotes.start();
         shieldOrb.start();
@@ -83,8 +80,6 @@ public class InterfaceLayoutPlugin extends Plugin
         eventBus.unregister(shieldOrb);
         eventBus.unregister(releaseNotes);
         releaseNotes.stop();
-        eventBus.unregister(presentation);
-        presentation.stop();
         OrbEventHandler handler = events.get();
         eventBus.unregister(handler);
         handler.shutDown();

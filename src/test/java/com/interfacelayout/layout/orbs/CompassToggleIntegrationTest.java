@@ -38,6 +38,7 @@ public class CompassToggleIntegrationTest {
             orbs.thread=mock(ClientThread.class);orbs.config=mock(InterfaceLayoutConfig.class,CALLS_REAL_METHODS);
             orbs.sprites=mock(MenuButtonSprites.class);
             when(orbs.client.getGameState()).thenReturn(GameState.LOGGED_IN);
+            when(orbs.config.hideMinimap()).thenReturn(true);
             when(orbs.manager.isFixedMode()).thenReturn(mode==0);when(orbs.manager.isClassicResizable()).thenReturn(mode==1);
             doAnswer(i->{queued.add(i.getArgument(0));return null;}).when(orbs.thread).invoke(any(Runnable.class));
             compass=CircularOrbInputTest.widget(orbs.client,COMPASSES[mode],null,x,50,35,35);

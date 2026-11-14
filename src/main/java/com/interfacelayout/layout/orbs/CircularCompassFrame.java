@@ -16,10 +16,11 @@ final class CircularCompassFrame {
     private Rectangle circle;
     private int originalOpacity, compassOpacity;
     private boolean customFrame;
+    private final CompassLayer layer=new CompassLayer();
     private final java.util.Set<Widget> covered=java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
 
     void restore(Client client, OrbController manager) {
-
+        layer.restore(client);
         for(Widget widget:covered)
             if(CircularOrbInput.current(client,widget) && widget.isSelfHidden())widget.setHidden(false);
         covered.clear();
@@ -34,6 +35,10 @@ final class CircularCompassFrame {
     void refresh(Client client, OrbController manager) {refresh(client, manager, true);}
 
     void refresh(Client client, OrbController manager, boolean customFrame) {
+        refresh(client,manager,customFrame,null);
+    }
+
+    void refresh(Client client, OrbController manager, boolean customFrame, Widget minimap) {
         this.customFrame = customFrame;
         if (manager.isCompassHidden() || manager.isMinimapMinimized()) return;
         int id = manager.isFixedMode() ? InterfaceID.Toplevel.MAPCONTAINER_GRAPHIC5
@@ -55,6 +60,7 @@ final class CircularCompassFrame {
             }
             compass=null;circle=null;return;
         }
+        layer.refresh(client,widget,minimap);
         if (!customFrame) return;
         Widget frame = manager.compassFrame;
         if (frame != null && !frame.isHidden() && frame.getOpacity() < 255) {
@@ -62,6 +68,22 @@ final class CircularCompassFrame {
             originalOpacity = frame.getOpacity();
             frame.setOpacity(255);
         }
+    }
+
+    void clear(Client client) {layer.clear(client);}
+
+    boolean hovered(net.runelite.api.Point mouse) {
+        return compass!=null && !compass.isHidden() && circle!=null && mouse!=null
+            && CircularOrbArtwork.contains(circle,mouse.getX(),mouse.getY());
+    }
+
+    void clipMinimap(Graphics2D draw) {
+        if(compass==null || compass.isHidden() || circle==null)return;
+        java.awt.Shape clip=draw.getClip();
+        if(clip==null)clip=new Rectangle(-65536,-65536,131072,131072);
+        java.awt.geom.Area visible=new java.awt.geom.Area(clip);
+        visible.subtract(new java.awt.geom.Area(new java.awt.geom.Ellipse2D.Double(circle.x,circle.y,circle.width,circle.height)));
+        draw.setClip(visible);
     }
 
     private void cover(Widget widget) {

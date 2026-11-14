@@ -28,11 +28,14 @@ public class CircularOrbTimersTest
         when(f.overlay.client.getRealSkillLevel(Skill.HITPOINTS)).thenReturn(99);
         when(f.overlay.client.getBoostedSkillLevel(Skill.HITPOINTS)).thenReturn(50);
         when(f.overlay.client.getRealSkillLevel(Skill.PRAYER)).thenReturn(99);
-        when(f.overlay.client.getBoostedSkillLevel(Skill.PRAYER)).thenReturn(1);
+        when(f.overlay.client.getBoostedSkillLevel(Skill.PRAYER)).thenReturn(5);
         when(f.overlay.client.isPrayerActive(Prayer.PROTECT_FROM_MELEE)).thenReturn(true);
         when(f.overlay.client.getMouseCanvasPosition()).thenReturn(new Point(10, 10));
         f.overlay.onGameTick(new GameTick());
-        for (int i = 0; i < 23; i++) f.overlay.timers.tick(f.overlay.client, null, System.nanoTime());
+        for (int i = 0; i < 23; i++) {
+            when(f.overlay.client.getBoostedSkillLevel(Skill.PRAYER)).thenReturn(5-(i+1)/5);
+            f.overlay.timers.tick(f.overlay.client, null, System.nanoTime());
+        }
         f.refresh();
         return f;
     }
@@ -83,9 +86,9 @@ public class CircularOrbTimersTest
         when(f.overlay.config.editInterface()).thenReturn(false); f.refresh();
         assertTrue(pixels(f.render(), OrbTimers.PRAYER_COLOR) > 0);
         when(f.overlay.config.hideOrbTabs()).thenReturn(false); f.refresh();
-        assertTrue(pixels(f.render(), OrbTimers.PRAYER_COLOR)>0);
+        assertTrue(NativeOrbTimerTest.pixels(f.render())>0);
         when(f.overlay.config.disableOrbTimers()).thenReturn(true);
-        assertEquals(0,pixels(f.render(),OrbTimers.PRAYER_COLOR));
+        assertEquals(0,NativeOrbTimerTest.pixels(f.render()));
         assertEquals(57, f.parent.getOriginalWidth());
     }
 

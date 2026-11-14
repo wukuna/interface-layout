@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 
 public class GameframeResizeTest
 {
-    @Test public void canvasResizeRefreshesOnceAndProfileSwitchClearsResolvedPositions()
+    @Test public void activeFramesReapplyGeometryAndProfileSwitchClearsResolvedPositions()
     {
         Client client = mock(Client.class);
         when(client.getGameState()).thenReturn(GameState.LOGGED_IN);
@@ -59,23 +59,23 @@ public class GameframeResizeTest
         frame.start();
         clearInvocations(menu, free, menuOverlays, freeOverlays);
         frame.onBeforeRender(new BeforeRender());
-        verify(free, never()).apply();
+        verify(free).apply();
         when(client.getCanvasWidth()).thenReturn(1920);
         when(client.getCanvasHeight()).thenReturn(1080);
         frame.onBeforeRender(new BeforeRender());
         frame.onBeforeRender(new BeforeRender());
-        verify(menu).apply(); verify(free).apply();
-        verify(menuOverlays).sync(); verify(freeOverlays).sync();
+        verify(menu,times(3)).apply(); verify(free,times(3)).apply();
+        verify(menuOverlays,times(3)).sync(); verify(freeOverlays,times(3)).sync();
         frame.onProfileChanged(mock(ProfileChanged.class));
         verify(menu).resetSession();
         verify(menuOverlays).profileChanged(); verify(freeOverlays).profileChanged();
         when(client.getCanvasWidth()).thenReturn(0);
         when(client.getCanvasHeight()).thenReturn(0);
         frame.onBeforeRender(new BeforeRender());
-        verify(free, times(1)).apply();
+        verify(free, times(3)).apply();
         when(client.getCanvasWidth()).thenReturn(5120);
         when(client.getCanvasHeight()).thenReturn(1440);
         frame.onBeforeRender(new BeforeRender());
-        verify(free, times(2)).apply();
+        verify(free, times(4)).apply();
     }
 }

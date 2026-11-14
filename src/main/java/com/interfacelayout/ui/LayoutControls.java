@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
@@ -24,6 +26,7 @@ import net.runelite.client.ui.ColorScheme;
 final class LayoutControls
 {
     private final List<Runnable> updates=new ArrayList<>();
+    private final Map<String,JComponent[]> helpTargets=new HashMap<>();
     private final LayoutSettings settings;
     private boolean refreshing;
 
@@ -55,6 +58,15 @@ final class LayoutControls
         label.setForeground(Color.LIGHT_GRAY);label.setBorder(BorderFactory.createEmptyBorder(3,0,8,0));label.setAlignmentX(0);parent.add(label);
     }
 
+    void tooltip(String key,String text)
+    {
+        String html="<html><body style='width:230px'>"+text.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")+"</body></html>";
+        for(JComponent target:helpTargets.get(key)) {
+            target.setToolTipText(html);
+            target.getAccessibleContext().setAccessibleDescription(text);
+        }
+    }
+
     JPanel when(JPanel parent,BooleanSupplier visible)
     {
         JPanel panel=column();panel.setBorder(BorderFactory.createCompoundBorder(
@@ -67,6 +79,7 @@ final class LayoutControls
         JPanel row=new JPanel(new BorderLayout(6,0));row.setOpaque(false);row.setAlignmentX(0);
         JLabel text=new JLabel("<html><body style='width:120px'>"+label+"</body></html>");text.setForeground(Color.WHITE);
         JCheckBox box=new JCheckBox();box.setOpaque(false);box.setName(key);box.getAccessibleContext().setAccessibleName(label);
+        text.setLabelFor(box);helpTargets.put(key,new JComponent[]{text,box,row});
         row.add(text,BorderLayout.CENTER);row.add(box,BorderLayout.EAST);row.setBorder(BorderFactory.createEmptyBorder(4,0,4,0));
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE,48));parent.add(row);
         updates.add(()->box.setSelected(current.getAsBoolean()!=inverted));
@@ -77,8 +90,8 @@ final class LayoutControls
     {
         JComboBox<T> combo=new JComboBox<>(values);combo.setName(name);combo.getAccessibleContext().setAccessibleName(label);
         combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,25));combo.setAlignmentX(0);combo.setPreferredSize(new Dimension(195,25));
-        label(parent,label,combo);
-        updates.add(()->{T value=current.get();combo.setSelectedItem(value);combo.setToolTipText(value==null?label:value.toString());});
+        helpTargets.put(name,new JComponent[]{label(parent,label,combo),combo});
+        updates.add(()->combo.setSelectedItem(current.get()));
         combo.addActionListener(e->{if(!refreshing && combo.getSelectedIndex()>=0)change.accept(values[combo.getSelectedIndex()]);});
     }
 
@@ -90,7 +103,8 @@ final class LayoutControls
     void number(JPanel parent,String key,String label,IntSupplier current,int min,int max)
     {
         JSpinner spinner=new JSpinner(new SpinnerNumberModel(min,min,max,1));spinner.setName(key);
-        spinner.setMaximumSize(new Dimension(Integer.MAX_VALUE,25));spinner.setAlignmentX(0);label(parent,label,spinner);
+        spinner.setMaximumSize(new Dimension(Integer.MAX_VALUE,25));spinner.setAlignmentX(0);
+        helpTargets.put(key,new JComponent[]{label(parent,label,spinner),spinner});
         updates.add(()->spinner.setValue(Math.max(min,Math.min(max,current.getAsInt()))));
         spinner.addChangeListener(e->{if(!refreshing)settings.set(key,spinner.getValue());});
     }
@@ -101,9 +115,28 @@ final class LayoutControls
         button.addActionListener(e->action.run());parent.add(button);
     }
 
-    private void label(JPanel parent,String text,JComponent control)
+    void orbOrder(JPanel parent, Supplier<String> current)
+    {
+        javax.swing.DefaultListModel<com.interfacelayout.layout.orbs.OrbOrder> model=new javax.swing.DefaultListModel<>();
+        javax.swing.JList<com.interfacelayout.layout.orbs.OrbOrder> list=new javax.swing.JList<>(model);
+        list.setName("orbStackOrder");list.setVisibleRowCount(4);list.setAlignmentX(0);
+        helpTargets.put("orbStackOrder",new JComponent[]{list});
+        list.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        list.setMaximumSize(new Dimension(Integer.MAX_VALUE,85));parent.add(list);
+        updates.add(()->{
+            com.interfacelayout.layout.orbs.OrbOrder selected=list.getSelectedValue();
+            model.clear();
+            List<com.interfacelayout.layout.orbs.OrbOrder> order=com.interfacelayout.layout.orbs.OrbOrder.backToFront(current.get());
+            java.util.Collections.reverse(order);order.forEach(model::addElement);
+            if(selected!=null)list.setSelectedValue(selected,true);else list.setSelectedIndex(0);
+        });
+        button(parent,"Bring forward",()->{if(list.getSelectedValue()!=null)settings.moveOrb(list.getSelectedValue(),1);});
+        button(parent,"Send backward",()->{if(list.getSelectedValue()!=null)settings.moveOrb(list.getSelectedValue(),-1);});
+    }
+
+    private JLabel label(JPanel parent,String text,JComponent control)
     {
         JLabel label=new JLabel(text);label.setForeground(Color.WHITE);label.setAlignmentX(0);label.setLabelFor(control);label.setBorder(BorderFactory.createEmptyBorder(5,0,3,0));
-        parent.add(label);parent.add(control);
+        parent.add(label);parent.add(control);return label;
     }
 }

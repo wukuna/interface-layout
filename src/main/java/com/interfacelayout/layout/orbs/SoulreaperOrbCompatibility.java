@@ -34,15 +34,17 @@ public final class SoulreaperOrbCompatibility extends Overlay
     @Inject ConfigManager configs;
     @Inject InterfaceLayoutConfig config;
     @Inject OverlayManager overlays;
+    @Inject com.interfacelayout.layout.menu.MenuButtonSprites sprites;
     private final Map<Overlay, OverlayLayer> replaced = new IdentityHashMap<>();
     private final CircularOrbArtwork artwork = new CircularOrbArtwork();
     private final BufferedImage timer = new BufferedImage(34,34,BufferedImage.TYPE_INT_ARGB);
     private Overlay extra, nativeOrb, imageOwner;
     private BufferedImage specialIcon, axeIcon;
     private Rectangle anchor;
+    private OrbTimers timers;
 
     public SoulreaperOrbCompatibility() {
-        setPosition(OverlayPosition.DYNAMIC); setLayer(OverlayLayer.ABOVE_WIDGETS);
+        setPosition(OverlayPosition.DYNAMIC); setLayer(OverlayLayer.ABOVE_WIDGETS);setPriority(Overlay.PRIORITY_HIGHEST);
     }
 
     void refresh(boolean enabled) {
@@ -101,6 +103,8 @@ public final class SoulreaperOrbCompatibility extends Overlay
     }
 
     void anchor(Rectangle circle) { anchor = new Rectangle(circle); }
+    void timers(OrbTimers timers) { this.timers=timers; }
+    boolean replacesSpecialTimer() { return nativeOrb!=null && equipped(); }
 
     void paintNativeTimer(Graphics2D draw, Rectangle circle) {
         if (nativeOrb != null && equipped()) paintTimer(draw, nativeOrb, circle, false);
@@ -109,7 +113,7 @@ public final class SoulreaperOrbCompatibility extends Overlay
     @Override public Dimension render(Graphics2D graphics) {
         Widget parent = client.getWidget(InterfaceID.Orbs.ORB_SPECENERGY);
         if (anchor == null || extra == null || parent == null || parent.isHidden()
-            || !config.hideOrbTabs() || config.editInterface()) return null;
+            || config.editInterface()) return null;
         boolean worn = equipped();
         int stacks = Math.max(0, Math.min(5, client.getVarpValue(VarPlayerID.SOULREAPER_STACKS)));
         if (!worn && stacks == 0) return null;
@@ -117,11 +121,18 @@ public final class SoulreaperOrbCompatibility extends Overlay
         int maximum = worn ? 100 : 5;
         Rectangle circle = new Rectangle(anchor);
         circle.translate(number("offsetX",22), number("offsetY",25));
-        if (InterfaceWindows.covered(client, circle)) return null;
+        boolean circular=config.hideOrbTabs(),mirrored=config.mirrorSpecial();
+        Widget backing=client.getWidget(InterfaceID.Orbs.SPECENERGY_BACKING);
+        BufferedImage frame=circular || sprites==null?null:sprites.getPadded(backing);
+        if(!circular && frame==null)return null;
+        int width=circular?circle.width:backing.getWidth();
+        Rectangle area=circular?circle:new Rectangle(mirrored?circle.x:circle.x-width+circle.width,circle.y,width,circle.height);
+        if (InterfaceWindows.covered(client, area)) return null;
         Color fill = color(worn ? "specOrbColour" : "soulreaperOrbColour", worn ? 0x2798bd : 0x8d4bd3);
         Graphics2D draw = (Graphics2D) graphics.create();
         try {
-            artwork.paintBackground(draw,circle);
+            if(circular)artwork.paintBackground(draw,circle);
+            else draw.drawImage(frame,mirrored?area.x+area.width:area.x,area.y,mirrored?-area.width:area.width,area.height,null);
             Graphics2D body = (Graphics2D) draw.create();
             try {
                 body.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
@@ -131,10 +142,30 @@ public final class SoulreaperOrbCompatibility extends Overlay
                 body.setPaint(new GradientPaint(circle.x,circle.y+4,fill.brighter(),circle.x,circle.y+30,fill.darker()));
                 body.fillRect(circle.x+4,circle.y+4,26,26);
             } finally { body.dispose(); }
-            paintTimer(draw,extra,circle,true);
-            artwork.paint(draw,circle,config.orbRim());
+            boolean customTimer=worn && timers!=null && !config.disableOrbTimers() && config.orbSpecialTimer();
+            if(!customTimer)paintTimer(draw,extra,circle,true);
             Color text = Color.getHSBColor((float)amount/maximum/3,1,1);
-            CircularOrbs.paintContent(draw,circle,worn?specialIcon:axeIcon,Integer.toString(amount),text,config.orbContent(),0,0);
+            if(circular) {
+                artwork.paint(draw,circle,config.orbRim());
+                CircularOrbs.paintContent(draw,circle,worn?specialIcon:axeIcon,Integer.toString(amount),text,config.orbContent(),0,0);
+            } else {
+                if(worn)draw.drawImage(specialIcon,circle.x+(circle.width-specialIcon.getWidth())/2,
+                    circle.y+(circle.height-specialIcon.getHeight())/2,null);
+                else draw.drawImage(axeIcon,circle.x+4,circle.y+4,26,26,null);
+                draw.setFont(net.runelite.client.ui.FontManager.getRunescapeSmallFont());
+                String value=Integer.toString(amount);
+                int center=mirrored?(circle.x+circle.width+area.x+area.width)/2:(area.x+circle.x)/2;
+                int x=center-draw.getFontMetrics().stringWidth(value)/2,y=area.y+26;
+                draw.setColor(Color.BLACK);draw.drawString(value,x+1,y+1);draw.setColor(text);draw.drawString(value,x,y);
+            }
+            if(customTimer) {
+                if(circular)timers.paint(draw,circle,InterfaceID.Orbs.ORB_SPECENERGY,config,System.nanoTime());
+                else {
+                    Rectangle inset=new Rectangle(circle);inset.grow(-5,-5);
+                    Rectangle number=new Rectangle(mirrored?circle.x+circle.width:area.x,area.y,area.width-circle.width,area.height);
+                    timers.paintInset(draw,inset,number,InterfaceID.Orbs.ORB_SPECENERGY,config,System.nanoTime(),0,0);
+                }
+            }
         } finally { draw.dispose(); }
         return null;
     }

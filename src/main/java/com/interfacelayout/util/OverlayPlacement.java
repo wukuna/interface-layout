@@ -43,6 +43,12 @@ public class OverlayPlacement
         return true;
     }
 
+    public boolean customAnchored(Overlay overlay)
+    {
+        String assignments=configs.getConfiguration("anchorcustomizer","overlayAssignments");
+        return assignments!=null && assignments.contains("\""+overlay.getName()+"\"");
+    }
+
     public static boolean usesLayout(Overlay overlay)
     {
         return overlay.getPreferredLocation() == null && (overlay.getPreferredPosition() == null

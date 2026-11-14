@@ -56,7 +56,7 @@ public final class InterfaceLayoutPanel extends PluginPanel
     {
         controls.heading(p,"Minimap & orbs");
         controls.choice(p,"positionMode","Positioning",LayoutSettings.Mode.values(),settings::mode,settings::mode);
-        controls.hint(p,"Normal restores the usual positions and keeps your saved free layout. Free placement uses Alt-drag in resizable modes and has its own anchor points or can be used with Custom UI Anchors.");
+        controls.tooltip("positionMode","Normal restores the usual positions without clearing your free layout. Free placement supports Alt-drag in resizable modes, its own anchor points, or Custom UI Anchors.");
         JPanel compact=controls.when(p,()->settings.mode()==LayoutSettings.Mode.COMPACT);
         controls.choice(compact,"orbLayout","Compact preset",new OrbLayout[]{OrbLayout.VERTICAL,OrbLayout.HORIZONTAL,OrbLayout.HORIZONTAL_WIDE,OrbLayout.CUSTOM},config::layout);
         controls.choice(compact,"verticalAnchor","Vertical anchor",VerticalAnchor.values(),config::verticalAnchor);
@@ -65,7 +65,7 @@ public final class InterfaceLayoutPanel extends PluginPanel
         controls.toggle(compact,"disableReordering","Keep hidden orb slots",config::disableReordering,false);
         controls.toggle(compact,"leaveEmptySpace","Keep preset container size",config::leaveEmptySpace,false);
         controls.toggle(compact,"enableOrbSwapping","Allow preset slot swaps",config::enableOrbSwapping,false);
-        controls.hint(compact,"Slot swaps require Edit interface. Drag an orb onto another slot.");
+        controls.tooltip("enableOrbSwapping","With Edit interface enabled, drag an orb onto another preset slot.");
         controls.heading(p,"Menu tabs");
         controls.choice(p,"menuLayout","Arrangement",MenuStoneController.Layout.values(),config::menuLayout);
         JPanel freeMenu=controls.when(p,()->config.menuLayout()==MenuStoneController.Layout.FREE_POSITION);
@@ -74,14 +74,18 @@ public final class InterfaceLayoutPanel extends PluginPanel
         controls.heading(p,"Editing");
         controls.toggle(p,"editInterface","Edit interface",config::editInterface,false);
         controls.number(p,"editGrid","Grouping grid",config::editGrid,1,32);
-        controls.hint(p,"Alt-drag moves bars and free orbs. Shift-drag joins or separates menu tabs.");
+        controls.hint(p,"Alt-drag to move. Shift-drag to group tabs.");
+        controls.tooltip("editInterface","Shift-right-click a free control to align it to an edge. Alt-drag releases alignment. Detach custom anchors before edge alignment; move the grave indicator while a grave is active.");
+        controls.heading(p,"Orb stacking · front first");
+        controls.orbOrder(p,config::orbStackOrder);
+        controls.tooltip("orbStackOrder","The front orb receives clicks where orbs overlap. Icons, numbers and timers move together.");
         controls.button(p,"Reset positions and groups...",()->settings.set("resetLayoutPositions",true));
         controls.heading(compact,"Legacy separate minimap");
         controls.toggle(compact,"enableMinimapOverlay","Show separate minimap",config::showMinimapInCompactView,false);
         JPanel legacy=controls.when(compact,config::showMinimapInCompactView);
         controls.toggle(legacy,"enableOverlayToggleOption","Include toggle action",config::showToggleOnMinimapButton,false);
         controls.toggle(legacy,"enableLogoutXOverlay","Show Logout-X",config::showOverlayLogoutX,false);
-        controls.hint(legacy,"This older map does not support other plugins' minimap overlays. Free placement moves the native map instead.");
+        controls.tooltip("enableMinimapOverlay","This legacy map does not support other plugins' minimap overlays. Free placement moves the native map.");
     }
 
     private void appearancePage(JPanel p)
@@ -99,13 +103,21 @@ public final class InterfaceLayoutPanel extends PluginPanel
             ()->config.hideOrbTabs()?"Circles only":"Number tabs",v->settings.set("hideOrbTabs",v.equals("Circles only")));
         JPanel circular=controls.when(p,config::hideOrbTabs);
         controls.choice(circular,"orbContent","Orb contents",OrbContent.values(),config::orbContent);
+        JPanel tabbed=controls.when(p,()->!config.hideOrbTabs());
+        controls.heading(tabbed,"Mirror number tabs");
+        controls.toggle(tabbed,"mirrorHitpoints","Hitpoints",config::mirrorHitpoints,false);
+        controls.toggle(tabbed,"mirrorPrayer","Prayer",config::mirrorPrayer,false);
+        controls.toggle(tabbed,"mirrorRun","Run energy",config::mirrorRun,false);
+        controls.toggle(tabbed,"mirrorSpecial","Special attack",config::mirrorSpecial,false);
+        for(String key:new String[]{"mirrorHitpoints","mirrorPrayer","mirrorRun","mirrorSpecial"})
+            controls.tooltip(key,"Swap the orb and number tab while keeping symbols and numbers upright.");
         JPanel freeMap=controls.when(p,()->settings.mode()==LayoutSettings.Mode.FREE);
         controls.heading(freeMap,"Minimap");
         controls.choice(freeMap,"minimapFrame","Frame",MinimapFrame.values(),config::minimapFrame);
         JPanel rims=controls.when(freeMap,()->config.minimapFrame()==MinimapFrame.CIRCULAR);
-        controls.hint(rims,"Circular rim uses custom rings. Native will not remove the compass circle attached to the minimap, even if the compass is Free Positioned.");
+        controls.tooltip("minimapFrame","Circular rim uses custom rings. Native keeps the attached compass circle, even when the compass is positioned separately.");
         controls.choice(rims,"orbRim","Shared circular rim",OrbRim.values(),config::orbRim);
-        controls.hint(rims,"Applies to custom circular map, compass, shield and orb frames.");
+        controls.tooltip("orbRim","Applies to custom circular minimap, compass, shield and orb frames.");
         controls.heading(p,"Equipment · Beta");
         controls.toggle(p,"betaEquipmentPanel","Enhanced equipment panel",config::betaEquipmentPanel,false);
         JPanel equipment=controls.when(p,config::betaEquipmentPanel);
@@ -114,10 +126,11 @@ public final class InterfaceLayoutPanel extends PluginPanel
 
     private void visibilityPage(JPanel p)
     {
-        controls.hint(p,"Checked controls stay visible. Hiding them keeps their saved positions.");
+        controls.hint(p,"Checked = shown.");
         controls.heading(p,"Minimap & orbs");
         controls.toggle(p,"hideMinimap","Minimap",config::hideMinimap,true);
         controls.toggle(p,"hideCompass","Compass",config::hideCompass,true);
+        controls.toggle(p,"hideGravestone","Grave indicator",config::hideGravestone,true);
         controls.toggle(p,"hideHp","Hitpoints",config::hideHp,true);
         controls.toggle(p,"hidePrayer","Prayer",config::hidePray,true);
         controls.toggle(p,"hideRun","Run energy",config::hideRun,true);
@@ -125,10 +138,9 @@ public final class InterfaceLayoutPanel extends PluginPanel
         JPanel special=controls.when(p,()->!config.hideSpec());
         controls.toggle(special,"showShieldSpecialOrb","Shield special orb · Beta",config::showShieldSpecialOrb,false);
         controls.toggle(special,"hideExtraSpecialAttackBar","Extra special-attack bar",config::hideExtraSpecialAttackBar,true);
-        JPanel extraBar=controls.when(special,()->config.hideOrbTabs() && !config.hideExtraSpecialAttackBar());
-        controls.hint(extraBar,"In Circles only, this bar sits below the special-attack orb, separate from its timer.");
+        controls.tooltip("hideExtraSpecialAttackBar","Show the additional special-attack meter below the orb, separate from its timer.");
         controls.toggle(p,"hideMinimapWithSidePanel","Hide map and orbs with side panel",config::hideMinimapWithSidePanel,false);
-        controls.hint(p,"Hide with side panel applies in resizable Modern.");
+        controls.tooltip("hideMinimapWithSidePanel","Applies in resizable Modern mode.");
         controls.heading(p,"Menu tabs");
         controls.toggle(p,"hideTopMenu","Combat–spellbook group",config::hideTopMenu,true);
         JPanel top=controls.when(p,()->!config.hideTopMenu());
@@ -177,16 +189,17 @@ public final class InterfaceLayoutPanel extends PluginPanel
         JPanel prayer=controls.when(prayerTimer,()->OrbTimerStyles.resolve(config,InterfaceID.Orbs.ORB_PRAYER)==NativeTimerStyle.TAG_METERS
             || OrbTimerStyles.resolve(config,InterfaceID.Orbs.ORB_PRAYER)==NativeTimerStyle.EIGHT_SLICES);
         controls.choice(prayer,"prayerOrbDisplay","Prayer display",PrayerDisplay.values(),config::prayerOrbDisplay);
-        controls.hint(prayer,"Amount tracks current prayer. The thin countdown shows the next point drained; it resets when a point is lost.");
+        controls.tooltip("prayerOrbDisplay","Amount tracks remaining prayer; Countdown tracks the next point drained. Both uses two tag meters, or amount slices with a thin countdown arc.");
         controls.toggle(timers,"orbSpecialTimer","Special regeneration",config::orbSpecialTimer,false);
         timerStyle(controls.when(timers,config::orbSpecialTimer),"specialTimerStyle","Special style",InterfaceID.Orbs.ORB_SPECENERGY);
-        controls.hint(timers,"Mix all four styles with Number tabs or Circles only. Tag meters sit below circular orbs.");
-        controls.hint(p,"Prayer's blue inset stays unchanged. Native low-prayer flashes and existing potion-dose reminders stay active with their own settings.");
+        
+        controls.tooltip("orbPrayerTimer","Native low-prayer flashes and potion-dose reminders keep their own settings.");
     }
     private void timerStyle(JPanel parent,String key,String label,int component)
     {
         controls.choice(parent,key,label,NativeTimerStyle.values(),()->OrbTimerStyles.resolve(config,component),
             value->settings.set(key,OrbTimerStyle.valueOf(value.name())));
+        controls.tooltip(key,"Inset sweep shades the orb; Tag meters use small bars; Quiet rims use a thin arc; Eight slices use wedges. All styles support number tabs and circles. Tag meters sit below circles.");
     }
 
 }

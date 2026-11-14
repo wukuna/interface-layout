@@ -60,10 +60,7 @@ final class OrbTimers
     private int specialPeriod = 50;
     private boolean specialActive;
     private boolean lightbearer;
-    private int prayerCharge;
-    private int prayerDrain;
-    private int prayerResistance = 60;
-    private int previousPrayer = -1;
+    private final PrayerDrainClock prayer = new PrayerDrainClock();
     private long lastTick;
     private boolean ready;
 
@@ -76,10 +73,7 @@ final class OrbTimers
         specialPeriod = 50;
         specialActive = false;
         lightbearer = false;
-        prayerCharge = 0;
-        prayerDrain = 0;
-        prayerResistance = 60;
-        previousPrayer = -1;
+        prayer.reset();
         ready = false;
     }
 
@@ -109,31 +103,16 @@ final class OrbTimers
         int drain = PrayerDrain.rate(client);
         int points = client.getBoostedSkillLevel(Skill.PRAYER);
         int bonus = 0;
-        boolean statsReady = true;
         if (drain > 0 && equipment != null)
         {
             for (Item item : equipment.getItems())
             {
                 if (item == null || item.getId() < 0) continue;
                 ItemStats stats = items == null ? null : items.getItemStats(item.getId());
-                if (stats == null) statsReady = false;
-                else if (stats.getEquipment() != null) bonus += stats.getEquipment().getPrayer();
+                if (stats != null && stats.getEquipment() != null) bonus += stats.getEquipment().getPrayer();
             }
         }
-        prayerResistance = Math.max(1, 60 + 2 * bonus);
-        if (drain == 0 || prayerDrain == 0 || points <= 0 || !statsReady)
-        {
-            prayerCharge = 0;
-        }
-        else
-        {
-            int charge = prayerCharge + drain;
-            int lost = previousPrayer - points;
-            prayerCharge = lost > 0 && lost != charge / prayerResistance
-                ? 0 : charge % prayerResistance;
-        }
-        prayerDrain = points > 0 && statsReady ? drain : 0;
-        previousPrayer = points;
+        prayer.tick(drain,60+2*bonus,points);
         lastTick = now;
         ready = true;
     }
@@ -149,8 +128,7 @@ final class OrbTimers
         }
         if (component == InterfaceID.Orbs.ORB_SPECENERGY && specialActive)
             return Math.min(1, (specialTicks + fraction) / specialPeriod);
-        if (component == InterfaceID.Orbs.ORB_PRAYER && prayerDrain > 0)
-            return 1 - Math.min(1, (prayerCharge + fraction * prayerDrain) / prayerResistance);
+        if (component == InterfaceID.Orbs.ORB_PRAYER)return prayer.progress(fraction);
         return 0;
     }
 
