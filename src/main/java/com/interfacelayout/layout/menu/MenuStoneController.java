@@ -471,7 +471,7 @@ public class MenuStoneController
 
     private boolean hasSavedOrigin(int group)
     {
-        return resolvedPositions.containsKey(positionKey(group)) || savedGroup(group) != null;
+        return anchorOwned(group) || resolvedPositions.containsKey(positionKey(group)) || savedGroup(group) != null;
     }
 
     private boolean hidden(int index)
@@ -508,8 +508,46 @@ public class MenuStoneController
         Point relative = LayoutGeometry.relative(destination, parent);
         states.position(widget, relative.x, relative.y);
     }
+    private final Map<String,Point> anchorPositions=new LinkedHashMap<>();
+    public String anchorGroupId(int id)
+    {
+        StringBuilder members=new StringBuilder();String savedId=null;int first=14;
+        for(int index=0;index<14;index++)if((individualDragging()?group(index):index/7)==id) {
+            members.append(index).append(',');first=Math.min(first,index);
+            String saved=configs.getConfiguration("interfacelayout","anchorMenuIdentity_"+index);
+            if(savedId==null && saved!=null && saved.matches("[a-fA-F0-9-]{36}"))savedId=saved;
+        }
+        if(savedId!=null) {
+            boolean duplicate=false;
+            for(int index=0;index<first;index++)if((individualDragging()?group(index):index/7)!=id
+                && savedId.equals(configs.getConfiguration("interfacelayout","anchorMenuIdentity_"+index))) {duplicate=true;break;}
+            if(!duplicate)return "layout.menu-group:"+savedId;
+        }
+        return "layout.menu-group:"+java.util.UUID.nameUUIDFromBytes(("interface-layout-menu-"+(members.length()==0?"missing-"+id:members.toString())).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
+    private void rememberGroupIdentity(int group,String identity)
+    {
+        String uuid=identity.substring(identity.indexOf(':')+1);
+        for(int index=0;index<14;index++)if(group(index)==group)
+            configs.setConfiguration("interfacelayout","anchorMenuIdentity_"+index,uuid);
+    }
+    public boolean anchorOwned(int id) { return anchorPositions.containsKey(anchorGroupId(id)); }
+    public String anchorState(int id) {
+        if(!orbs.isLoggedIn())return "UNAVAILABLE";
+        boolean member=false,shown=false;
+        for(int index=0;index<14;index++)if((individualDragging()?group(index):index/7)==id){member=true;shown|=!hidden(index);}
+        return member&&!shown?"HIDDEN":groups().containsKey(id)?"VISIBLE":"UNAVAILABLE";
+    }
+    public boolean anchorMove(int id,Point point) { return !point.equals(anchorPositions.put(anchorGroupId(id),new Point(point))); }
+    public void anchorRelease(String id,boolean keep)
+    {
+        Point point=anchorPositions.remove(id);
+        if(keep && point!=null)for(int group:groups().keySet())if(anchorGroupId(group).equals(id))saveGroup(group,point);
+    }
     private Point loadOrigin(int group, int width, int height, Point nativeOrigin)
     {
+        Point anchored=anchorPositions.get(anchorGroupId(group));
+        if(anchored!=null)return LayoutGeometry.clamp(anchored,width,height,client.getCanvasWidth(),client.getCanvasHeight());
         Point saved = resolvedPositions.get(positionKey(group));
         if (saved == null) saved = savedPositions.load(positionKey(group), width, height);
         Point point = saved != null ? saved : nativeOrigin != null ? nativeOrigin : new Point(config.menuLayout() == Layout.VERTICAL_RIGHT
@@ -566,6 +604,8 @@ public class MenuStoneController
         for (int member = 0; member < 14; member++) usedGroups.add(group(member));
         while (id < 14 && usedGroups.contains(id)) id++;
 
+        rememberGroupIdentity(currentGroup,anchorGroupId(currentGroup));
+        configs.setConfiguration("interfacelayout","anchorMenuIdentity_"+index,java.util.UUID.randomUUID().toString());
         configs.setConfiguration("interfacelayout", "menuGeneration_" + layoutMode() + "_" + id, groupGeneration(id) + 1);
         configs.setConfiguration("interfacelayout", "menuGroup_" + layoutMode() + "_" + index, id);
         configs.setConfiguration("interfacelayout", "menuHorizontal_" + layoutMode() + "_" + id, false);
@@ -575,6 +615,11 @@ public class MenuStoneController
     public void reattach(int index)
     {
         dragStone = -1;
+        Integer savedBottom=configs.getConfiguration("interfacelayout","menuBottomGroup_"+layoutMode(),Integer.class);
+        int destination=config.menuLayout()==Layout.FREE_POSITION && Boolean.TRUE.equals(configs.getConfiguration("interfacelayout","menuSeparateRows_"+layoutMode(),Boolean.class)) && index>=7
+            ?savedBottom==null?1:savedBottom:0;
+        String identity=anchorGroupId(destination);rememberGroupIdentity(destination,identity);
+        configs.setConfiguration("interfacelayout","anchorMenuIdentity_"+index,identity.substring(identity.indexOf(':')+1));
         if (config.menuLayout() == Layout.FREE_POSITION
             && Boolean.TRUE.equals(configs.getConfiguration("interfacelayout", "menuSeparateRows_" + layoutMode(), Boolean.class)))
         {
@@ -616,6 +661,9 @@ public class MenuStoneController
             members.sort(Comparator.comparingInt(this::order).thenComparingInt(Integer::intValue));
             int insertion = members.indexOf(candidate.getKey()) + (before ? 0 : 1);
             members.add(insertion, index);
+            String identity=anchorGroupId(targetGroup);
+            rememberGroupIdentity(targetGroup,identity);
+            configs.setConfiguration("interfacelayout","anchorMenuIdentity_"+index,identity.substring(identity.indexOf(':')+1));
             configs.setConfiguration("interfacelayout", "menuGroup_" + layoutMode() + "_" + index, targetGroup);
             for (int position = 0; position < members.size(); position++)
                 configs.setConfiguration("interfacelayout", "menuOrder_" + layoutMode() + "_" + members.get(position), position);

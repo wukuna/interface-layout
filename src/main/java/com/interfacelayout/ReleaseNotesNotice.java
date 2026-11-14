@@ -22,7 +22,7 @@ final class ReleaseNotesNotice
     static final String RELEASE = "2026-11-13-sidebar-and-beta-timers";
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] UPDATES = {
-        "Detailed settings have moved to the side panel with a Minimap icon: Layout, Appearance, Visibility and Timers are adjustable there. Please report any inconsistencies on Github or Discord DM.",
+        "Detailed settings have moved to the side panel with a Minimap icon: Menu Tabs, Orbs, Anchors and General are adjustable there. Please report any inconsistencies on Github or Discord DM.",
         "Choose Normal, Free placement or Compact orbs with controls that adapt to your selection.",
         "Beta timers: choose Inset sweep, Tag meters, Quiet rims or Eight slices separately for HP, Prayer and Special, with number tabs or circles only.",
         "New Prayer drain meters - actual drain rate, tick-by-tick, or both.",

@@ -48,6 +48,63 @@ public class FreePositionController
     private final Map<TargetWidget,Rectangle> overlayBounds=new LinkedHashMap<>();
     private final Map<TargetWidget,Point> overlayOffsets=new LinkedHashMap<>();
 
+    private final Map<String, Point> anchorPositions = new LinkedHashMap<>();
+    public static String anchorId(TargetWidget target)
+    {
+        if(target instanceof Compass)return "layout.compass";
+        if(target instanceof Minimap)return "layout.minimap";
+        if(target instanceof Gravestone)return "layout.grave";
+        OrbOrder orb=OrbOrder.forComponent(target.getComponentId());
+        if(orb!=null)return "layout.orb."+orb.name().toLowerCase(java.util.Locale.ROOT);
+        return "layout.control."+((Enum<?>)target).name().toLowerCase(java.util.Locale.ROOT);
+    }
+    public List<TargetWidget> anchorTargets()
+    {
+        List<TargetWidget> result=new ArrayList<>();
+        for(TargetWidget[] choices:EditManager.EDIT_TARGETS)
+            if(!choices[0].isMinimapButton() && !choices[0].isCompass())result.add(choices[0]);
+        result.add(manager.isClassicResizable()?Minimap.CLASSIC_MINIMAP_MASK:Minimap.MODERN_MINIMAP_MASK);
+        result.add(compassTarget());
+        result.add(manager.isFixedMode()?Gravestone.FIXED:manager.isClassicResizable()?Gravestone.CLASSIC:Gravestone.MODERN);
+        return result;
+    }
+    public boolean anchorOwned(TargetWidget target) { return anchorPositions.containsKey(anchorId(target)); }
+    public boolean anchorMove(TargetWidget target,Point point) { return !point.equals(anchorPositions.put(anchorId(target),new Point(point))); }
+    public void anchorRelease(TargetWidget target,boolean keep)
+    {
+        Point point=anchorPositions.remove(anchorId(target));
+        if(keep && point!=null) {
+            Point offset=overlayOffsets.get(target);if(offset!=null)point.translate(offset.x,offset.y);
+            clearAlignment(target);save(target,point);
+        }
+    }
+    public String anchorState(TargetWidget target)
+    {
+        if(!enabled() || !manager.isLoggedIn() || manager.isMinimapMinimized())return "UNAVAILABLE";
+        if(manager.isFixedMode() && (target instanceof Compass || target instanceof Minimap))return "UNAVAILABLE";
+        if(!targets().contains(target) || target instanceof Compass && config.hideCompass())return "HIDDEN";
+        if(target instanceof Orbs) {
+            boolean hidden=false;
+            switch((Orbs)target) {
+                case HP_ORB_CONTAINER:hidden=config.hideHp();break;
+                case PRAYER_ORB_CONTAINER:hidden=config.hidePray();break;
+                case RUN_ORB_CONTAINER:hidden=config.hideRun();break;
+                case SPEC_ORB_CONTAINER:hidden=config.hideSpec();break;
+                case STORE_ORB_CONTAINER:hidden=config.hideStore();break;
+                case ACTIVITY_ORB_CONTAINER:hidden=config.hideActivity();break;
+                case WORLD_MAP_CONTAINER:hidden=config.hideWorld();break;
+                case WIKI_ICON_CONTAINER:hidden=config.hideWiki();break;
+                case XP_DROPS_CONTAINER:hidden=config.hideXp();break;
+                case LOGOUT_X_ICON:hidden=config.hideLogout();break;
+                default:break;
+            }
+            if(hidden)return "HIDDEN";
+        }
+        Widget widget=widgets.getTargetWidget(target);
+        if(widget==null || widget.isHidden())return "UNAVAILABLE";
+        Rectangle area=overlayBounds.get(target);
+        return area!=null && com.interfacelayout.util.InterfaceWindows.covered(client,area)?"OCCLUDED":"VISIBLE";
+    }
     public boolean enabled() { return config.layout() == OrbLayout.FREE_POSITION; }
     private List<TargetWidget> targets()
     {
@@ -110,9 +167,16 @@ public class FreePositionController
         }
 
         if (hasSavedPosition) positions.forEach(this::move);
+        for(TargetWidget target:targets()) {
+            Point desired=anchorPositions.get(anchorId(target));Widget widget=widgets.getTargetWidget(target);
+            if(desired==null || widget==null || widget.isHidden())continue;
+            Rectangle nativeArea=bounds(target,widget),visible=anchorBounds(target,widget);
+            move(target,new Point(desired.x+nativeArea.x-visible.x,desired.y+nativeArea.y-visible.y));
+        }
         for(Map.Entry<TargetWidget,Rectangle> entry:bounds().entrySet()) {
             TargetWidget target=entry.getKey();Rectangle nativeBounds=entry.getValue();
-            Rectangle visible=config.hideOrbTabs() && !config.editInterface() && OrbOrder.forComponent(target.getComponentId())!=null
+            Rectangle visible=anchorOwned(target)?anchorBounds(target,widgets.getTargetWidget(target)):
+                config.hideOrbTabs() && !config.editInterface() && OrbOrder.forComponent(target.getComponentId())!=null
                 ? visibleBounds(target,widgets.getTargetWidget(target)):nativeBounds;
             overlayBounds.put(target,new Rectangle(visible));
             overlayOffsets.put(target,new Point(nativeBounds.x-visible.x,nativeBounds.y-visible.y));
@@ -146,7 +210,7 @@ public class FreePositionController
         Point visibleDesired=new Point(desired.x+visible.x-bounds.x,desired.y+visible.y-bounds.y);
         Point location=LayoutGeometry.clamp(visibleDesired,visible.width,visible.height,client.getCanvasWidth(),client.getCanvasHeight());
         location.translate(bounds.x-visible.x,bounds.y-visible.y);
-        EdgeAlignment edge=alignment(target);
+        EdgeAlignment edge=anchorOwned(target)?null:alignment(target);
         if(edge!=null)location=edge.place(bounds,visibleBounds(target,widget),desired,client.getCanvasWidth(),client.getCanvasHeight());
         location.translate(original.x - bounds.x, original.y - bounds.y);
         Widget attachedCompass = isMinimap(target)
@@ -197,6 +261,12 @@ public class FreePositionController
     public void align(TargetWidget target,EdgeAlignment edge)
     { resolvedPositions.remove(key(target));configs.setConfiguration("interfacelayout",key(target)+"_edge",edge); }
     public void clearAlignment(TargetWidget target) { configs.unsetConfiguration("interfacelayout",key(target)+"_edge"); }
+    public Rectangle anchorBounds(TargetWidget target)
+    {
+        Widget widget=widgets.getTargetWidget(target);
+        return widget==null?new Rectangle():anchorBounds(target,widget);
+    }
+    private Rectangle anchorBounds(TargetWidget target,Widget widget) { return visibleBounds(target,widget); }
     private Rectangle visibleBounds(TargetWidget target,Widget widget)
     {
         Rectangle area=bounds(target,widget);

@@ -44,6 +44,8 @@ public class DependencyGraphTest
                 bind(ConfigManager.class).toInstance(configs);
                 bind(ChatMessageManager.class).toInstance(mock(ChatMessageManager.class));
                 bind(KeyManager.class).toInstance(mock(KeyManager.class));
+                bind(net.runelite.client.config.RuneLiteConfig.class).toInstance(mock(net.runelite.client.config.RuneLiteConfig.class));
+                bind(java.util.concurrent.ScheduledExecutorService.class).toInstance(mock(java.util.concurrent.ScheduledExecutorService.class));
                 bind(MouseManager.class).toInstance(mock(MouseManager.class));
                 bind(OverlayManager.class).toInstance(mock(OverlayManager.class));
                 bind(net.runelite.client.ui.overlay.tooltip.TooltipManager.class).toInstance(mock(net.runelite.client.ui.overlay.tooltip.TooltipManager.class));
@@ -74,6 +76,8 @@ public class DependencyGraphTest
                 bind(ConfigManager.class).toInstance(mock(ConfigManager.class));
                 bind(ChatMessageManager.class).toInstance(mock(ChatMessageManager.class));
                 bind(KeyManager.class).toInstance(mock(KeyManager.class));
+                bind(net.runelite.client.config.RuneLiteConfig.class).toInstance(mock(net.runelite.client.config.RuneLiteConfig.class));
+                bind(java.util.concurrent.ScheduledExecutorService.class).toInstance(mock(java.util.concurrent.ScheduledExecutorService.class));
                 bind(MouseManager.class).toInstance(mock(MouseManager.class));
                 bind(OverlayManager.class).toInstance(mock(OverlayManager.class));
                 bind(net.runelite.client.ui.overlay.tooltip.TooltipManager.class).toInstance(mock(net.runelite.client.ui.overlay.tooltip.TooltipManager.class));

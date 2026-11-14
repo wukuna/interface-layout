@@ -16,6 +16,10 @@ import static com.interfacelayout.layout.orbs.OrbConstants.ConfigGroup.GROUP_NAM
 @Singleton
 public final class InterfaceLayoutSidebar
 {
+    @Inject com.interfacelayout.anchors.AnchorCoordinator anchors;
+    @Inject com.interfacelayout.anchors.AnchorTransfers transfers;
+    @Inject com.interfacelayout.anchors.AnchorTemplates templates;
+    @Inject com.interfacelayout.anchors.ExternalAnchorAdapter external;
     @Inject InterfaceLayoutConfig config;
     @Inject LayoutSettings settings;
     @Inject ClientToolbar toolbar;
@@ -30,6 +34,7 @@ public final class InterfaceLayoutSidebar
     {
         active=true;generation++;settings.start();
         panel=new InterfaceLayoutPanel(config,settings);
+        panel.addAnchors(anchors,transfers,templates,external);
         navigation=NavigationButton.builder().tooltip("Interface Layout").icon(icon()).priority(7).panel(panel).build();
         refresh();
     }

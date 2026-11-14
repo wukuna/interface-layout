@@ -21,6 +21,20 @@ import static org.mockito.Mockito.*;
 
 public class MenuStoneControllerTest
 {
+    @Test public void anchorGroupIdentitiesFollowMembersAcrossModesWithoutDuplicatingClaims() {
+        Client client=mock(Client.class);OrbController mode=mock(OrbController.class);when(mode.isLoggedIn()).thenReturn(true);when(mode.isClassicResizable()).thenReturn(true);
+        InterfaceLayoutConfig config=mock(InterfaceLayoutConfig.class,CALLS_REAL_METHODS);when(config.menuLayout()).thenReturn(MenuStoneController.Layout.FREE_POSITION);
+        ConfigManager configs=mock(ConfigManager.class);java.util.Map<String,Object> values=new java.util.HashMap<>();
+        when(configs.getConfiguration(anyString(),anyString())).thenAnswer(call->values.get(call.getArgument(1)));
+        when(configs.getConfiguration(anyString(),anyString(),any(java.lang.reflect.Type.class))).thenAnswer(call->values.get(call.getArgument(1)));
+        for(String layout:new String[]{"classic","modern"})for(int index=0;index<14;index++)values.put("menuGroup_"+layout+"_"+index,index<7?0:1);
+        MenuStoneController controller=controller(client,config,new WidgetStateStore(),mode,configs);
+        String first=controller.anchorGroupId(0),second=controller.anchorGroupId(1);assertNotEquals(first,second);
+        when(mode.isClassicResizable()).thenReturn(false);assertEquals(first,controller.anchorGroupId(0));assertEquals(second,controller.anchorGroupId(1));
+        String shared=java.util.UUID.randomUUID().toString();for(int index=0;index<14;index++)values.put("anchorMenuIdentity_"+index,shared);
+        assertNotEquals(controller.anchorGroupId(0),controller.anchorGroupId(1));verify(configs,never()).setConfiguration(anyString(),anyString(),any());
+    }
+
     @Test public void nativeRowsCompactWithoutExpandingParentsOrMovingModernLogout()
     {
         int[][][] registries = {MenuStoneRegistry.FIXED, MenuStoneRegistry.CLASSIC, MenuStoneRegistry.MODERN};

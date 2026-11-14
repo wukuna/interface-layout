@@ -17,11 +17,11 @@ Open Interface Layout's minimap icon in RuneLite's toolbar. **Show side panel ic
 | Visibility | Individual map controls and menu tabs; group visibility; extra special-attack meter; shield orb; classic borders. Checked means visible. |
 | Timers | Beta HP, Prayer and Special timers, each with its own style selection. |
 
-**Normal** restores native positioning while retaining the saved free layout. **Free placement** uses the plugin's own anchor points or Custom UI Anchors. For a movable native minimap, select Free placement and keep **Visibility → Minimap** checked. **Appearance → Minimap → Frame → Circular rim** reveals **Shared circular rim**; Native / resource pack retains the attached compass socket even when the compass is moved separately.
+**Normal** restores native positioning while retaining the saved free layout. **Free placement** uses the plugin's own anchor points or Custom UI Anchors. For a movable native minimap, select Free placement and keep **Orbs → Minimap & compass → Show minimap** checked. **Orbs → Minimap & compass → Frame → Circular rim** reveals **Shared circular rim**; Native / resource pack retains the attached compass socket even when the compass is moved separately.
 
 Choose **Inset sweep**, **Tag meters**, **Quiet rims** or **Eight slices** independently for each timer with Number tabs or Circles only. Prayer Tag meters and Eight slices support **Amount only**, **Drain only** or **Amount + drain**. Amount tracks actual current/max prayer; the countdown shows the next point drained. The existing circular prayer ring remains the default for existing circular layouts. Native low-prayer flashes and potion-dose reminders are preserved. In Circles only, the extra special-attack meter appears below the orb, clear of its timer; closely packed orbs can clip the extra meter.
 
-The screenshots and recordings below use the earlier settings layout. Earlier references to Menu bars map to Layout or Appearance, map/orb hiding controls map to Visibility, and Beta equipment appearance maps to Appearance. In the current Visibility tab, uncheck a control to hide it; older screenshots use inverse Hide checkboxes.
+The screenshots and recordings below use the earlier settings layout. Menu arrangement, artwork and visibility are now together in Menu Tabs. Minimap and orb settings are together in Orbs, with each orb’s timer and mirror controls in its own section. Anchors has its own tab; General contains equipment, borders, editing and resets. Visibility checkboxes mean shown; older screenshots use inverse Hide checkboxes.
 
 ## Features
 

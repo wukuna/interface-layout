@@ -41,6 +41,12 @@ import net.runelite.client.plugins.PluginDescriptor;
 )
 public class InterfaceLayoutPlugin extends Plugin
 {
+    public net.runelite.client.util.Filepath anchorDirectory() throws java.io.IOException {return getPluginDirectory().joinSegment("anchor-templates");}
+    @Inject private com.interfacelayout.anchors.ExternalAnchorAdapter externalAnchors;
+    @Inject private com.interfacelayout.anchors.AnchorEditor anchorEditor;
+    @Inject private com.interfacelayout.anchors.AnchorTemplates anchorTemplates;
+    @Inject private com.interfacelayout.anchors.AnchorCoordinator anchors;
+    @Inject private com.interfacelayout.anchors.LayoutAnchorAdapter anchorAdapter;
     @Inject private Provider<OrbEventHandler> events;
     @Inject private EventBus eventBus;
     @Inject private ReleaseNotesNotice releaseNotes;
@@ -58,7 +64,7 @@ public class InterfaceLayoutPlugin extends Plugin
 
     @Override protected void startUp() throws Exception
     {
-        sidebar.start();eventBus.register(sidebar);
+        anchors.start();sidebar.start();eventBus.register(sidebar);
         OrbEventHandler handler = events.get();
         eventBus.register(handler);
         handler.startUp();
@@ -69,9 +75,11 @@ public class InterfaceLayoutPlugin extends Plugin
         overlayManager.add(shieldOrb);
         equipmentPanel.start();eventBus.register(equipmentPanel);overlayManager.add(equipmentPanel);
         overlayManager.add(soulreaperOrbs);circularOrbs.start();eventBus.register(circularOrbs);overlayManager.add(circularOrbs.frames());overlayManager.add(circularOrbs);
+        anchorAdapter.start();anchorEditor.start();anchorTemplates.start();externalAnchors.start();
     }
     @Override protected void shutDown() throws Exception
     {
+        externalAnchors.stop();anchorTemplates.stop();anchorEditor.stop();anchors.stop();anchorAdapter.stop();
         eventBus.unregister(sidebar);sidebar.stop();
         circularOrbs.stop();overlayManager.remove(soulreaperOrbs);overlayManager.remove(circularOrbs);overlayManager.remove(circularOrbs.frames());eventBus.unregister(circularOrbs);
         equipmentPanel.stop();overlayManager.remove(equipmentPanel);eventBus.unregister(equipmentPanel);

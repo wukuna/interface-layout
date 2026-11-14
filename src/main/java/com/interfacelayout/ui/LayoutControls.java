@@ -52,10 +52,13 @@ final class LayoutControls
         label.setBorder(BorderFactory.createEmptyBorder(12,0,5,0));label.setAlignmentX(0);parent.add(label);
     }
 
-    void hint(JPanel parent,String text)
+    JPanel section(JPanel parent,String title,boolean expanded)
     {
-        JLabel label=new JLabel("<html><body style='width:130px'>"+text+"</body></html>");
-        label.setForeground(Color.LIGHT_GRAY);label.setBorder(BorderFactory.createEmptyBorder(3,0,8,0));label.setAlignmentX(0);parent.add(label);
+        JPanel section=column(),body=column();body.setName("section:"+title);body.setVisible(expanded);
+        JButton toggle=new JButton((expanded?"▾ ":"▸ ")+title);toggle.setName("expand:"+title);toggle.setHorizontalAlignment(JButton.LEFT);
+        toggle.setMaximumSize(new Dimension(Integer.MAX_VALUE,30));toggle.setAlignmentX(0);toggle.setForeground(ColorScheme.BRAND_ORANGE);
+        toggle.addActionListener(event->{boolean open=!body.isVisible();body.setVisible(open);toggle.setText((open?"▾ ":"▸ ")+title);section.revalidate();section.repaint();});
+        section.add(toggle);section.add(body);parent.add(section);return body;
     }
 
     void tooltip(String key,String text)

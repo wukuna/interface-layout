@@ -43,7 +43,7 @@ import net.runelite.client.config.Range;
 @ConfigGroup(GROUP_NAME)
 public interface InterfaceLayoutConfig extends Config
 {
-    @ConfigSection(name="<html>Settings have been moved<br>to the side panel</html>",description="Enable the sidebar icon below to open Layout, Appearance, Visibility and Beta Timers.",position=-5,closedByDefault=false)
+    @ConfigSection(name="<html>Settings have been moved<br>to the side panel</html>",description="Enable the sidebar icon below to open Menu Tabs, Orbs, Anchors and General.",position=-5,closedByDefault=false)
     String editorInfo="editorInfo";
 
     @ConfigItem(keyName="showSidePanel",name="Show side panel icon",description="Show the Interface Layout editor in the sidebar.",section=editorInfo,position=-3)

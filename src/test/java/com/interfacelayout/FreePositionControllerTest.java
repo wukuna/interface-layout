@@ -99,6 +99,13 @@ public class FreePositionControllerTest
             assertFalse(free.bounds().containsKey(target));
             when(config.hideCompass()).thenReturn(false); states.restore(); free.apply();
             assertEquals(new Point(100, 200), WidgetGeometry.location(compass));
+            Map<String,Object> preferences=new HashMap<>(saved);
+            free.anchorMove(target,new Point(300,310));states.restore();free.apply();
+            assertEquals(new Point(300,310),free.anchorBounds(target).getLocation());
+            assertEquals(new Point(299,309),WidgetGeometry.location(options));
+            assertEquals(preferences,saved);
+            free.anchorRelease(target,false);states.restore();free.apply();
+            assertEquals(new Point(100,200),WidgetGeometry.location(compass));assertEquals(preferences,saved);
             free.resetAll(); assertTrue(saved.isEmpty());
             states.restore();
             assertEquals(new Point(940, 150), WidgetGeometry.location(world));

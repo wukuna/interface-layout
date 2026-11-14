@@ -94,6 +94,18 @@ public final class ShieldSpecialOrb extends Overlay
     }
 
     @Override public String getName() { return "INTERFACE_LAYOUT_SHIELD_SPECIAL"; }
+    public void anchorMobility(boolean movable,boolean snappable) {setMovable(movable);setSnappable(snappable);}
+    public Rectangle anchorBounds() {
+        Rectangle bounds=new Rectangle(getBounds());
+        Widget backing=client.getWidget(InterfaceID.Orbs.SPECENERGY_BACKING);
+        boolean wide=backing!=null && (backing.getSpriteId()==5791 || backing.getSpriteId()==5792);
+        bounds.setSize(config.hideOrbTabs() && !config.editInterface()?34:wide?65:WIDTH,HEIGHT);return bounds;
+    }
+    public String anchorState() {
+        if(!config.showShieldSpecialOrb())return "HIDDEN";
+        if(resolve()==null)return "UNAVAILABLE";
+        return InterfaceWindows.covered(client,anchorBounds())?"OCCLUDED":"VISIBLE";
+    }
     public void start() { active = true; }
     public void stop()
     {

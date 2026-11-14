@@ -35,7 +35,7 @@ public class FreeOrbOverlayBridge
     {
         running = false;
         if(events!=null)events.unregister(this);
-        elements.values().forEach(overlay -> { overlay.getBounds().setSize(0, 0); overlays.remove(overlay); });
+        elements.values().forEach(overlay -> { overlay.anchorOwnership(false);overlay.getBounds().setSize(0, 0); overlays.remove(overlay); });
         elements.clear();
         free.resetSession();
     }
@@ -64,9 +64,10 @@ public class FreeOrbOverlayBridge
             { overlays.remove(overlay);overlay.setPriority(priority);overlays.add(overlay); }
             overlay.layoutBounds = new Rectangle(bounds);
             overlay.getBounds().setSize(bounds.getSize());
-            if (!overlay.reset && placement.adopt(overlay, free.savedPosition(target)))
+            overlay.anchorOwnership(free.anchorOwned(target));
+            if (!free.anchorOwned(target) && !overlay.reset && placement.adopt(overlay, free.savedPosition(target)))
             { free.clearPosition(target); overlay.lastApplied = null; overlay.reset = false; }
-            if (OverlayPlacement.usesLayout(overlay))
+            if (free.anchorOwned(target) || OverlayPlacement.usesLayout(overlay))
                 overlay.getBounds().setLocation(bounds.getLocation());
         });
 
@@ -74,6 +75,13 @@ public class FreeOrbOverlayBridge
             if (!overlay.name.equals(name(overlay.target)) || !current.containsKey(overlay.target))
                 overlay.getBounds().setSize(0, 0);
         });
+    }
+    public void releaseAnchor(TargetWidget target,boolean keep)
+    {
+        for(var overlay:elements.values())if(overlay.target == target && overlay.lease!=null) {
+            overlay.lease.release(keep,overlays);overlay.lease=null;overlay.reset=false;overlay.lastApplied=null;
+            if(keep)overlays.saveOverlay(overlay);
+        }
     }
     public void profileChanged()
     {
@@ -102,6 +110,7 @@ public class FreeOrbOverlayBridge
         if(!running || !(event.getOverlay() instanceof ElementOverlay))return;
         ElementOverlay overlay=(ElementOverlay)event.getOverlay();
         if(elements.get(overlay.name)!=overlay)return;
+        if(free.anchorOwned(overlay.target) && event.getEntry().getOption().startsWith("Align"))return;
         String option=event.getEntry().getOption();
         OrbOrder orb=OrbOrder.forComponent(overlay.target.getComponentId());
         if(orb!=null && (option.equals("Bring forward") || option.equals("Send backward")))
@@ -125,6 +134,11 @@ public class FreeOrbOverlayBridge
         private Rectangle layoutBounds;
         private Point lastApplied;
         private boolean reset;
+        private com.interfacelayout.anchors.OverlayLease lease;
+        private void anchorOwnership(boolean owned) {
+            if(owned) { if(lease==null)lease=new com.interfacelayout.anchors.OverlayLease(this,(movable,snappable)->{setMovable(movable);setSnappable(snappable);},overlays);lease.hold(); }
+            else if(lease!=null) { lease.release(false);lease=null;reset=false;lastApplied=null; }
+        }
         private ElementOverlay(String name, TargetWidget target)
         {
             this.name = name; this.target = target;
@@ -147,6 +161,7 @@ public class FreeOrbOverlayBridge
             if (!running || !name.equals(FreeOrbOverlayBridge.this.name(target))) return null;
             if (!free.overlayBounds().containsKey(target)) return null;
             Rectangle actual = layoutBounds;
+            if(free.anchorOwned(target)) { anchorOwnership(true);getBounds().setBounds(actual);return actual.getSize(); }
             if (reset && getPreferredLocation() == null && getPreferredPosition() == null)
             {
                 reset = false; lastApplied = null; free.reset(target);

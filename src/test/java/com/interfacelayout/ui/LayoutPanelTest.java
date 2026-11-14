@@ -44,7 +44,7 @@ public class LayoutPanelTest
         for(boolean circles:new boolean[]{false,true}) {
             when(config.hideOrbTabs()).thenReturn(circles);
             SwingUtilities.invokeAndWait(()->{
-                InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);button(panel,"Timers").doClick();
+                InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);button(panel,"Orbs").doClick();expand(panel);
                 for(String key:new String[]{"hitpointsTimerStyle","prayerTimerStyle","specialTimerStyle"}) {
                     JComboBox<?> choice=(JComboBox<?>)control(panel,key);assertTrue(visible(choice));assertEquals(4,choice.getItemCount());
                 }
@@ -61,7 +61,7 @@ public class LayoutPanelTest
     {
         setup();when(config.hideOrbTabs()).thenReturn(true);
         SwingUtilities.invokeAndWait(()->{
-            InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);button(panel,"Appearance").doClick();
+            InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);button(panel,"Orbs").doClick();expand(panel);
             JComponent rim=control(panel,"orbRim");assertFalse(visible(rim));
             when(config.minimapFrame()).thenReturn(InterfaceLayoutConfig.MinimapFrame.CIRCULAR);panel.refresh();assertTrue(visible(rim));
             when(config.minimapFrame()).thenReturn(InterfaceLayoutConfig.MinimapFrame.NATIVE);panel.refresh();assertFalse(visible(rim));
@@ -75,8 +75,8 @@ public class LayoutPanelTest
         SwingUtilities.invokeAndWait(()->{
             InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);
             panel.onActivate();panel.refresh();
-            for(String tab:new String[]{"Layout","Appearance","Visibility","Timers"}) {
-                button(panel,tab).doClick();panel.refresh();
+            for(String tab:new String[]{"Menu Tabs","Orbs","General"}) {
+                button(panel,tab).doClick();expand(panel);panel.refresh();
             }
         });
         assertTrue(pending.isEmpty());verify(settings.configs,never()).setConfiguration(anyString(),anyString(),any());
@@ -87,13 +87,13 @@ public class LayoutPanelTest
         setup();
         SwingUtilities.invokeAndWait(()->{
             InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);
-            button(panel,"Appearance").doClick();
+            button(panel,"Orbs").doClick();expand(panel);
             JComponent frame=control(panel,"minimapFrame");
             String help=frame.getToolTipText();assertNotNull(help);assertTrue(help.contains("compass"));
             when(config.minimapFrame()).thenReturn(InterfaceLayoutConfig.MinimapFrame.NATIVE);
             panel.refresh();assertEquals(help,frame.getToolTipText());
             assertTrue(frame.getAccessibleContext().getAccessibleDescription().contains("compass"));
-            button(panel,"Timers").doClick();
+            button(panel,"Orbs").doClick();expand(panel);
             assertTrue(control(panel,"prayerTimerStyle").getToolTipText().contains("Eight slices"));
         });
         assertTrue(pending.isEmpty());verify(settings.configs,never()).setConfiguration(anyString(),anyString(),any());
@@ -103,10 +103,10 @@ public class LayoutPanelTest
     {
         setup();
         SwingUtilities.invokeAndWait(()->{
-            InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);button(panel,"Appearance").doClick();
+            InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);button(panel,"Orbs").doClick();expand(panel);
             when(config.hideOrbTabs()).thenReturn(false);panel.refresh();assertTrue(visible(control(panel,"mirrorPrayer")));
             when(config.hideOrbTabs()).thenReturn(true);panel.refresh();assertFalse(visible(control(panel,"mirrorPrayer")));
-            button(panel,"Visibility").doClick();JCheckBox grave=(JCheckBox)control(panel,"hideGravestone");assertTrue(grave.isSelected());grave.doClick();
+            button(panel,"Orbs").doClick();expand(panel);JCheckBox grave=(JCheckBox)control(panel,"hideGravestone");assertTrue(grave.isSelected());grave.doClick();
         });
         assertEquals(1,pending.size());pending.remove(0).run();verify(settings.configs).setConfiguration("interfacelayout","hideGravestone",true);
     }
@@ -115,13 +115,13 @@ public class LayoutPanelTest
     {
         setup();when(config.orbPrayerTimer()).thenReturn(true);when(config.prayerOrbDisplay()).thenReturn(InterfaceLayoutConfig.PrayerDisplay.BOTH);
         SwingUtilities.invokeAndWait(()->{
-            InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);button(panel,"Timers").doClick();
+            InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);button(panel,"Orbs").doClick();expand(panel);
             JComponent display=control(panel,"prayerOrbDisplay");assertFalse(visible(display));
             when(config.nativeOrbTimerStyle()).thenReturn(NativeTimerStyle.EIGHT_SLICES);panel.refresh();assertTrue(visible(display));
             when(config.disableOrbTimers()).thenReturn(true);panel.refresh();assertFalse(visible(display));
             when(config.disableOrbTimers()).thenReturn(false);panel.refresh();assertTrue(visible(display));
             assertEquals(InterfaceLayoutConfig.PrayerDisplay.BOTH,((JComboBox<?>)display).getSelectedItem());
-            button(panel,"Visibility").doClick();
+            button(panel,"Orbs").doClick();expand(panel);
             JCheckBox hp=(JCheckBox)control(panel,"hideHp");assertTrue(hp.isSelected());hp.doClick();
         });
         assertEquals(1,pending.size());pending.remove(0).run();
@@ -151,6 +151,7 @@ public class LayoutPanelTest
     @Test public void sidebarVisibilityAndPendingRefreshRespectLifecycle() throws Exception
     {
         setup();InterfaceLayoutSidebar sidebar=new InterfaceLayoutSidebar();sidebar.config=config;sidebar.settings=settings;sidebar.toolbar=mock(ClientToolbar.class);
+        sidebar.anchors=new com.interfacelayout.anchors.AnchorCoordinator();sidebar.transfers=new com.interfacelayout.anchors.AnchorTransfers();sidebar.templates=new com.interfacelayout.anchors.AnchorTemplates();sidebar.external=new com.interfacelayout.anchors.ExternalAnchorAdapter();
         SwingUtilities.invokeAndWait(sidebar::start);verify(sidebar.toolbar).addNavigation(any());
         when(config.showSidePanel()).thenReturn(false);ConfigChanged event=new ConfigChanged();event.setGroup("interfacelayout");event.setKey("showSidePanel");
         sidebar.onConfigChanged(event);SwingUtilities.invokeAndWait(()->{});verify(sidebar.toolbar).removeNavigation(any());
@@ -165,8 +166,9 @@ public class LayoutPanelTest
         when(config.menuOverlayButtons()).thenReturn(true);
         SwingUtilities.invokeAndWait(()->{
             InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);
-            for(String tab:new String[]{"Layout","Appearance","Visibility","Timers"}) {
-                button(panel,tab).doClick();panel.refresh();panel.setSize(225,panel.getPreferredSize().height);layout(panel);
+            panel.addAnchors(new com.interfacelayout.anchors.AnchorCoordinator(),new com.interfacelayout.anchors.AnchorTransfers(),new com.interfacelayout.anchors.AnchorTemplates(),new com.interfacelayout.anchors.ExternalAnchorAdapter());
+            for(String tab:new String[]{"Menu Tabs","Orbs","Anchors","General"}) {
+                button(panel,tab).doClick();expand(panel);panel.refresh();panel.setSize(225,panel.getPreferredSize().height);layout(panel);
                 BufferedImage image=new BufferedImage(225,panel.getHeight(),BufferedImage.TYPE_INT_RGB);
                 Graphics2D draw=image.createGraphics();panel.printAll(draw);draw.dispose();
                 try {
@@ -180,6 +182,35 @@ public class LayoutPanelTest
         });
     }
 
+    private static void expand(Container panel){for(Component component:all(panel))if(component instanceof JButton && component.getName()!=null && component.getName().startsWith("expand:") && ((JButton)component).getText().startsWith("▸"))((JButton)component).doClick();}
+    @Test public void featurePagesKeepEveryExistingControlExactlyOnceAndOpenAnchorsDirectly()throws Exception
+    {
+        setup();java.util.Set<String> expected;
+        try(var stream=getClass().getResourceAsStream("sidebar-keys.txt")){expected=new java.util.HashSet<>(List.of(new String(stream.readAllBytes(),java.nio.charset.StandardCharsets.UTF_8).trim().split("\\R")));}
+        SwingUtilities.invokeAndWait(()->{
+            InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);java.util.Set<String> seen=new java.util.HashSet<>();
+            for(String tab:new String[]{"Menu Tabs","Orbs","General"}) {
+                button(panel,tab).doClick();expand(panel);
+                for(Component c:all(panel))if(c instanceof JCheckBox || c instanceof JComboBox || c instanceof javax.swing.JSpinner || c instanceof javax.swing.JList)assertTrue("Duplicate "+c.getName(),seen.add(c.getName()));
+            }
+            assertEquals(expected,seen);
+            button(panel,"Menu Tabs").doClick();assertNotNull(control(panel,"menuLayout"));assertNotNull(control(panel,"menuOverlayIconStyle"));assertNotNull(control(panel,"hideStone13"));
+            button(panel,"Orbs").doClick();
+            for(String key:List.of("hidePrayer","mirrorPrayer","orbPrayerTimer","prayerTimerStyle","prayerOrbDisplay"))assertTrue(javax.swing.SwingUtilities.isDescendingFrom(control(panel,key),control(panel,"section:Prayer")));
+            panel.addAnchors(new com.interfacelayout.anchors.AnchorCoordinator(),new com.interfacelayout.anchors.AnchorTransfers(),new com.interfacelayout.anchors.AnchorTemplates(),new com.interfacelayout.anchors.ExternalAnchorAdapter());
+            button(panel,"Anchors").doClick();assertNotNull(button(panel,"Import Custom Anchors…"));assertTrue(button(panel,"Anchors").isEnabled());
+        });
+        assertTrue(pending.isEmpty());verify(settings.configs,never()).setConfiguration(anyString(),anyString(),any());
+    }
+    @Test public void collapsedSectionsStayCollapsedAcrossRefreshAndProfileValuesRemainUntouched()throws Exception
+    {
+        setup();SwingUtilities.invokeAndWait(()->{
+            InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);JComponent prayer=control(panel,"section:Prayer");assertFalse(prayer.isVisible());
+            ((JButton)control(panel,"expand:Prayer")).doClick();assertTrue(prayer.isVisible());panel.refresh();assertTrue(prayer.isVisible());
+            ((JButton)control(panel,"expand:Prayer")).doClick();when(config.hidePray()).thenReturn(true);panel.refresh();assertFalse(prayer.isVisible());
+            ((JButton)control(panel,"expand:Prayer")).doClick();assertFalse(((JCheckBox)control(panel,"hidePrayer")).isSelected());
+        });assertTrue(pending.isEmpty());
+    }
     private static ConfigProfile profile(long id) {ConfigProfile profile=mock(ConfigProfile.class);when(profile.getId()).thenReturn(id);return profile;}
     private static boolean visible(Component c) {for(Component p=c;p!=null;p=p.getParent())if(!p.isVisible())return false;return true;}
     private static JComponent control(Container parent,String key) {return (JComponent)all(parent).stream().filter(c->key.equals(c.getName())).findFirst().orElseThrow(AssertionError::new);}

@@ -34,7 +34,7 @@ public class MenuOverlayBridge
     public void stop()
     {
         running = false;
-        groups.values().forEach(overlay -> { overlay.getBounds().setSize(0, 0); overlays.remove(overlay); }); groups.clear();
+        groups.values().forEach(overlay -> { overlay.anchorOwnership(false);overlay.getBounds().setSize(0, 0); overlays.remove(overlay); }); groups.clear();
         nativeOverlays.forEach(overlays::add); nativeOverlays.clear();
     }
     public void sync()
@@ -45,7 +45,7 @@ public class MenuOverlayBridge
             + (menu.individualDragging() ? "group_" : "row_");
         groups.values().removeIf(overlay -> {
             if (!overlay.name.startsWith(prefix) || overlay.name.equals(name(overlay.id))) return false;
-            overlay.getBounds().setSize(0, 0); overlays.remove(overlay); return true;
+            overlay.anchorOwnership(false);overlay.getBounds().setSize(0, 0); overlays.remove(overlay); return true;
         });
 
         nativeOverlays.removeIf(overlay -> {
@@ -68,9 +68,10 @@ public class MenuOverlayBridge
             }
             GroupOverlay overlay = groups.get(key);
             overlay.getBounds().setSize(bounds.getSize());
-            if (!overlay.reset && placement.adopt(overlay, menu.savedGroup(id)))
+            overlay.anchorOwnership(menu.anchorOwned(id));
+            if (!menu.anchorOwned(id) && !overlay.reset && placement.adopt(overlay, menu.savedGroup(id)))
             { menu.clearGroupPosition(id); overlay.lastApplied = null; overlay.reset = false; }
-            if (OverlayPlacement.usesLayout(overlay))
+            if (menu.anchorOwned(id) || OverlayPlacement.usesLayout(overlay))
                 overlay.getBounds().setLocation(bounds.getLocation());
         });
         groups.values().forEach(overlay -> {
@@ -117,6 +118,13 @@ public class MenuOverlayBridge
         GroupOverlay overlay = groups.get(name(id));
         if (overlay != null) { overlays.resetOverlay(overlay); overlay.lastApplied = null; overlay.reset = false; }
     }
+    public void releaseAnchor(int target,boolean keep)
+    {
+        for(var overlay:groups.values())if(overlay.id == target && overlay.lease!=null) {
+            overlay.lease.release(keep,overlays);overlay.lease=null;overlay.reset=false;overlay.lastApplied=null;
+            if(keep)overlays.saveOverlay(overlay);
+        }
+    }
     public void profileChanged()
     {
         groups.values().forEach(overlay -> { overlay.lastApplied = null; overlay.reset = false; });
@@ -141,6 +149,11 @@ public class MenuOverlayBridge
         private final int id;
         private Point lastApplied;
         private boolean reset;
+        private com.interfacelayout.anchors.OverlayLease lease;
+        private void anchorOwnership(boolean owned) {
+            if(owned) { if(lease==null)lease=new com.interfacelayout.anchors.OverlayLease(this,(movable,snappable)->{setMovable(movable);setSnappable(snappable);},overlays);lease.hold(); }
+            else if(lease!=null) { lease.release(false);lease=null;reset=false;lastApplied=null; }
+        }
         GroupOverlay(String name, int id)
         {
             this.name = name; this.id = id;
@@ -159,6 +172,7 @@ public class MenuOverlayBridge
         {
             Rectangle actual = menu.groups().get(id);
             if (!running || !name.equals(MenuOverlayBridge.this.name(id)) || actual == null) return null;
+            if(menu.anchorOwned(id)) { anchorOwnership(true);getBounds().setBounds(actual);return actual.getSize(); }
             if (reset && getPreferredLocation() == null && getPreferredPosition() == null)
             {
                 reset = false; lastApplied = null; menu.resetGroup(id); refresh.run();
