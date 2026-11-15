@@ -22,6 +22,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 public final class LayoutAnchorAdapter implements AnchorParticipant.Provider
 {
     @Inject private FreePositionController free;
+    @Inject private com.interfacelayout.layout.orbs.CircularOrbs circular;
     @Inject private MenuStoneController menu;
     @Inject private GameframeCoordinator frame;
     @Inject private ShieldSpecialOrb shield;
@@ -62,7 +63,7 @@ public final class LayoutAnchorAdapter implements AnchorParticipant.Provider
         public String id() { return id; }
         public String name() { return id.substring(id.lastIndexOf('.')+1).replace('_',' '); }
         public Rectangle bounds() { return free.anchorBounds(target); }
-        public String state() { return free.anchorState(target); }
+        public String state() { return free.anchorState(target,circular::covers); }
         public boolean available() { String state=state();return state.equals("VISIBLE") || state.equals("OCCLUDED"); }
         public List<String> aliases() {
             List<String> names=new ArrayList<>();List<TargetWidget> candidates=new ArrayList<>(FreePositionController.EXTRA_TARGETS);candidates.add(target);

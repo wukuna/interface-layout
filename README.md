@@ -59,9 +59,9 @@ Hiding and showing the map retains its position. Resetting the element clears it
 
 The **Anchors** tab stores containers and their members in Interface Layout. Importing Custom UI Anchors previews the transfer and leaves that plugin's settings unchanged. Avoid assigning the same overlay to both systems at once.
 
-Drag-to-attach works with Edit anchors enabled and your configured RuneLite drag hotkey. Free containers retain the drop offset; Row, Column and Wrap containers use member order. Dropping outside cancels. **Detach** removes an assignment; **Undo** restores the previous edit. Hidden members retain their assignments.
+Drag-to-attach works with Edit anchors enabled and your configured RuneLite drag hotkey. Free containers retain the drop offset; Row, Column and Wrap containers use member order. Changing the arrangement applies immediately. Drag an attached member outside the anchors to detach it at the drop position, or select **Detach** to leave it in place. **Undo** restores the previous edit. Hidden members retain their assignments.
 
-With **Edit anchors** enabled, drag ordinary movable overlays or infobox groups straight into an anchor using your RuneLite drag hotkey. No selection under **Other overlays…** is required; that picker also lets you include overlays in the member list when editing is off. Their original placement is restored when detached. World/actor overlays, tooltips, manually rendered overlays, ambiguous names and plugins that continually reposition themselves are not guaranteed compatible. Our supported menu groups, free map controls, Chat overlays, customized bank and Looting notifications use dedicated adapters.
+With **Edit anchors** enabled, drag ordinary movable overlays or infobox groups straight into an anchor using your RuneLite drag hotkey. No selection under **Other overlays…** is required; that picker also lets you include overlays in the member list when editing is off. Detaching saves their new placement. World/actor overlays, tooltips, manually rendered overlays, ambiguous names and plugins that continually reposition themselves are not guaranteed compatible. Our supported menu groups, free map controls, Chat overlays, customized bank and Looting notifications use dedicated adapters.
 
 ## Movement, anchors and resets
 

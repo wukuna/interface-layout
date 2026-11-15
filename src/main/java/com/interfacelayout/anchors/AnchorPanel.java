@@ -33,7 +33,7 @@ public final class AnchorPanel extends JPanel
         this.coordinator=coordinator;this.transfers=transfers;this.templates=templates;
         setLayout(new BorderLayout(0,6));setBackground(net.runelite.client.ui.ColorScheme.DARK_GRAY_COLOR);
         JPanel top=column();
-        JCheckBox edit=new JCheckBox("Edit anchors");edit.setToolTipText("Hold your RuneLite drag hotkey (normally Alt) to drag controls, other movable overlays or infobox groups into anchors. No selection under Other overlays is needed. Drag an anchor header to move it, or its corner to resize.");
+        JCheckBox edit=new JCheckBox("Edit anchors");edit.setToolTipText("Hold your RuneLite drag hotkey (normally Alt) to drag controls, other movable overlays or infobox groups into anchors, or outside to detach. No selection under Other overlays is needed. Drag an anchor header to move it, or its corner to resize.");
         edit.addActionListener(event->coordinator.editing(edit.isSelected()));top.add(edit);
         JLabel dragHint=new JLabel("Drag overlays in with your drag hotkey.");dragHint.setToolTipText(edit.getToolTipText());top.add(dragHint);
         list.setVisibleRowCount(4);list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);top.add(new JScrollPane(list));
@@ -86,12 +86,12 @@ public final class AnchorPanel extends JPanel
         JSpinner padding=number(anchor.padding,0,100),gap=number(anchor.gap,0,100);field(details,"Padding",padding);
         JPanel ordered=column();field(ordered,"Spacing",gap);
         JComboBox<Alignment> alignment=new JComboBox<>(Alignment.values());alignment.setSelectedItem(anchor.alignment);field(ordered,"Alignment",alignment);details.add(ordered);
-        ordered.setVisible(anchor.arrangement!=Arrangement.FREE);arrangement.addActionListener(e->ordered.setVisible(arrangement.getSelectedItem()!=Arrangement.FREE));
+        ordered.setVisible(anchor.arrangement!=Arrangement.FREE);
         JCheckBox background=new JCheckBox("Background",anchor.background),border=new JCheckBox("Border",anchor.border);
         details.add(row(background,border));
         int[] colors={anchor.backgroundColor,anchor.borderColor};
         details.add(row(button("Fill color",()->color(colors,0)),button("Border color",()->color(colors,1))));
-        details.add(button("Apply",()-> {
+        Runnable apply=()-> {
             String nextName=name.getText().trim(),parentId=parents.get(parent.getSelectedIndex());
             Reference ref=(Reference)reference.getSelectedItem();Arrangement flow=(Arrangement)arrangement.getSelectedItem();Alignment align=(Alignment)alignment.getSelectedItem();
             int px=value(x),py=value(y),width=value(w),height=value(h),pad=value(padding),space=value(gap),fillColor=colors[0],lineColor=colors[1];
@@ -99,7 +99,10 @@ public final class AnchorPanel extends JPanel
             coordinator.edit(next->{Anchor a=next.find(anchor.id);if(a==null)return;a.name=nextName;a.enabled=on;a.locked=lock;a.parent=parentId;a.reference=ref;
                 a.x=px;a.y=py;a.width=width;a.height=height;a.padding=pad;a.gap=space;a.arrangement=flow;a.alignment=align;
                 a.background=fill;a.border=outline;a.backgroundColor=fillColor;a.borderColor=lineColor;});
-        }));
+        };
+        arrangement.setToolTipText("Applies the anchor settings immediately.");
+        arrangement.addActionListener(e->{ordered.setVisible(arrangement.getSelectedItem()!=Arrangement.FREE);apply.run();});
+        details.add(button("Apply",apply));
         details.add(new JLabel("Members"));
         members(anchor);
         JComboBox<AnchorGeometry.Target> available=new JComboBox<>();availableControl=available;refreshAvailable();

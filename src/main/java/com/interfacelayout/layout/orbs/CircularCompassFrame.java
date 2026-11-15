@@ -89,6 +89,7 @@ final class CircularCompassFrame {
     private void cover(Widget widget) {
         if(widget!=null && !widget.isHidden()) {covered.add(widget);widget.setHidden(true);}
     }
+    boolean covers(Widget widget) {return covered.contains(widget);}
 
     boolean coveredMenu(net.runelite.api.MenuEntry entry) {
         for(Widget widget:covered)

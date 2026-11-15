@@ -47,6 +47,16 @@ public class ExternalAnchorAdapterTest
         ConfigManager config=mock(ConfigManager.class);when(config.getConfiguration("interfacelayout","anchorExternalOverlaysV1")).thenReturn("[\""+id(first)+"\"]");
         assertTrue(adapter(manager,config).targets().isEmpty());verify(config,never()).setConfiguration(anyString(),anyString(),any());
     }
+    @Test public void detachingKeepsAndSavesTheDroppedLocationWithoutLosingSize()throws Exception
+    {
+        OverlayManager manager=spy(manager());ConfigManager config=mock(ConfigManager.class);OrdinaryOverlay overlay=new OrdinaryOverlay();manager.add(overlay);
+        overlay.setPreferredLocation(new Point(80,90));overlay.setPreferredSize(new Dimension(130,40));
+        when(config.getConfiguration("interfacelayout","anchorExternalOverlaysV1")).thenReturn("[\""+id(overlay)+"\"]");
+        var target=adapter(manager,config).targets().iterator().next();target.claim();target.move(new Point(400,450));target.release(true);
+        assertEquals(new Point(400,450),overlay.getPreferredLocation());assertEquals(new Dimension(130,40),overlay.getPreferredSize());
+        assertEquals(OverlayPosition.TOP_LEFT,overlay.getPosition());assertNull(overlay.getPreferredPosition());assertTrue(overlay.isMovable());
+        verify(manager,atLeastOnce()).saveOverlay(overlay);verify(config,never()).setConfiguration(anyString(),anyString(),any());
+    }
     @Test public void nativeInfoboxGroupsCanBeDiscoveredAndPlacedDuringEditingWithoutOptIn()throws Exception
     {
         var constructor=net.runelite.client.ui.overlay.infobox.InfoBoxOverlay.class.getDeclaredConstructors()[0];constructor.setAccessible(true);

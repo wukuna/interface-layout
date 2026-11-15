@@ -54,6 +54,7 @@ final class CircularMinimapFrame {
     private void hide(Widget widget) {
         if(widget!=null && !widget.isHidden()) {hidden.put(widget,false);widget.setHidden(true);}
     }
+    boolean covers(Widget widget) {return hidden.containsKey(widget);}
 
     boolean coveredMenu(net.runelite.api.MenuEntry entry) {
         for(Widget widget:hidden.keySet())

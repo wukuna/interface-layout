@@ -59,8 +59,10 @@ public final class AnchorCoordinator
         public final int dx,dy;
         public final boolean resize;
         public final Dimension canvas;
+        public final Rectangle initial;
         public Drag(String session,String id,int dx,int dy,boolean resize) {this(session,id,dx,dy,resize,null);}
-        public Drag(String session,String id,int dx,int dy,boolean resize,Dimension canvas) {this.session=session;this.id=id;this.dx=dx;this.dy=dy;this.resize=resize;this.canvas=canvas==null?null:new Dimension(canvas);}
+        public Drag(String session,String id,int dx,int dy,boolean resize,Dimension canvas) {this(session,id,dx,dy,resize,canvas,null);}
+        public Drag(String session,String id,int dx,int dy,boolean resize,Dimension canvas,Rectangle initial) {this.session=session;this.id=id;this.dx=dx;this.dy=dy;this.resize=resize;this.canvas=canvas==null?null:new Dimension(canvas);this.initial=initial==null?null:new Rectangle(initial);}
     }
 
     public static final class Snapshot
@@ -200,14 +202,39 @@ public final class AnchorCoordinator
             Map<String,AnchorGeometry.Target> targets=registry.targets(request);
             Snapshot current=capture(geometry.solve(layout,targets,new Dimension(client.getCanvasWidth(),client.getCanvasHeight())),targets);
             AnchorLayout next=store.snapshot();
-            if(value.plan(current,next)!=null)store.replace(next);
+            AnchorMemberDrag.Drop drop=value.plan(current,next);
+            if(drop!=null) {
+                store.replace(next);
+                if(drop.anchor==null)releaseAtCurrent(value.target,drop.member.getLocation());
+            }
         });
     }
     public void finishDrag(Drag value) {command(()->{drag=null;lastDrag=null;draft=null;if(value.canvas==null || value.canvas.equals(new Dimension(client.getCanvasWidth(),client.getCanvasHeight())))store.edit(next->applyDrag(next,value));});}
-    private static void applyDrag(AnchorLayout layout,Drag drag)
+    private void applyDrag(AnchorLayout layout,Drag drag)
     {
         AnchorLayout.Anchor anchor=layout.find(drag.id);if(anchor==null || anchor.locked)return;
-        if(drag.resize) {
+        if(drag.initial!=null) {
+            if(drag.resize) {
+                int minX=0,minY=0;
+                if(anchor.arrangement==AnchorLayout.Arrangement.FREE)for(AnchorLayout.Member member:anchor.members) {
+                    AnchorGeometry.Target target=view.targets.get(member.target);
+                    if(target!=null && target.state==AnchorGeometry.State.HIDDEN && !member.reserveHidden)continue;
+                    minX=Math.min(minX,member.x);minY=Math.min(minY,member.y);
+                }
+                anchor.width=Math.max(20,Math.min(16384,drag.initial.width+minX+drag.dx));
+                anchor.height=Math.max(20,Math.min(16384,drag.initial.height+minY+drag.dy));
+            }
+            AnchorGeometry.Result resolved=geometry.solve(layout,view.targets,view.canvas);
+            Rectangle bounds=resolved.anchors.get(anchor.id),reference=new Rectangle(view.canvas);
+            if(bounds==null)return;
+            if(!anchor.parent.isEmpty()) {
+                AnchorGeometry.Target parent=view.targets.get(anchor.parent);if(parent==null)return;
+                reference=resolved.targets.getOrDefault(anchor.parent,parent.bounds);
+            }
+            anchor.x=drag.initial.x+(drag.resize?0:drag.dx)-reference.x-(int)Math.round((reference.width-bounds.width)*anchor.reference.x);
+            anchor.y=drag.initial.y+(drag.resize?0:drag.dy)-reference.y-(int)Math.round((reference.height-bounds.height)*anchor.reference.y);
+        }
+        else if(drag.resize) {
             int width=Math.max(20,Math.min(16384,anchor.width+drag.dx)),height=Math.max(20,Math.min(16384,anchor.height+drag.dy));
             anchor.x+=(int)Math.round((width-anchor.width)*anchor.reference.x);anchor.y+=(int)Math.round((height-anchor.height)*anchor.reference.y);
             anchor.width=width;anchor.height=height;
@@ -270,10 +297,16 @@ public final class AnchorCoordinator
         });
     }
     private void releaseAtCurrent(String id)
+    {releaseAtCurrent(id,null);}
+    private void releaseAtCurrent(String id,java.awt.Point location)
     {
         for(AnchorRegistry.Provider provider:registry.providers())
             if(owned.getOrDefault(provider.token,Collections.emptySet()).contains(id))
             {
+                if(location!=null) {
+                    request++;send("measure",Map.of("request",request));
+                    send("apply",Map.of("provider",provider.token,"request",request,"placements",List.of(Map.of("id",id,"x",location.x,"y",location.y)),"release",Collections.emptyList()));
+                }
                 request++;send("measure",Map.of("request",request));
                 send("apply",Map.of("provider",provider.token,"request",request,"placements",Collections.emptyList(),"release",List.of(id),"keepPosition",true));
                 owned.get(provider.token).remove(id);

@@ -78,7 +78,7 @@ public class FreePositionController
             clearAlignment(target);save(target,point);
         }
     }
-    public String anchorState(TargetWidget target)
+    public String anchorState(TargetWidget target,java.util.function.Predicate<Widget> covered)
     {
         if(!enabled() || !manager.isLoggedIn() || manager.isMinimapMinimized())return "UNAVAILABLE";
         if(manager.isFixedMode() && (target instanceof Compass || target instanceof Minimap))return "UNAVAILABLE";
@@ -101,7 +101,8 @@ public class FreePositionController
             if(hidden)return "HIDDEN";
         }
         Widget widget=widgets.getTargetWidget(target);
-        if(widget==null || widget.isHidden())return "UNAVAILABLE";
+        if(widget==null)return "UNAVAILABLE";
+        if(widget.isHidden())return covered.test(widget)?"OCCLUDED":"UNAVAILABLE";
         Rectangle area=overlayBounds.get(target);
         return area!=null && com.interfacelayout.util.InterfaceWindows.covered(client,area)?"OCCLUDED":"VISIBLE";
     }
@@ -264,6 +265,8 @@ public class FreePositionController
     public Rectangle anchorBounds(TargetWidget target)
     {
         Widget widget=widgets.getTargetWidget(target);
+        Rectangle measured=overlayBounds.get(target);
+        if(widget!=null && widget.isHidden() && measured!=null)return new Rectangle(measured);
         return widget==null?new Rectangle():anchorBounds(target,widget);
     }
     private Rectangle anchorBounds(TargetWidget target,Widget widget) { return visibleBounds(target,widget); }

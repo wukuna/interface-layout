@@ -115,6 +115,6 @@ public final class ExternalAnchorAdapter implements AnchorParticipant.Provider
         public List<String> aliases(){return List.of(overlay.getName());}
         public boolean claim(){if(lease==null)lease=new OverlayLease(overlay,null,overlays);return true;}
         public void move(Point point){lease.move(point);}
-        public void release(boolean keep){if(lease!=null){lease.release(false);lease=null;}}
+        public void release(boolean keep){if(lease!=null){lease.release(keep,overlays);lease=null;if(keep)overlays.saveOverlay(overlay);}}
     }
 }

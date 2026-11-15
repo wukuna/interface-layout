@@ -97,13 +97,19 @@ final class AnchorMemberDrag
                 return resolved==null?null:new Drop(anchor.id,anchor.name,resolved,placement.anchors.get(anchor.id));
             } catch(IllegalArgumentException invalid){return null;}
         }
-        return null;
+        if(owner(view.layout,target)==null || !new Rectangle(canvas).contains(pointer))return null;
+        Rectangle bounds=ghost(),limits=view.targets.get(target).limits;
+        if(limits==null)limits=new Rectangle(canvas);
+        bounds.x=Math.max(limits.x,Math.min(limits.x+Math.max(0,limits.width-bounds.width),bounds.x));
+        bounds.y=Math.max(limits.y,Math.min(limits.y+Math.max(0,limits.height-bounds.height),bounds.y));
+        next.anchors.forEach(anchor->anchor.members.removeIf(member->member.target.equals(target)));
+        return new Drop(null,"",bounds,null);
     }
     static final class Drop
     {
         final String anchor,name;
         final Rectangle member,bounds;
         Drop(String anchor,String name,Rectangle member,Rectangle bounds)
-        {this.anchor=anchor;this.name=name;this.member=new Rectangle(member);this.bounds=new Rectangle(bounds);}
+        {this.anchor=anchor;this.name=name;this.member=new Rectangle(member);this.bounds=bounds==null?null:new Rectangle(bounds);}
     }
 }

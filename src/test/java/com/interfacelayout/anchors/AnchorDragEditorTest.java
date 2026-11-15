@@ -66,7 +66,8 @@ public class AnchorDragEditorTest
         public boolean available(){return state.equals("VISIBLE");}
         public boolean claim(){return true;}
         public void move(Point point){bounds.setLocation(point);}
-        public void release(boolean keep){}
+        boolean kept;
+        public void release(boolean keep){kept=keep;}
     }
     @Before public void setup()
     {
@@ -107,6 +108,43 @@ public class AnchorDragEditorTest
     {
         press();drag(800,600);frame();assertNull(coordinator.memberPreview().drop);release(800,600);flush();assertTrue(store.snapshot().find(anchor).members.isEmpty());
         press();release(55,65);flush();assertTrue(store.snapshot().find(anchor).members.isEmpty());
+    }
+    @Test public void attachedMemberDropsOutsideAtThePointerAndUndoReattaches()throws Exception
+    {
+        press();drag(255,255);release(255,255);flush();frame();clearInvocations(configs,client);
+        SwingUtilities.invokeAndWait(()->{assertTrue(mice.processMousePressed(event(MouseEvent.MOUSE_PRESSED,255,255)).isConsumed());drag(805,605);});
+        verifyNoInteractions(client,configs);frame();assertEquals(1,store.snapshot().find(anchor).members.size());
+        assertNotNull(coordinator.memberPreview().drop);assertEquals(new Rectangle(800,600,34,34),coordinator.memberPreview().drop.member);
+        release(805,605);flush();frame();assertTrue(store.snapshot().find(anchor).members.isEmpty());
+        assertEquals(new Point(800,600),control.bounds.getLocation());assertTrue(control.kept);assertFalse(participant.owns(control.id()));
+        verify(configs,times(1)).setConfiguration(eq("interfacelayout"),eq("anchorsV1"),any());
+        frame();assertEquals(new Point(800,600),control.bounds.getLocation());coordinator.undo();flush();frame();
+        assertEquals(1,store.snapshot().find(anchor).members.size());assertEquals(new Point(250,250),control.bounds.getLocation());
+    }
+    @Test public void cancelledDragOutKeepsMembershipAndPlacement()
+    {
+        press();drag(255,255);release(255,255);flush();frame();
+        mice.processMousePressed(event(MouseEvent.MOUSE_PRESSED,255,255));drag(805,605);hotkey.hotkeyReleased();release(805,605);flush();frame();
+        assertEquals(1,store.snapshot().find(anchor).members.size());assertEquals(new Point(250,250),control.bounds.getLocation());
+    }
+    @Test public void arrangementSelectionSavesWithoutApplyAndSurvivesPanelRefreshAndReload()throws Exception
+    {
+        AnchorPanel[] panel=new AnchorPanel[1];
+        SwingUtilities.invokeAndWait(()->panel[0]=new AnchorPanel(coordinator,new AnchorTransfers(),new AnchorTemplates(),new ExternalAnchorAdapter()));
+        for(AnchorLayout.Arrangement arrangement:List.of(AnchorLayout.Arrangement.COLUMN,AnchorLayout.Arrangement.ROW,AnchorLayout.Arrangement.WRAP,AnchorLayout.Arrangement.FREE)) {
+            SwingUtilities.invokeAndWait(()->arrangement(panel[0]).setSelectedItem(arrangement));flush();frame();
+            assertEquals(arrangement,store.snapshot().find(anchor).arrangement);
+            SwingUtilities.invokeAndWait(()->{try{var refresh=AnchorPanel.class.getDeclaredMethod("refresh");refresh.setAccessible(true);refresh.invoke(panel[0]);}catch(Exception error){throw new AssertionError(error);}});
+            assertEquals(arrangement,arrangement(panel[0]).getSelectedItem());store.load();frame();assertEquals(arrangement,store.snapshot().find(anchor).arrangement);
+        }
+    }
+    private static javax.swing.JComboBox<?> arrangement(java.awt.Container parent)
+    {
+        for(java.awt.Component child:parent.getComponents()) {
+            if(child instanceof javax.swing.JComboBox && ((javax.swing.JComboBox<?>)child).getItemAt(0) instanceof AnchorLayout.Arrangement)return (javax.swing.JComboBox<?>)child;
+            if(child instanceof java.awt.Container){var found=arrangement((java.awt.Container)child);if(found!=null)return found;}
+        }
+        return null;
     }
     @Test public void focusLossOrReleasingHotkeyCancelsAndConsumesRelease()
     {
@@ -181,6 +219,39 @@ public class AnchorDragEditorTest
         assertEquals(0,coordinator.snapshot().geometry.anchors.get(anchor).y);assertEquals(0,store.snapshot().find(anchor).y);
         coordinator.undo();flush();assertEquals(200,store.snapshot().find(anchor).y);
     }
+    @Test public void clampedAnchorCanMoveAwayFromTheCanvasEdgeImmediately()
+    {
+        coordinator.edit(next->{next.find(anchor).x=5000;next.find(anchor).y=5000;});flush();frame();
+        Rectangle before=coordinator.snapshot().geometry.anchors.get(anchor),header=AnchorEditor.headerBounds(before,coordinator.snapshot().canvas);
+        mice.processMousePressed(event(MouseEvent.MOUSE_PRESSED,header.x+30,header.y+8));drag(header.x-20,header.y-52);release(header.x-20,header.y-52);flush();frame();
+        Rectangle expected=new Rectangle(before);expected.translate(-50,-60);assertEquals(expected,coordinator.snapshot().geometry.anchors.get(anchor));
+    }
+    @Test public void resizeStartsAtVisibleSizeWhenMembersHaveExpandedTheAnchor()
+    {
+        press();drag(255,255);release(255,255);flush();
+        coordinator.edit(next->{next.find(anchor).width=20;next.find(anchor).height=20;});flush();frame();
+        Rectangle before=coordinator.snapshot().geometry.anchors.get(anchor);int x=before.x+before.width-3,y=before.y+before.height-3;
+        mice.processMousePressed(event(MouseEvent.MOUSE_PRESSED,x,y));drag(x+20,y+30);release(x+20,y+30);flush();frame();
+        Rectangle expected=new Rectangle(before);expected.width+=20;expected.height+=30;assertEquals(expected,coordinator.snapshot().geometry.anchors.get(anchor));
+    }
+    @Test public void resizingReferencedAnchorsWithNegativeOffsetsPreservesTheirTopLeftAndUndo()
+    {
+        for(AnchorLayout.Reference reference:List.of(AnchorLayout.Reference.BOTTOM_RIGHT,AnchorLayout.Reference.CENTER)) {
+            coordinator.edit(next->{var a=next.find(anchor);a.reference=reference;a.x=-100;a.y=-80;a.width=150;a.height=100;a.members.clear();
+                var m=new AnchorLayout.Member();m.target=control.id();m.x=-20;m.y=-10;a.members.add(m);});flush();frame();
+            Rectangle before=coordinator.snapshot().geometry.anchors.get(anchor);int x=before.x+before.width-3,y=before.y+before.height-3;
+            mice.processMousePressed(event(MouseEvent.MOUSE_PRESSED,x,y));drag(x+30,y+20);release(x+30,y+20);flush();frame();
+            Rectangle expected=new Rectangle(before);expected.width+=30;expected.height+=20;assertEquals(expected,coordinator.snapshot().geometry.anchors.get(anchor));
+            coordinator.undo();flush();frame();assertEquals(before,coordinator.snapshot().geometry.anchors.get(anchor));
+        }
+    }
+    @Test public void clickingAHeaderOrResizeGripDoesNotRewriteTheAnchor()
+    {
+        Rectangle bounds=coordinator.snapshot().geometry.anchors.get(anchor),header=AnchorEditor.headerBounds(bounds,coordinator.snapshot().canvas);long revision=store.revision();
+        for(Point point:List.of(new Point(header.x+10,header.y+8),new Point(bounds.x+bounds.width-3,bounds.y+bounds.height-3))) {
+            mice.processMousePressed(event(MouseEvent.MOUSE_PRESSED,point.x,point.y));release(point.x,point.y);flush();frame();assertEquals(revision,store.revision());
+        }
+    }
     @Test public void focusLossStillCancelsAHeaderDraggedAcrossTheEdge()
     {
         Rectangle header=AnchorEditor.headerBounds(coordinator.snapshot().geometry.anchors.get(anchor),coordinator.snapshot().canvas);
@@ -207,7 +278,7 @@ public class AnchorDragEditorTest
             assertEquals(new Point(210,220),overlay.getBounds().getLocation());coordinator.editing(false);frame();
             assertTrue(coordinator.snapshot().targets.containsKey(id));assertEquals(new Point(210,220),overlay.getBounds().getLocation());
             external.stop();assertEquals(new Point(40,50),overlay.getPreferredLocation());external.start();frame();assertEquals(new Point(210,220),overlay.getBounds().getLocation());
-            coordinator.detach(id);flush();frame();assertEquals(net.runelite.client.ui.overlay.OverlayPosition.TOP_LEFT,overlay.getPosition());assertEquals(new Point(40,50),overlay.getPreferredLocation());
+            coordinator.detach(id);flush();frame();assertEquals(net.runelite.client.ui.overlay.OverlayPosition.TOP_LEFT,overlay.getPosition());assertEquals(new Point(210,220),overlay.getPreferredLocation());
             assertNull(values.get("interfacelayout/anchorExternalOverlaysV1"));
         } finally {external.stop();}
     }

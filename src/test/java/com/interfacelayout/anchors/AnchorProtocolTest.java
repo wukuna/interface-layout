@@ -115,4 +115,25 @@ public class AnchorProtocolTest
         assertEquals(125,coordinator.snapshot().geometry.anchors.get(id).x);assertEquals(100,store.snapshot().anchors.get(0).x);verify(configs,never()).setConfiguration(anyString(),anyString(),any());
         coordinator.finishDrag(drag);assertEquals(125,store.snapshot().anchors.get(0).x);coordinator.undo();assertEquals(100,store.snapshot().anchors.get(0).x);
     }
+    @Test public void dragOutCommitsProviderGeometryBeforeSavingDetachedPosition()
+    {
+        class Deferred implements AnchorParticipant.Target,AnchorParticipant.Provider {
+            final Rectangle bounds=new Rectangle(50,60,34,34);
+            Point pending,saved;
+            public String id(){return "banking.window";}
+            public String name(){return "Bank";}
+            public Rectangle bounds(){return new Rectangle(bounds);}
+            public boolean claim(){return true;}
+            public void move(Point point){pending=new Point(point);}
+            public void release(boolean keep){if(keep)saved=bounds.getLocation();pending=null;}
+            public java.util.Collection<AnchorParticipant.Target> targets(){return List.of(this);}
+            public void commit(){if(pending!=null)bounds.setLocation(pending);}
+        }
+        Deferred target=new Deferred();when(client.getGameState()).thenReturn(net.runelite.api.GameState.LOGGED_IN);
+        coordinator.start();coordinator.editing(true);AnchorParticipant provider=new AnchorParticipant("Bank",bus,thread,target);provider.start();
+        attach(target.id());frame();var view=coordinator.snapshot();
+        var drag=new AnchorMemberDrag(view,view.targets.get(target.id()),new Point(105,125)).at(new Point(805,605));
+        coordinator.finishMemberDrag(drag);frame();assertEquals(new Point(800,600),target.saved);
+        assertEquals(target.saved,target.bounds.getLocation());assertFalse(provider.owns(target.id()));assertTrue(store.snapshot().anchors.get(0).members.isEmpty());
+    }
 }

@@ -83,6 +83,15 @@ public final class CircularOrbs extends Overlay {
     public void stop() {if(drawManager!=null)drawManager.unregisterEveryFrameListener(afterFrame);running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation){scriptDepth=0;restore();compass.clear(client);timers.reset();if(soulreaper!=null)soulreaper.restore();if(nativeTimerCompatibility!=null)nativeTimerCompatibility.restore();artwork.clear();}});}
     public void releaseForLayout() {restore();}
     public void refreshAfterLayout() {refresh();}
+    public boolean covers(Widget widget) {
+        boolean covered=false;
+        for(int depth=0;widget!=null && depth<16;depth++,widget=widget.getParent()) {
+            if(!widget.isSelfHidden())continue;
+            if(!coveredWidgets.contains(widget) && !minimap.covers(widget) && !compass.covers(widget))return false;
+            covered=true;
+        }
+        return covered;
+    }
     private void restore() {
         for (Widget widget : coveredWidgets)
             if (CircularOrbInput.current(client, widget) && widget.isSelfHidden()) widget.setHidden(false);

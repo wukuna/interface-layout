@@ -68,4 +68,14 @@ public class AnchorMemberDragTest
         targets.put(t.id,t);canvas.width=900;assertFalse(drag.valid(view(List.of())));
         assertFalse(drag.valid(new AnchorCoordinator.Snapshot("session",layout,view.geometry,targets,"",false,5,new Dimension(1000,700),true,List.of(),2)));
     }
+    @Test public void detachingRespectsMovementLimitsAndDoesNotEscapeLockedTargetsOrCanvas()
+    {
+        Anchor source=add("A",50,60,Arrangement.FREE),locked=add("Locked",400,300,Arrangement.COLUMN);locked.locked=true;
+        var target=target("banking.window",50,60,100,80);member(source,target.id);
+        targets.put(target.id,new AnchorGeometry.Target(target.id,target.name,target.bounds,target.state,true,false,new Rectangle(10,20,600,500),target.generation));
+        var view=view(List.of());var drag=new AnchorMemberDrag(view,targets.get(target.id),new Point(55,65));
+        assertNull(drag.at(new Point(440,340)).plan(view,copy()));assertNull(drag.at(new Point(1100,800)).plan(view,copy()));
+        AnchorLayout next=copy();var drop=drag.at(new Point(990,690)).plan(view,next);
+        assertNotNull(drop);assertNull(drop.anchor);assertEquals(new Rectangle(510,440,100,80),drop.member);assertTrue(next.find(source.id).members.isEmpty());
+    }
 }

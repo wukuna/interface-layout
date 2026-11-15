@@ -39,6 +39,7 @@ public final class AnchorEditor extends MouseAdapter
     private boolean resize,captured,swallow;
     private long revision;
     private Dimension canvas;
+    private Rectangle initial;
     private AnchorMemberDrag member;
     private boolean firstListener;
     private double scaleX,scaleY;
@@ -84,6 +85,7 @@ public final class AnchorEditor extends MouseAdapter
             if(!title && !hit && control!=null)continue;
             if(!title && !hit && point.y>bounds.y+5 && point.x>bounds.x+5 && point.x<bounds.x+bounds.width-5 && point.y<bounds.y+bounds.height-5)continue;
             headerDrag=title;headerAbove=header.y<bounds.y;headerGrabY=point.y-header.y;anchorTop=bounds.y;
+            initial=new Rectangle(bounds);
             pressed=point;anchor=candidate.id;session=view.session;revision=view.revision;canvas=new Dimension(view.canvas);scaleX=view.mouseScaleX;scaleY=view.mouseScaleY;resize=hit;captured=true;event.consume();break;
         }
         if(!captured && control!=null){member=new AnchorMemberDrag(view,control,point);captured=true;event.consume();}
@@ -104,7 +106,8 @@ public final class AnchorEditor extends MouseAdapter
         if(valid()) {
             Point point=coordinator.snapshot().mousePoint(event);
             if(member!=null)coordinator.finishMemberDrag(member.at(point));
-            else coordinator.finishDrag(anchorDrag(point));
+            else if(!point.equals(pressed))coordinator.finishDrag(anchorDrag(point));
+            else coordinator.preview(null);
         } else {coordinator.preview(null);coordinator.previewMember(null);}
         captured=false;member=null;return event;
     }
@@ -113,7 +116,7 @@ public final class AnchorEditor extends MouseAdapter
     private AnchorCoordinator.Drag anchorDrag(Point point)
     {
         int dy=headerDrag && headerAbove && point.y<=headerGrabY?-anchorTop:point.y-pressed.y;
-        return new AnchorCoordinator.Drag(session,anchor,point.x-pressed.x,dy,resize,canvas);
+        return new AnchorCoordinator.Drag(session,anchor,point.x-pressed.x,dy,resize,canvas,initial);
     }
     private boolean valid() {AnchorCoordinator.Snapshot view=coordinator.snapshot();return active && coordinator.editing() && view.inputAllowed && (member!=null?member.valid(view):view.session.equals(session) && view.revision==revision && view.canvas.equals(canvas) && scaleX==view.mouseScaleX && scaleY==view.mouseScaleY);}
     static Rectangle headerBounds(Rectangle bounds,Dimension canvas)
@@ -147,10 +150,10 @@ public final class AnchorEditor extends MouseAdapter
                 AnchorCoordinator.MemberPreview preview=coordinator.memberPreview();
                 if(edit && preview!=null && preview.drag.moved() && preview.drag.valid(view)) {
                     AnchorMemberDrag.Drop drop=preview.drop;Rectangle ghost=drop==null?preview.drag.ghost():drop.member;
-                    if(drop!=null){g.setColor(new Color(75,185,240,45));g.fill(drop.bounds);g.setColor(new Color(95,200,255));g.setStroke(new BasicStroke(2));g.draw(drop.bounds);}
+                    if(drop!=null && drop.bounds!=null){g.setColor(new Color(75,185,240,45));g.fill(drop.bounds);g.setColor(new Color(95,200,255));g.setStroke(new BasicStroke(2));g.draw(drop.bounds);}
                     g.setColor(drop==null?new Color(225,175,90,55):new Color(95,200,255,80));g.fill(ghost);
                     g.setColor(drop==null?new Color(225,175,90):new Color(130,220,255));g.setStroke(new BasicStroke(2));g.draw(ghost);
-                    g.drawString(drop==null?"Drop onto an unlocked anchor":"Release to place in "+drop.name,Math.max(4,Math.min(view.canvas.width-190,ghost.x)),Math.max(14,ghost.y-5));
+                    g.drawString(drop==null?"Drop onto an unlocked anchor":drop.anchor==null?"Release to detach":"Release to place in "+drop.name,Math.max(4,Math.min(view.canvas.width-190,ghost.x)),Math.max(14,ghost.y-5));
                 }
             } finally {g.dispose();}
             return null;
