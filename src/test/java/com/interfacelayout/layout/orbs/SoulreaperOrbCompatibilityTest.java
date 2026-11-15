@@ -55,7 +55,7 @@ public class SoulreaperOrbCompatibilityTest {
         verify(other,never()).setLayer(any());assertEquals(4,f.active.size());
     }
     @Test public void providerShutdownIsNotUndoneAndItsObjectsCanRestartNormally() throws Exception {
-        Fixture f=new Fixture();f.refresh();f.active.remove(f.extra);f.active.remove(f.nativeOrb);f.adapter.refresh(true);
+        Fixture f=new Fixture();f.refresh();f.active.remove(f.extra);f.active.remove(f.nativeOrb);f.adapter.invalidate();f.adapter.refresh(true);
         assertFalse(f.active.contains(f.extra));assertFalse(f.active.contains(f.nativeOrb));
         assertEquals(OverlayLayer.ABOVE_WIDGETS,f.extra.getLayer());assertEquals(OverlayLayer.ABOVE_WIDGETS,f.nativeOrb.getLayer());
         f.active.add(f.extra);f.active.add(f.nativeOrb);f.refresh();f.adapter.refresh(false);

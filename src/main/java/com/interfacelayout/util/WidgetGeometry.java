@@ -9,23 +9,39 @@ import net.runelite.api.widgets.Widget;
 
 public final class WidgetGeometry
 {
+    private static final ThreadLocal<Set<Widget>> VISITED = ThreadLocal.withInitial(
+        () -> Collections.newSetFromMap(new IdentityHashMap<>()));
+
     private WidgetGeometry() {}
     public static Point location(Widget widget)
     {
-        Point point = new Point();
-        Set<Widget> visited = Collections.newSetFromMap(new IdentityHashMap<>());
-        for (Widget current = widget; current != null && visited.add(current); current = current.getParent())
-        {
-            point.translate(current.getRelativeX(), current.getRelativeY());
-            Widget parent = current.getParent();
-            if (parent != null) point.translate(-parent.getScrollX(), -parent.getScrollY());
-        }
-        return point;
+        long position = position(widget);
+        return new Point((int) (position >> 32), (int) position);
     }
+
+    private static long position(Widget widget)
+    {
+        int x = 0, y = 0;
+        Set<Widget> visited = VISITED.get();
+        if (!visited.isEmpty()) visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        try
+        {
+            for (Widget current = widget; current != null && visited.add(current);)
+            {
+                x += current.getRelativeX(); y += current.getRelativeY();
+                Widget parent = current.getParent();
+                if (parent != null) { x -= parent.getScrollX(); y -= parent.getScrollY(); }
+                current = parent;
+            }
+            return ((long) x << 32) | (y & 0xffffffffL);
+        }
+        finally { visited.clear(); }
+    }
+
     public static Rectangle bounds(Widget widget)
     {
         if (widget == null) return new Rectangle();
-        Point point = location(widget);
-        return new Rectangle(point.x, point.y, widget.getWidth(), widget.getHeight());
+        long position = position(widget);
+        return new Rectangle((int) (position >> 32), (int) position, widget.getWidth(), widget.getHeight());
     }
 }

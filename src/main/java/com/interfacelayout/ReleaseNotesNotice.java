@@ -22,12 +22,13 @@ final class ReleaseNotesNotice
     static final String RELEASE = "2026-11-13-sidebar-and-beta-timers";
     static final String SEEN_KEY = "releaseNotesShown";
     private static final String[] UPDATES = {
-        "Detailed settings have moved to the side panel with a Minimap icon: Menu Tabs, Orbs, Anchors and General are adjustable there. Please report any inconsistencies on Github or Discord DM.",
-        "Choose Normal, Free placement or Compact orbs with controls that adapt to your selection.",
-        "Beta timers: choose Inset sweep, Tag meters, Quiet rims or Eight slices separately for HP, Prayer and Special, with number tabs or circles only.",
-        "New Prayer drain meters - actual drain rate, tick-by-tick, or both.",
-        "Your existing prayer ring, low-prayer flashes and potion-dose reminders are preserved.",
-        "The extra special-attack meter sits below the orb in circles-only mode.",
+        "Open the minimap sidebar icon for Menu Tabs, Orbs, Anchors and General settings; changes apply immediately.",
+        "New built-in anchors: create Free, Row, Column or Wrap layouts, or import your Custom UI Anchors setup.",
+        "Enable Edit anchors and use your RuneLite drag hotkey to attach compatible controls, overlays and infobox groups; drag outside to detach.",
+        "Move, resize, lock and reorder anchors and members, with Undo and optional shared templates.",
+        "Choose Normal, Free placement or Compact orbs, with four Beta timer styles and separate prayer amount and drain displays.",
+        "Prayer reminders and saved layouts are preserved; minimap, compass and special-attack positioning are more reliable.",
+        "Reduced repeated orb and overlay work."
     };
 
     @Inject private Client client;

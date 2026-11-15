@@ -76,4 +76,18 @@ public class WidgetGeometryTest
         doAnswer(invocation -> { size[1] = invocation.getArgument(0); return null; }).when(widget).setOriginalHeight(anyInt());
         return widget;
     }
+    @Test public void nestedQueriesAndExceptionsDoNotRetainTraversalState() {
+        Widget child=widget(-50,20,33,36),parent=widget(10,-100,100,100),nested=widget(7,9,1,1);
+        when(child.getParent()).thenReturn(parent);
+        when(parent.getScrollX()).thenReturn(4);
+        when(child.getRelativeX()).thenAnswer(call -> WidgetGeometry.location(nested).x-57);
+        assertEquals(new Rectangle(-44,-80,33,36),WidgetGeometry.bounds(child));
+        when(parent.getRelativeY()).thenThrow(new IllegalStateException("unavailable"));
+        try { WidgetGeometry.bounds(child); fail(); } catch(IllegalStateException expected) { }
+        doReturn(100).when(parent).getRelativeY();
+        assertEquals(new Point(-44,120),WidgetGeometry.location(child));
+        when(parent.getParent()).thenReturn(child);
+        assertEquals(new Point(-44,120),WidgetGeometry.location(child));
+        assertEquals(new Point(7,9),WidgetGeometry.location(nested));
+    }
 }

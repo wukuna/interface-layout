@@ -19,6 +19,7 @@ final class NativeOrbTimerCompatibility
 {
     private static final String REGEN="net.runelite.client.plugins.regenmeter.RegenMeterOverlay";
     private static final String DOSE="net.runelite.client.plugins.prayer.PrayerDoseOverlay";
+    private final OverlayDiscovery discovery = new OverlayDiscovery(REGEN, DOSE);
     @Inject Client client;
     @Inject InterfaceLayoutConfig config;
     @Inject OverlayManager overlays;
@@ -27,12 +28,7 @@ final class NativeOrbTimerCompatibility
     void refresh(boolean enabled)
     {
         if(!enabled){restore();return;}
-        ArrayList<Overlay> found=new ArrayList<>();
-        overlays.anyMatch(overlay->{
-            String name=overlay.getClass().getName();
-            if(REGEN.equals(name) || DOSE.equals(name))found.add(overlay);
-            return false;
-        });
+        java.util.List<Overlay> found=discovery.find(overlays,client.getGameCycle());
         for(Overlay overlay:new ArrayList<>(owned.keySet()))if(!found.contains(overlay))release(overlay,false);
         for(Overlay overlay:found)if(overlay.getLayer()!=OverlayLayer.MANUAL) {
             owned.put(overlay,overlay.getLayer());overlays.remove(overlay);
@@ -40,8 +36,11 @@ final class NativeOrbTimerCompatibility
         }
     }
 
+    void invalidate() { discovery.clear(); }
+
     void restore()
     {
+        invalidate();
         for(Overlay overlay:new ArrayList<>(owned.keySet()))release(overlay,true);
     }
 

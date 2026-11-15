@@ -30,6 +30,7 @@ public final class SoulreaperOrbCompatibility extends Overlay
     private static final String GROUP = "soulreaperaxeqol";
     private static final String EXTRA = "com.soulreaperaxeqol.SoulreaperAxeQoLExtraOrbOverlay";
     private static final String NATIVE = "com.soulreaperaxeqol.SoulreaperAxeQoLNativeOrbOverlay";
+    private final OverlayDiscovery discovery = new OverlayDiscovery(EXTRA, NATIVE);
     @Inject Client client;
     @Inject ConfigManager configs;
     @Inject InterfaceLayoutConfig config;
@@ -50,12 +51,7 @@ public final class SoulreaperOrbCompatibility extends Overlay
     void refresh(boolean enabled) {
         anchor = null;
         if (!enabled) { restore(); return; }
-        List<Overlay> found = new ArrayList<>();
-        overlays.anyMatch(overlay -> {
-            String type = overlay.getClass().getName();
-            if (EXTRA.equals(type) || NATIVE.equals(type)) found.add(overlay);
-            return false;
-        });
+        List<Overlay> found = discovery.find(overlays, client.getGameCycle());
         replaced.entrySet().removeIf(entry -> {
             if(found.contains(entry.getKey()))return false;
             if(entry.getKey().getLayer()==OverlayLayer.MANUAL)entry.getKey().setLayer(entry.getValue());
@@ -66,7 +62,7 @@ public final class SoulreaperOrbCompatibility extends Overlay
             if (EXTRA.equals(overlay.getClass().getName())) extra = overlay;
             else nativeOrb = overlay;
         }
-        if (extra == null) { restore(); return; }
+        if (extra == null) { release(); return; }
         if (imageOwner != extra) {
             imageOwner = extra;
             try {
@@ -90,7 +86,11 @@ public final class SoulreaperOrbCompatibility extends Overlay
         }
     }
 
-    void restore() {
+    void invalidate() { discovery.clear(); }
+
+    void restore() { invalidate(); release(); }
+
+    private void release() {
         for (Map.Entry<Overlay, OverlayLayer> entry : replaced.entrySet()) {
             Overlay overlay = entry.getKey();
             if (overlay.getLayer() == OverlayLayer.MANUAL) {

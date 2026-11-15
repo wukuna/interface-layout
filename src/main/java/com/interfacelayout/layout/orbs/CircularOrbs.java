@@ -139,6 +139,14 @@ public final class CircularOrbs extends Overlay {
         if(OrbConstants.ConfigGroup.GROUP_NAME.equals(event.getGroup()))releaseBeforeLayout();
     }
     @Subscribe(priority=4) public void onProfileChanged(ProfileChanged event) {releaseBeforeLayout();}
+    @Subscribe public void onPluginChanged(net.runelite.client.events.PluginChanged event) {
+        int token=generation;
+        thread.invokeLater(()->{
+            if(!running || token!=generation)return;
+            if(soulreaper!=null)soulreaper.invalidate();
+            if(nativeTimerCompatibility!=null)nativeTimerCompatibility.invalidate();
+        });
+    }
     private boolean freeMinimap() {
         return config.layout() == OrbLayout.FREE_POSITION && !manager.isFixedMode();
     }

@@ -76,7 +76,7 @@ public class NativeOrbTimerCompatibilityTest
         adapter.refresh(true);
         Rectangle circle=new Rectangle(100,70,34,34),pixels=painted(InterfaceID.Orbs.ORB_PRAYER,circle,false);
         assertFalse(pixels.isEmpty());assertEquals(circle.getCenterX(),pixels.getCenterX(),1);
-        active.remove(source);adapter.refresh(true);assertFalse(active.contains(source));
+        active.remove(source);adapter.invalidate();adapter.refresh(true);assertFalse(active.contains(source));
         assertEquals(OverlayLayer.ABOVE_WIDGETS,source.getLayer());
     }
 }

@@ -2,7 +2,7 @@
 
 Arrange menu tabs, orbs, the compass and minimap around the way you play. Build movable rows or columns, choose what stays visible, and scale overlay menu buttons from **25–200%**. Resource-pack icons are the default; bundled **Faithful contours** are an optional style and fallback. Menu layouts are saved separately for Fixed, Resizable Classic and Resizable Modern.
 
-**Pending Hub update:** frame choices and always-on orb/minimap click protection are included in [the submitted update](https://github.com/runelite/plugin-hub/pull/20615). The existing separate-minimap option is a different feature.
+This guide follows the current source version. See [the Plugin Hub update](https://github.com/runelite/plugin-hub/pull/20665) for availability of the new sidebar and built-in anchors.
 
 [Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Inspiration and recipe](#inspiration-and-recipe) · [Support](#support) · [License and attribution](#license-and-attribution)
 
@@ -12,10 +12,10 @@ Open Interface Layout's minimap icon in RuneLite's toolbar. **Show side panel ic
 
 | Tab | Controls |
 | --- | --- |
-| Layout | Normal, Free placement or Compact orbs; compact presets; menu-tab arrangement; editing and position resets. |
-| Appearance | Overlay menu buttons, artwork and size; Number tabs or Circles only; native/resource-pack or circular minimap frame; Beta equipment presentation. |
-| Visibility | Individual map controls and menu tabs; group visibility; extra special-attack meter; shield orb; classic borders. Checked means visible. |
-| Timers | Beta HP, Prayer and Special timers, each with its own style selection. |
+| Menu Tabs | Arrangement, overlay buttons, artwork, scaling, grouping and individual tab visibility. |
+| Orbs | Native/free/compact positioning, minimap and compass frames, individual visibility and mirroring, and per-orb Beta timers. |
+| Anchors | Free/Row/Column/Wrap layouts, imports, drag attachment, member order, locking, shared templates and Undo. |
+| General | Editing, equipment options, borders and resets. |
 
 **Normal** restores native positioning while retaining the saved free layout. **Free placement** uses the plugin's own anchor points or Custom UI Anchors. For a movable native minimap, select Free placement and keep **Orbs → Minimap & compass → Show minimap** checked. **Orbs → Minimap & compass → Frame → Circular rim** reveals **Shared circular rim**; Native / resource pack retains the attached compass socket even when the compass is moved separately.
 
@@ -26,7 +26,7 @@ The screenshots and recordings below use the earlier settings layout. Menu arran
 ## Features
 
 - **Free-position controls** — move and anchor the native minimap, orbs and compass in resizable modes.
-- **Circular orbs** — under Beta features, hide the number tabs beside HP, Prayer, Run and Special (including the optional shield orb). Choose number only, icon only, or a small icon and number inside the circle. The button and click-blocking area fit the circle; the removed tab no longer intercepts clicks. Use **Circular orb rim** to choose a smooth Silver or Dark grey edge, or None to remove the custom rim for all circular orbs and the compass. Native fill/availability/actions and saved positions remain. Turning the option off restores the native background, number tab and full click area. Off by default; Edit interface temporarily uses native artwork.
+- **Circular orbs** — select **Orbs → Orb appearance → Circles only** to hide the number tabs beside HP, Prayer, Run and Special (including the optional shield orb). Choose number only, icon only, or a small icon and number inside the circle. The button and click-blocking area fit the circle; the removed tab no longer intercepts clicks. Use **Orbs → Minimap & compass → Frame → Circular rim → Shared circular rim** to choose a smooth Silver or Dark grey edge, or None to remove the custom rim for all circular orbs and the compass. Native fill/availability/actions and saved positions remain. Turning the option off restores the native background, number tab and full click area. Off by default; Edit interface temporarily uses native artwork.
 - **Compact orb layouts** — arrange orbs vertically, horizontally, in a wider row, or with a custom preset.
 - **Movable menu bars** — keep native rows or start with vertical bars, then drag each bar wherever you want.
 - **Menu icon style** — Resource pack is the default and uses your active icon replacements, including custom spellbooks. Missing pack icons fall back to bundled Faithful contours. Choose Faithful contours to use the bundled dark artwork and original accents instead. Both styles scale with your buttons and keep active resource-pack backgrounds.
@@ -47,26 +47,26 @@ The screenshots and recordings below use the earlier settings layout. Menu arran
 1. Choose your game display mode, then open **Interface Layout** settings.
 2. Pick an orb arrangement and a menu arrangement. Enable **Edit interface** for editing guides.
 3. **Alt-drag** moves a whole control or bar. **Shift-drag** detaches or joins menu stones when custom grouping is enabled.
-4. To resize the menu buttons together, open **Menu bars**, enable **Use overlay menu buttons**, and adjust **Resize menu tabs (%)**. Leave it at **100%** for native-size buttons.
+4. To resize the menu buttons together, open **Menu Tabs**, enable **Use overlay menu buttons**, and adjust **Button size (%)**. Leave it at **100%** for native-size buttons.
 5. Turn off **Edit interface** when finished. Layouts remain saved separately for Fixed, Classic and Modern. Turn overlay buttons off to return to your saved native menu layout.
 
-The movement recording uses a local **TEST** build and an example setup. Other overlays visible in it are not Interface Layout features. Checked visibility controls hide the named element. Use the current setting names in the instructions below.
+The movement recording uses a local **TEST** build and an example setup. Other overlays visible in it are not Interface Layout features. The recordings use the older Hide checkboxes; current Show checkboxes make the named element visible. Use the current setting names in the instructions below.
 
 ## Usage
 
 ### Beta equipment panel
 
-Enable **Beta features → Beta equipment panel**, off by default. It places attack and defence bonuses, strength bonuses, magic damage, prayer, carried weight and the current spellbook beneath the equipment slots. The equipment tab's four native utility buttons become a small horizontal row at the bottom left, retaining their original actions. Actual equipment slots keep their native positions and sizes. Disabling the feature restores the original utility buttons.
+Enable **General → Equipment · Beta → Enhanced equipment panel**, off by default. It places attack and defence bonuses, strength bonuses, magic damage, prayer, carried weight and the current spellbook beneath the equipment slots. The equipment tab's four native utility buttons become a small horizontal row at the bottom left, retaining their original actions. Actual equipment slots keep their native positions and sizes. Disabling the feature restores the original utility buttons.
 
 A small **?** at the top left provides a hover-only tooltip with set descriptions from the game's current equipment-effect state, additional equipment effects, and supported target-specific conditions. Base and adjusted weapon intervals appear in ticks and seconds. Adjusted speed follows the selected style (including Rapid and autocast) and supported weapon effects such as Harmonised Nightmare staff, Twinflame staff and Obligator. It is not a measurement of time between attacks. Conditional procs, target exceptions and temporary encounter effects can change individual intervals; the tooltip describes supported exceptions separately. Unknown weapon or style data is shown as unavailable. The question mark remains detailed with **Reduced tooltips** enabled and introduces no click action.
 
 The compact layout applies only to the in-game Equipment tab, not RuneLite’s toolbar side panel. The expanded equipment window and bank equipment menu retain their native layouts and statistics. The sidebar uses base item bonuses; conditional weapon, set and target effects can differ from the game's effective values. Missing item-stat data is shown as `?`, not zero. Hover a value for its full description and source.
 
-Enable **Reduced tooltips** in Beta features to show only the relevant values and control names on hover. Leave it off for the full source and conditional-effect explanations. If the native sidebar is too small to fit the readout without overlapping gear, it keeps the native display.
+Enable **Reduced equipment tooltips** in General → Equipment · Beta to show only the relevant values and control names on hover. Leave it off for the full source and conditional-effect explanations. If the native sidebar is too small to fit the readout without overlapping gear, it keeps the native display.
 
 ### Moving menu stones and orbs
 
-Enable **Edit interface** to show editing outlines and allow **Shift-drag** stone grouping. RuneLite **Alt-drag** moves whole bars, detached stones, free orbs and the compass with Edit interface on or off. Choose **Free Position** under **Map and orb visibility → Orb arrangement** to move orbs individually, and choose a vertical or free-position menu arrangement to detach and regroup stones.
+Enable **Edit interface** to show editing outlines and allow **Shift-drag** stone grouping. RuneLite **Alt-drag** moves whole bars, detached stones, free orbs and the compass with Edit interface on or off. Choose **Free placement** under **Orbs → Positioning** to move orbs individually, and choose a vertical or free-position menu arrangement to detach and regroup stones.
 
 > Move, detach and reattach: the new recording shows individual stones leaving a menu bar and joining it again, alongside independently positioned orbs.
 
@@ -76,11 +76,11 @@ Enable **Edit interface** to show editing outlines and allow **Shift-drag** ston
 
 ### Menu bars and stone groups
 
-Open **Menu bars** and choose a **Menu arrangement**:
+Open **Menu Tabs** and choose a **Arrangement**:
 
 - **Native rows** keeps the game's row arrangement. The rows remain movable, including when individual tabs are hidden.
 - **Vertical left** and **Vertical right** start the bars along the selected edge. These are starting positions; you can move the bars afterward.
-- **Free position** lets you build your own arrangement. **Initial bar direction** chooses the starting direction of new bars; existing groups keep their direction.
+- **Free position** lets you build your own arrangement. **Initial direction** chooses the starting direction of new bars; existing groups keep their direction.
 
 In Fixed and both resizable modes, **Free position** starts with separate top and bottom groups. Older combined defaults are split too, including moved bars; explicitly saved custom memberships, detached groups and ordering are retained. Choosing Column starts the default groups beside each other. In Resizable Classic, an untouched **Native rows** layout keeps the game's original stone artwork, spacing and icon alignment. Moving a native row with zero spacing translates it as a whole.
 
@@ -93,11 +93,11 @@ In Fixed and both resizable modes, **Free position** starts with separate top an
 
 </details>
 
-Under **Menu bars**, enable **Use overlay menu buttons**, then choose **Resize menu tabs (%)** (25–200%; 100% follows the native tab size). The setting is off by default. It supports **Fixed**, **Resizable Classic** and **Resizable Modern** and uses the same grouping, hiding controls and drag gestures as native buttons. First use copies the current arrangement into a separate overlay layout for that display mode.
+Under **Menu Tabs**, enable **Use overlay menu buttons**, then choose **Button size (%)** (25–200%; 100% follows the native tab size). The setting is off by default. It supports **Fixed**, **Resizable Classic** and **Resizable Modern** and uses the same grouping, hiding controls and drag gestures as native buttons. First use copies the current arrangement into a separate overlay layout for that display mode.
 
 One percentage applies to all overlay menu buttons, including custom bars and detached buttons. It does not give each tab a different size.
 
-Under **Menu bars > Overlay icon style**, **Resource pack** is selected by default. It follows active Resource Packs and Interface Styles icon replacements, including custom spellbooks, and uses bundled Faithful contours for icons the pack does not replace. Choose **Faithful contours** to use the bundled dark icons, original accents and four custom spellbooks instead. Unrecognized alternate icons and tab backgrounds follow the current game or resource-pack artwork in both styles. Pack changes refresh automatically without importing files or changing another plugin's settings. Both styles retain scalable contours and the subtle gold hover outline. Fixed and Classic use their own row artwork; Modern uses its native stone background. Resource packs must support the selected display mode.
+Under **Menu Tabs → Icon artwork**, **Resource pack** is selected by default. It follows active Resource Packs and Interface Styles icon replacements, including custom spellbooks, and uses bundled Faithful contours for icons the pack does not replace. Choose **Faithful contours** to use the bundled dark icons, original accents and four custom spellbooks instead. Unrecognized alternate icons and tab backgrounds follow the current game or resource-pack artwork in both styles. Pack changes refresh automatically without importing files or changing another plugin's settings. Both styles retain scalable contours and the subtle gold hover outline. Fixed and Classic use their own row artwork; Modern uses its native stone background. Resource packs must support the selected display mode.
 
 Clicking a replacement opens the corresponding native tab. Existing native tab options and RuneLite-registered widget options remain on right-click. This changes the replacement menu-tab surfaces only: it does not resize orbs, the inventory contents, prayers, spells or other game interfaces. Native tab widgets retain their original dimensions. Controls hidden by the game remain unavailable, and supported overlapping windows take priority.
 
@@ -137,32 +137,30 @@ This also covers Combat Achievements overview, tasks, boss lists/details and rew
 
 Banking can hide tab icons as part of the game's normal behavior. Interface Layout preserves stone backgrounds that the game still displays without forcing hidden icons back on or making them clickable. Bank and PIN windows keep their native positions and sizing. Window protection covers the interfaces listed above; it does not promise coverage for every game interface.
 
-Open **Hide menu tabs** to hide individual tabs, including Combat options, Skills, Quests, Inventory, Equipment, Prayer, Spellbook, Clan, Account Management, Friends, Logout, Settings, Emotes and Music.
+Open **Menu Tabs → Visible menu tabs** to show or hide individual tabs, including Combat options, Skills, Quests, Inventory, Equipment, Prayer, Spellbook, Clan, Account Management, Friends, Logout, Settings, Emotes and Music.
 
-Hiding a tab removes its icon and stone background. The remaining stones close the gap, and the bar stays movable. Show the tab again by clearing its visibility setting.
+Hiding a tab removes its icon and stone background. The remaining stones close the gap, and the bar stays movable. Show the tab again by checking it under Visible menu tabs.
 
-The **Menu bars** section also includes broader controls:
+The **Menu Tabs** section also includes broader controls:
 
-- **Hide combat–spellbook tabs** hides the first seven tabs wherever you have placed them.
-- **Hide clan–music tabs** hides the second set of tabs wherever you have placed them.
-- **Hide classic left border** and **Hide classic right border** remove the decorative borders in Resizable Classic.
+- Uncheck **Visible menu tabs → Combat–spellbook group** to hide the first seven tabs wherever they are placed.
+- Uncheck **Visible menu tabs → Clan–music group** to hide the second group wherever it is placed.
+- Uncheck **General → Classic borders → Left border / Right border** to remove either decorative border in Resizable Classic.
 - **Restore native menu shortcut** temporarily shows the original menu arrangement and visibility. Press it again to return to your saved layout.
 
 The logout control depends on the game's display mode. **Fixed** and **Resizable Classic** have a Logout tab in the menu row. **Resizable Modern** uses the Logout-X beside the minimap instead.
 
 #### Logout control in Modern
 
-**Restore logout stone (Modern)** places the existing logout X over a menu-stone background. Leave it off for the bare X. Both forms can be detached and joined to custom menu bars; changing the background preserves saved grouping. In Native rows, the bare X stays beside the minimap.
+**Restore logout tab (Modern only)** places the existing logout X over a menu-stone background. Leave it off for the bare X. Both forms can be detached and joined to custom menu bars; changing the background preserves saved grouping. In Native rows, the bare X stays beside the minimap.
 
-Fixed and Resizable Classic keep their native Logout tabs. **Hide Logout-X (Modern)**, the individual logout visibility setting and **Hide clan–music tabs** can hide the Modern control; check those settings if it is missing. In custom menu arrangements, the logout control belongs to the menu group, so individual orb dragging and the separate minimap logout copy are suspended. Turning restoration off removes only the added background and keeps custom group membership. The X opens the native logout panel; game-hidden controls remain hidden.
+Fixed and Resizable Classic keep their native Logout tabs. Check **Menu Tabs → Visible menu tabs → Clan–music group → Logout tab / Logout-X** if the Modern control is missing. In custom menu arrangements, the logout control belongs to the menu group, so individual orb dragging and the separate minimap logout copy are suspended. Turning restoration off removes only the added background and keeps custom group membership. The X opens the native logout panel; game-hidden controls remain hidden.
 
-### Beta features: appearance
+### Special-attack extras
 
-Enable **Beta features > Hide extra special-attack bar** to hide the small secondary meter beneath the special-attack orb. This is optional and starts off. The orb's icon, number and normal special-attack controls remain available. Turning the setting off restores the meter when the game would normally show it.
+Open **Orbs → Special attack**. **Extra special-attack bar** shows or hides the native secondary meter; it keeps the orb's icon, number and actions. In Circles only, the meter sits below the circle. The game still determines whether a meter is available.
 
-Enable **Beta features > Show shield special orb** for a separate special-attack orb for supported shield-slot equipment, using the game's existing off-hand action. It uses the native shield icon, shows the shield's charges, and follows compatible resource-pack sprite replacements. It starts off and appears only while a supported shield and its native special-attack control are available. The current supported charge system has 20 charges and requires 10 to activate; other shield abilities are not assumed to work the same way.
-
-The shield orb starts beside the regular special-attack orb. Move it with RuneLite's overlay-drag modifier (normally Alt). Clicking it selects **Use Offhand** or **Deactivate Offhand** when both weapon and shield specials are available; when the shield supplies the primary special, it uses that action instead. Keep the native special orb visible. **Hide extra special-attack bar** is a separate choice, so you can hide the small meter while using the new orb. Unequipping the shield removes the extra orb; two-handed weapon stacks do not activate it.
+Enable **Shield special orb · Beta** for a separate movable control for supported shield-slot equipment. It uses the native off-hand special-attack action, icon and charges, and follows compatible resource-pack artwork. It starts off and appears only when the game exposes a supported shield control. Keep the main special-attack orb visible. Alt-drag the shield orb to move it. Unequipping the shield removes it; the feature does not expose game-hidden actions.
 
 Circular mode also styles Soulreaper Axe QoL's extra display, using your selected icon/number option while keeping its offsets, colours and regeneration timers. Turning circular mode off restores its own artwork. The extra display remains informational.
 
@@ -170,16 +168,11 @@ The shield orb follows the native control's availability, including in PvP areas
 
 After an update, the chatbox lists the current changes once per RuneLite profile.
 
-### Map and orb visibility
+### Minimap and orb visibility
 
-Use **Map and orb visibility** to choose an orb arrangement and hide individual controls.
+Open **Orbs** to choose positioning and appearance. **Minimap & compass** has independent Show minimap and Show compass controls. Hitpoints, Prayer, Run energy and Special attack each have their own section; remaining controls are under **Other map controls**. Uncheck a Show setting to hide that control.
 
-- **Hide minimap** removes the native minimap in resizable modes. In Free Position, the orbs keep their saved locations.
-- **Hide compass** hides the compass independently.
-- Individual orb settings hide HP, Prayer, Run, Special, XP and the other available map-side controls.
-- **Hide Logout-X (Modern)** hides the minimap's logout control in Resizable Modern.
-
-Showing a free-position orb or the compass again restores its saved location. A control that the game itself does not currently display will not appear just because its hide setting is off.
+Showing a free-position control again restores its saved location. The plugin does not reveal controls that the game itself has hidden.
 
 #### Free-position minimap, compass and orbs
 
@@ -187,13 +180,13 @@ Showing a free-position orb or the compass again restores its saved location. A 
 
 [Watch the 26-second control demonstration](media/free-minimap-and-orb-controls.mp4). It shows circular-orb display choices, visibility toggles and minimap movement with anchor guides in a local TEST build. Audio is removed from this documentation copy.
 
-Choose **Orb arrangement → Free Position**, then **Alt-drag** an orb or the compass to its own position. Enable **Edit interface** if you want additional outlines and guidance. The compass can move separately from the minimap.
+Choose **Orbs → Positioning → Free placement**, then **Alt-drag** an orb or the compass to its own position. Enable **Edit interface** if you want additional outlines and guidance. The compass can move separately from the minimap.
 
 Use RuneLite's **Alt-right-click** to reset an element's position. Disable **Edit interface** or press **Escape** to hide editing guidance when you are finished.
 
-**Native minimap movement:** in Classic or Modern resizable mode, select **Map and orb visibility → Orb arrangement → Free Position** and leave **Hide minimap** off. Alt-drag the minimap using RuneLite’s overlay movement controls. It is available to **Custom UI Anchors** through the same overlay placement system as free orbs.
+**Native minimap movement:** in Classic or Modern resizable mode, select **Orbs → Positioning → Free placement** and leave **Show minimap** checked. Alt-drag the minimap using RuneLite’s overlay movement controls. It can join the built-in **Anchors** or use **Custom UI Anchors**, with one active owner per control.
 
-The native minimap keeps its map content and navigation. Choose **Map and orb visibility → Free minimap frame**: **Native / resource pack** preserves the original surround and is the default; **Circular rim** uses the selected **Circular orb rim** for the map and compass. Set the rim to **None** for no custom border. The native surround moves with the map and retains its combined compass socket. The compass follows the minimap until you position it independently. Other orbs keep their own saved positions. This minimap frame does not require enabling the separate circular-orb number-tab option.
+The native minimap keeps its map content and navigation. Choose **Orbs → Minimap & compass → Frame**: **Native / resource pack** preserves the original surround and is the default; **Circular rim** uses the selected **Shared circular rim** for the map and compass. Set the rim to **None** for no custom border. The native surround moves with the map and retains its combined compass socket. The compass follows the minimap until you position it independently. Other orbs keep their own saved positions. This minimap frame does not require enabling the separate circular-orb number-tab option.
 
 Hiding and showing the map retains its saved position. Resetting the element clears its custom position; resetting the layout or disabling the plugin restores native layout behavior. Controls hidden by the game remain hidden. Fixed mode keeps its native constraints.
 
@@ -203,23 +196,15 @@ Moving another orb preserves the native Wiki and world-map button positions, eve
 
 #### Compact orb arrangements
 
-Choose **Vertical preset**, **Horizontal preset**, **Horizontal-wide preset** or **Custom preset**, then enable **Hide minimap** to activate the compact arrangement.
+Choose **Orbs → Positioning → Compact orbs** and select the compact arrangement and alignment controls revealed below it. **Show separate minimap** offers the alternative map described below. Free placement keeps each control's independent saved position.
 
-Open **Orb layout options** to adjust the preset:
-
-- **Vertical anchor**, **Horizontal anchor** and **Vertical offset** control its placement.
-- **Keep hidden orb slots** preserves the remaining orbs' slots when another orb is hidden.
-- **Keep preset container size** preserves the preset's empty space after hiding orbs.
-- **Swap preset orb slots** lets you enable Edit interface and drag HP, Prayer, Run or Special onto another orb to swap their slots.
-- **Hide preset with side panel** hides the minimap, compass and orbs when the side panel is hidden in Resizable Modern, including the normal minimap with **Hide minimap** disabled. Reopening the side panel restores their previous visibility. Fixed and Resizable Classic are unchanged.
-
-Preset anchoring, gap handling and slot swapping apply to compact arrangements. Free Position uses each element's saved location.
+**Minimap & compass → Hide with side panel** hides map controls with the side panel in Resizable Modern, restoring their previous visibility when it reopens. Fixed and Resizable Classic are unchanged.
 
 Orb and minimap click protection is always enabled. Visible controls block clicks from reaching the world behind them, while normal minimap navigation and orb actions keep working. This also applies to the separate minimap and does not require a checkbox. Circular-orb protection follows the visible circle; empty space outside it remains usable.
 
 ### Separate minimap and shortcuts
 
-**Show separate minimap**, under **Orb layout options**, displays a separate movable minimap while **Hide minimap** is enabled in a resizable mode. Use RuneLite's normal **Alt-drag** controls to position it.
+**Show separate minimap**, revealed by **Orbs → Positioning → Compact orbs**, displays a separate movable map in resizable modes. Use RuneLite's normal **Alt-drag** controls to position it.
 
 This separate minimap does not support other plugins' minimap overlays, such as names, tile markers or lines. Keep the native minimap visible if you need those overlays.
 
@@ -230,9 +215,9 @@ The **Minimap toggle button** section controls the optional eye button, its loca
 
 ## Saved settings
 
-**Editing controls** includes:
+**General** includes:
 
-- **Stone grouping grid** aligns Shift-dragged stones to a grid measured in pixels. Set it to **1** to disable snapping. RuneLite handles snapping for Alt-drag movement.
+- **Grouping grid** aligns Shift-dragged stones to a grid measured in pixels. Set it to **1** to disable snapping. RuneLite handles snapping for Alt-drag movement.
 - **Reset positions and groups** asks for confirmation before clearing saved positions and menu groups in every display mode. Choose No or close the dialog to cancel. Your visibility choices are kept.
 
 Menu positions and groups are saved separately for **Fixed**, **Resizable Classic** and **Resizable Modern**. Independent orb and compass positioning, native-minimap movement, hiding the native minimap, and the separate minimap are features for resizable modes; Fixed keeps its native gameframe constraints.
@@ -245,7 +230,9 @@ Legacy Compact Orbs and Menu Stones Hider settings are imported once per RuneLit
 
 Disable other plugins that move or hide the same controls before using Interface Layout. Declared conflicts include **Compact Orbs**, **Menu Stones Hider**, **Fixed Resizable Hybrid**, **Orb Hider**, **Minimap Hider**, **Movable Orbs** and **Custom Game Tabs**. Custom Game Tabs and Interface Layout both own the menu-tab surfaces; use one at a time.
 
-### Custom UI Anchors
+### Built-in anchors and Custom UI Anchors
+
+Use **Anchors** to create Free, Row, Column or Wrap containers, import an existing Custom UI Anchors setup, and arrange compatible controls. **Edit anchors** plus the RuneLite drag hotkey enables drag-to-attach and dragging outside to detach. Ordinary movable overlays and infobox groups do not require prior selection in Other overlays. Enable, lock, spacing and size changes apply immediately; text inputs use normal commit behavior. Undo restores the previous edit.
 
 Whole bars, detached stones, free orbs and the compass expose separate RuneLite movement overlays. Custom UI Anchors can capture those overlays using the normal overlay movement control. Use Shift-drag to change stone groups. Hidden controls retain their saved positions, while a newly created group gets a new identity.
 
@@ -268,7 +255,7 @@ Interface Layout builds on Compact Orbs by cue and Menu Stones Hider by Richarda
 | [Movable Orbs](https://github.com/anonyser/runelite-movable-orbs) | Related approach | Positions native orbs around the minimap. Both plugins manage orb placement; declared conflict. |
 | [Fixed Resizable Hybrid](https://github.com/Lapask/fixed-resizable-hybrid) | Different layout approach | A Fixed-style gameframe in Resizable Classic. Its reskin is distinct from custom stone grouping. Declared conflict. |
 | [Minimap Hider](https://github.com/Richardant/minimaphider) | Focused alternative | Native minimap hiding. Already covered by Interface Layout; declared conflict. |
-| [Custom UI Anchors](https://github.com/Car-Role/Custom-UI-Anchors) | Optional companion | Positions and stacks RuneLite overlays, including the movement overlays exposed by Interface Layout. Stone grouping remains in Interface Layout. |
+| [Custom UI Anchors](https://github.com/Car-Role/Custom-UI-Anchors) | Optional alternative | Import into built-in Anchors or use it independently; avoid two owners for the same member. Positions and stacks RuneLite overlays, including the movement overlays exposed by Interface Layout. Stone grouping remains in Interface Layout. |
 | [Interface Styles (built in)](https://github.com/runelite/runelite/tree/master/runelite-client/src/main/java/net/runelite/client/plugins/interfacestyles) | Optional appearance tool | Classic interface artwork. Styling and control placement are different jobs; check the selected gameframe when combining them. |
 | [Resource Packs](https://github.com/melkypie/resource-packs) | Optional appearance tool | Custom UI artwork. Follow its gameframe guidance, including Interface Styles set to Default when required; pack artwork is not bundled here. |
 | [Stretched Mode (built in)](https://github.com/runelite/runelite/tree/master/runelite-client/src/main/java/net/runelite/client/plugins/stretchedmode) | Optional display tool | Scales the game view. Interface Layout arranges controls within that view; it does not replace whole-client scaling. |

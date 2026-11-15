@@ -4,6 +4,7 @@ Arrange RuneLite around the way you play. Move menu bars, detach tabs into rows 
 
 ## What you can do
 
+- **Create anchor layouts:** group compatible controls, overlays and infoboxes in Free, Row, Column or Wrap containers, with import, drag-to-attach, locking and Undo.
 - **Build menu layouts:** keep native rows, start with vertical bars, or create custom groups and detached buttons.
 - **Scale overlay buttons:** adjust all menu buttons together from **25–200%**.
 - **Keep your artwork:** **Resource pack** is the default icon source, including custom spellbooks. **Faithful contours** is an optional style and a fallback for missing pack replacements.
@@ -43,7 +44,7 @@ Example from a local TEST build with Resource pack selected. The displayed artwo
 
 ## Free-position native minimap
 
-In **Classic or Modern resizable**, choose **Orbs → Positioning → Free placement** and leave **Orbs → Minimap & compass → Show minimap** checked. Alt-drag the native minimap, or place it through **Custom UI Anchors** using the normal overlay placement system.
+In **Classic or Modern resizable**, choose **Orbs → Positioning → Free placement** and leave **Orbs → Minimap & compass → Show minimap** checked. Alt-drag the native minimap, or attach it through the built-in **Anchors** tab. **Custom UI Anchors** remains an optional alternative; give each control one layout owner.
 
 [![Free-position minimap, separate compass and circular orbs with the Dark grey rim](docs/media/free-minimap-compass-orbs.png)](docs/media/free-minimap-and-orb-controls.mp4)
 
@@ -59,9 +60,17 @@ Hiding and showing the map retains its position. Resetting the element clears it
 
 The **Anchors** tab stores containers and their members in Interface Layout. Importing Custom UI Anchors previews the transfer and leaves that plugin's settings unchanged. Avoid assigning the same overlay to both systems at once.
 
-Drag-to-attach works with Edit anchors enabled and your configured RuneLite drag hotkey. Free containers retain the drop offset; Row, Column and Wrap containers use member order. Changing the arrangement applies immediately. Drag an attached member outside the anchors to detach it at the drop position, or select **Detach** to leave it in place. **Undo** restores the previous edit. Hidden members retain their assignments.
+Drag-to-attach works with Edit anchors enabled and your configured RuneLite drag hotkey. Free containers retain the drop offset; Row, Column and Wrap containers use member order. Arrangement, Enabled, Locked, spacing, size and appearance changes apply immediately. Text and typed numeric values use their normal Enter/focus-loss commit behavior. Drag an attached member outside the anchors to detach it at the drop position, or select **Detach** to leave it in place. **Undo** restores the previous edit. Hidden members retain their assignments.
 
 With **Edit anchors** enabled, drag ordinary movable overlays or infobox groups straight into an anchor using your RuneLite drag hotkey. No selection under **Other overlays…** is required; that picker also lets you include overlays in the member list when editing is off. Detaching saves their new placement. World/actor overlays, tooltips, manually rendered overlays, ambiguous names and plugins that continually reposition themselves are not guaranteed compatible. Our supported menu groups, free map controls, Chat overlays, customized bank and Looting notifications use dedicated adapters.
+
+### Import an existing Custom UI Anchors layout
+
+1. Open **Anchors** and choose the Custom UI Anchors import action. Review the preview before importing.
+2. Keep one layout owner for each member. Import leaves the original plugin's saved setup intact; disable that plugin when switching to the built-in anchors.
+3. Enable **Edit anchors**, then use your configured RuneLite drag hotkey (Alt by default) to move the imported anchors or drag additional members into them. Drop a member outside the anchors, within the canvas, to detach it.
+
+**Enabled** releases or reclaims an anchor's members. **Locked** keeps them arranged while preventing edits. Ctrl-click or Shift-click names to reorder a selection. Hidden or temporarily covered members keep their assignments. Shared templates are optional; applying one is separate from automatically sharing every profile's window size or settings.
 
 ## Movement, anchors and resets
 
@@ -73,13 +82,13 @@ With **Edit anchors** enabled, drag ordinary movable overlays or infobox groups 
 | Alt-right-click | Open RuneLite’s overlay reset controls for the element. |
 | Reset positions and groups | Reset saved positions/groups after confirmation; retain visibility choices. |
 
-If you changed RuneLite’s overlay movement hotkey, use that modifier instead of Alt. Free-position overlays work with Custom UI Anchors. Ordinary inventory interaction remains protected; orb and minimap click protection is always active, and allowing clicks through gaps between menu tabs does not turn inventory items into click-through space.
+If you changed RuneLite’s overlay movement hotkey, use that modifier instead of Alt. Free-position overlays have their own anchor points and can use the built-in Anchors tab or Custom UI Anchors. Ordinary inventory interaction remains protected; orb and minimap click protection is always active, and allowing clicks through gaps between menu tabs does not turn inventory items into click-through space.
 
 Free-position controls and menu groups follow their saved screen edge or center when the game canvas changes size. Explicit RuneLite origins and Custom UI Anchors keep controlling attached elements. Controls are kept within the available canvas; returning to the larger size restores their placement without saving the temporary clamped position. Changing monitors alone does not move the layout if the game canvas stays the same size. Existing absolute layouts learn their reference size when first loaded within the visible canvas, so open the update at your usual size before moving to a smaller display.
 
 ## Beta appearance and timers
 
-**Orbs → Orb appearance** offers **Number tabs** or **Circles only**. **Orbs → Special attack** contains the optional shield special orb and extra special-attack meter. The extra meter sits below the special orb in Circles only, separated from its timer. **General → Equipment** contains the optional enhanced equipment panel and reduced tooltips; native equipment slots and the expanded equipment window remain unchanged.
+**Orbs → Orb appearance** offers **Number tabs** or **Circles only**. **Orbs → Special attack** contains the optional shield special orb and extra special-attack meter. The extra meter sits below the special orb in Circles only, separated from its timer. **General → Equipment · Beta** contains the optional enhanced equipment panel and reduced tooltips; native equipment slots and the expanded equipment window remain unchanged.
 
 Under **Orbs → Hitpoints / Prayer / Special attack**, choose **Inset sweep**, **Tag meters**, **Quiet rims** or **Eight slices** independently for HP, Prayer and Special. All four styles work with Number tabs and Circles only. HP and Special show regeneration progress. Prayer's countdown empties counterclockwise toward the next point drained, follows active prayers and equipped prayer bonus, and stops when prayers are inactive.
 
