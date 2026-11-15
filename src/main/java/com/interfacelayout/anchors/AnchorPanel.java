@@ -8,6 +8,7 @@ import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import javax.swing.*;
 import static com.interfacelayout.anchors.AnchorLayout.*;
 
@@ -27,6 +28,8 @@ public final class AnchorPanel extends JPanel
     private JComboBox<AnchorGeometry.Target> availableControl;
     private String memberAnchor="";
     private List<String> selectedMembers=List.of();
+    private String formKey="";
+    private final List<Consumer<Anchor>> fieldUpdates=new ArrayList<>(),memberUpdates=new ArrayList<>();
 
     public AnchorPanel(AnchorCoordinator coordinator,AnchorTransfers transfers,AnchorTemplates templates,ExternalAnchorAdapter external)
     {
@@ -69,8 +72,18 @@ public final class AnchorPanel extends JPanel
     }
     private void showSelection()
     {
-        details.removeAll();availableControl=null;Anchor anchor=list.getSelectedValue();
+        Anchor anchor=list.getSelectedValue();
+        String key=session+"/"+(anchor==null?"":anchor.id+"/"+anchor.parent+"/"+anchor.arrangement+"/"+anchor.members.stream().map(m->m.target+":"+m.reserveHidden).collect(java.util.stream.Collectors.joining("|")))+coordinator.snapshot().targets.keySet();
+        if(anchor!=null && key.equals(formKey)) {
+            refreshing=true;
+            try {fieldUpdates.forEach(update->update.accept(anchor));memberUpdates.forEach(update->update.accept(anchor));}
+            finally {refreshing=false;}
+            refreshAvailable();return;
+        }
+        formKey=key;fieldUpdates.clear();memberUpdates.clear();details.removeAll();availableControl=null;
         if(anchor==null) {details.add(new JLabel("Add an anchor to begin."));revalidate();repaint();return;}
+        String editingSession=session;
+        Consumer<Consumer<Anchor>> edit=change->{if(!refreshing && editingSession.equals(coordinator.snapshot().session))coordinator.edit(next->{Anchor a=next.find(anchor.id);if(a!=null)change.accept(a);});};
         JTextField name=new JTextField(anchor.name);field(details,"Name",name);
         JCheckBox enabled=new JCheckBox("Enabled",anchor.enabled),locked=new JCheckBox("Locked",anchor.locked);
         details.add(row(enabled,locked));
@@ -90,19 +103,28 @@ public final class AnchorPanel extends JPanel
         JCheckBox background=new JCheckBox("Background",anchor.background),border=new JCheckBox("Border",anchor.border);
         details.add(row(background,border));
         int[] colors={anchor.backgroundColor,anchor.borderColor};
-        details.add(row(button("Fill color",()->color(colors,0)),button("Border color",()->color(colors,1))));
-        Runnable apply=()-> {
-            String nextName=name.getText().trim(),parentId=parents.get(parent.getSelectedIndex());
-            Reference ref=(Reference)reference.getSelectedItem();Arrangement flow=(Arrangement)arrangement.getSelectedItem();Alignment align=(Alignment)alignment.getSelectedItem();
-            int px=value(x),py=value(y),width=value(w),height=value(h),pad=value(padding),space=value(gap),fillColor=colors[0],lineColor=colors[1];
-            boolean on=enabled.isSelected(),lock=locked.isSelected(),fill=background.isSelected(),outline=border.isSelected();
-            coordinator.edit(next->{Anchor a=next.find(anchor.id);if(a==null)return;a.name=nextName;a.enabled=on;a.locked=lock;a.parent=parentId;a.reference=ref;
-                a.x=px;a.y=py;a.width=width;a.height=height;a.padding=pad;a.gap=space;a.arrangement=flow;a.alignment=align;
-                a.background=fill;a.border=outline;a.backgroundColor=fillColor;a.borderColor=lineColor;});
-        };
-        arrangement.setToolTipText("Applies the anchor settings immediately.");
-        arrangement.addActionListener(e->{ordered.setVisible(arrangement.getSelectedItem()!=Arrangement.FREE);apply.run();});
-        details.add(button("Apply",apply));
+        details.add(row(button("Fill color",()->color(colors,0,value->edit.accept(a->a.backgroundColor=value))),button("Border color",()->color(colors,1,value->edit.accept(a->a.borderColor=value)))));
+        Runnable rename=()->{String value=name.getText().trim();if(!value.isEmpty())edit.accept(a->a.name=value);};
+        name.addActionListener(event->rename.run());
+        name.addFocusListener(new java.awt.event.FocusAdapter(){@Override public void focusLost(java.awt.event.FocusEvent event){rename.run();}});
+        name.setToolTipText("Saved when you press Enter or leave this field.");
+        enabled.addActionListener(event->{boolean value=enabled.isSelected();edit.accept(a->a.enabled=value);});
+        locked.addActionListener(event->{boolean value=locked.isSelected();edit.accept(a->a.locked=value);});
+        reference.addActionListener(event->{Reference value=(Reference)reference.getSelectedItem();edit.accept(a->a.reference=value);});
+        parent.addActionListener(event->{String value=parents.get(parent.getSelectedIndex());edit.accept(a->a.parent=value);});
+        arrangement.addActionListener(event->{Arrangement value=(Arrangement)arrangement.getSelectedItem();ordered.setVisible(value!=Arrangement.FREE);edit.accept(a->a.arrangement=value);});
+        alignment.addActionListener(event->{Alignment value=(Alignment)alignment.getSelectedItem();edit.accept(a->a.alignment=value);});
+        background.addActionListener(event->{boolean value=background.isSelected();edit.accept(a->a.background=value);});
+        border.addActionListener(event->{boolean value=border.isSelected();edit.accept(a->a.border=value);});
+        changed(x,"anchorX",value->edit.accept(a->a.x=value));changed(y,"anchorY",value->edit.accept(a->a.y=value));
+        changed(w,"anchorWidth",value->edit.accept(a->a.width=value));changed(h,"anchorHeight",value->edit.accept(a->a.height=value));
+        changed(padding,"anchorPadding",value->edit.accept(a->a.padding=value));changed(gap,"anchorGap",value->edit.accept(a->a.gap=value));
+        fieldUpdates.add(a->{
+            if(!name.isFocusOwner())name.setText(a.name);enabled.setSelected(a.enabled);locked.setSelected(a.locked);
+            reference.setSelectedItem(a.reference);parent.setSelectedIndex(parents.indexOf(a.parent));arrangement.setSelectedItem(a.arrangement);alignment.setSelectedItem(a.alignment);
+            update(x,a.x);update(y,a.y);update(w,a.width);update(h,a.height);update(padding,a.padding);update(gap,a.gap);
+            background.setSelected(a.background);border.setSelected(a.border);colors[0]=a.backgroundColor;colors[1]=a.borderColor;
+        });
         details.add(new JLabel("Members"));
         members(anchor);
         JComboBox<AnchorGeometry.Target> available=new JComboBox<>();availableControl=available;refreshAvailable();
@@ -146,14 +168,21 @@ public final class AnchorPanel extends JPanel
         details.add(row(up,down,detach));details.add(options);
         Runnable refresh=()->{
             selectedMembers=selection(members);boolean selected=!selectedMembers.isEmpty();up.setEnabled(selected);down.setEnabled(selected);detach.setEnabled(selected);
-            options.removeAll();List<Member> chosen=members.getSelectedValuesList();
+            options.removeAll();memberUpdates.clear();
+            Anchor current=coordinator.snapshot().layout.find(anchor.id);
+            List<Member> chosen=new ArrayList<>();if(current!=null)for(Member member:current.members)if(selectedMembers.contains(member.target))chosen.add(member);
             if(selected) {
                 boolean all=chosen.stream().allMatch(member->member.reserveHidden),mixed=!all && chosen.stream().anyMatch(member->member.reserveHidden);
                 JCheckBox reserve=new JCheckBox("Reserve hidden space",all);reserve.setToolTipText(mixed?"Mixed values. Toggle to apply to all selected controls.":"Apply to selected controls.");
                 reserve.addActionListener(e->{boolean value=reserve.isSelected();List<String> ids=selection(members);coordinator.edit(next->{Anchor a=next.find(anchor.id);if(a!=null)a.members.stream().filter(m->ids.contains(m.target)).forEach(m->m.reserveHidden=value);});});options.add(reserve);
                 if(chosen.size()==1 && anchor.arrangement==Arrangement.FREE) {
                     Member member=chosen.get(0);JSpinner x=number(member.x,-32768,32768),y=number(member.y,-32768,32768);field(options,"X / Y",row(x,y));
-                    options.add(button("Set offset",()->{int px=value(x),py=value(y);coordinator.edit(next->{Anchor a=next.find(anchor.id);if(a!=null)a.members.stream().filter(m->m.target.equals(member.target)).forEach(m->{m.x=px;m.y=py;});});}));
+                    String editingSession=session;
+                    java.util.function.BiConsumer<Boolean,Integer> offset=(horizontal,value)->{
+                        if(!refreshing && editingSession.equals(coordinator.snapshot().session))coordinator.edit(next->{Anchor a=next.find(anchor.id);if(a!=null)a.members.stream().filter(m->m.target.equals(member.target)).forEach(m->{if(horizontal)m.x=value;else m.y=value;});});
+                    };
+                    changed(x,"memberX",value->offset.accept(true,value));changed(y,"memberY",value->offset.accept(false,value));
+                    memberUpdates.add(a->a.members.stream().filter(m->m.target.equals(member.target)).findFirst().ifPresent(m->{update(x,m.x);update(y,m.y);}));
                 }
             }
             revalidate();repaint();
@@ -181,7 +210,9 @@ public final class AnchorPanel extends JPanel
         String name=JOptionPane.showInputDialog(this,"Template name (letters, numbers, spaces, hyphens):");if(name==null)return;
         if(action.equals("Create from this layout"))templates.create(name);else templates.link(name);
     }
-    private void color(int[] colors,int index) {Color color=JColorChooser.showDialog(this,"Anchor color",new Color(colors[index],true));if(color!=null)colors[index]=(colors[index]&0xff000000)|(color.getRGB()&0xffffff);}
+    private void color(int[] colors,int index,Consumer<Integer> save) {Color color=JColorChooser.showDialog(this,"Anchor color",new Color(colors[index],true));if(color!=null){colors[index]=(colors[index]&0xff000000)|(color.getRGB()&0xffffff);save.accept(colors[index]);}}
+    private static void changed(JSpinner spinner,String name,java.util.function.IntConsumer change) {spinner.setName(name);spinner.addChangeListener(event->change.accept(value(spinner)));}
+    private static void update(JSpinner spinner,int value) {if(!((JSpinner.DefaultEditor)spinner.getEditor()).getTextField().isFocusOwner())spinner.setValue(value);}
     private static JPanel column() {
         JPanel p=new JPanel(){@Override protected void addImpl(Component component,Object constraints,int index) {
             if(component instanceof JComponent)((JComponent)component).setAlignmentX(LEFT_ALIGNMENT);

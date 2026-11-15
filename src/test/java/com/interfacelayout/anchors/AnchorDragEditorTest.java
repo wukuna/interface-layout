@@ -282,5 +282,79 @@ public class AnchorDragEditorTest
             assertNull(values.get("interfacelayout/anchorExternalOverlaysV1"));
         } finally {external.stop();}
     }
+    @Test public void addingAnotherAnchorKeepsBothHeadersAndCornersOperable()throws Exception {
+        AnchorPanel panel=panel();
+        SwingUtilities.invokeAndWait(()->button(panel,"Add").doClick());flush();frame();
+        assertEquals(2,store.snapshot().anchors.size());
+        for(AnchorLayout.Anchor value:store.snapshot().anchors)moveAndResize(value.id);
+    }
+    @Test public void completedNativeDragDoesNotDisableEveryAnchorAfterAddingAnother()throws Exception {
+        AnchorPanel panel=panel();SwingUtilities.invokeAndWait(()->button(panel,"Add").doClick());flush();frame();
+        when(client.isDraggingWidget()).thenReturn(true);when(client.getDraggedWidget()).thenReturn(null);frame();
+        for(AnchorLayout.Anchor value:store.snapshot().anchors)moveAndResize(value.id);
+    }
+    @Test public void activeNativeDragStillBlocksAnchorMovement()throws Exception {
+        AnchorPanel panel=panel();SwingUtilities.invokeAndWait(()->button(panel,"Add").doClick());flush();frame();
+        when(client.isDraggingWidget()).thenReturn(true);when(client.getDraggedWidget()).thenReturn(mock(net.runelite.api.widgets.Widget.class));frame();
+        for(AnchorLayout.Anchor value:store.snapshot().anchors) {
+            Rectangle r=coordinator.snapshot().geometry.anchors.get(value.id),header=AnchorEditor.headerBounds(r,coordinator.snapshot().canvas);
+            assertFalse(mice.processMousePressed(event(MouseEvent.MOUSE_PRESSED,header.x+5,header.y+5)).isConsumed());
+            assertFalse(mice.processMousePressed(event(MouseEvent.MOUSE_PRESSED,r.x+r.width-3,r.y+r.height-3)).isConsumed());
+        }
+    }
+    @Test public void enabledAndLockedApplyImmediatelyAndReleaseOrProtectMembers()throws Exception {
+        press();drag(255,255);release(255,255);flush();frame();AnchorPanel panel=panel();
+        assertNull(button(panel,"Apply"));assertNull(button(panel,"Set offset"));
+        SwingUtilities.invokeAndWait(()->check(panel,"Enabled").doClick());flush();frame();
+        assertFalse(store.snapshot().find(anchor).enabled);assertFalse(participant.owns(control.id()));assertFalse(coordinator.snapshot().geometry.anchors.containsKey(anchor));
+        refresh(panel);SwingUtilities.invokeAndWait(()->check(panel,"Enabled").doClick());flush();frame();
+        assertTrue(store.snapshot().find(anchor).enabled);assertTrue(participant.owns(control.id()));
+        SwingUtilities.invokeAndWait(()->check(panel,"Locked").doClick());flush();frame();
+        assertTrue(store.snapshot().find(anchor).locked);assertTrue(participant.owns(control.id()));
+        Rectangle r=coordinator.snapshot().geometry.anchors.get(anchor),header=AnchorEditor.headerBounds(r,coordinator.snapshot().canvas);
+        assertFalse(mice.processMousePressed(event(MouseEvent.MOUSE_PRESSED,header.x+5,header.y+5)).isConsumed());
+        assertFalse(mice.processMousePressed(event(MouseEvent.MOUSE_PRESSED,r.x+r.width-3,r.y+r.height-3)).isConsumed());
+        refresh(panel);SwingUtilities.invokeAndWait(()->check(panel,"Locked").doClick());flush();frame();moveAndResize(anchor);
+    }
+    @Test public void immediateFieldEditsDoNotOverwriteOtherChangesAndKeepTheForm()throws Exception {
+        AnchorPanel panel=panel();javax.swing.JSpinner x=spinner(panel,"anchorX");
+        coordinator.edit(next->next.find(anchor).y=350);
+        SwingUtilities.invokeAndWait(()->{x.setValue(420);spinner(panel,"anchorPadding").setValue(8);check(panel,"Border").doClick();check(panel,"Background").doClick();});
+        flush();frame();AnchorLayout.Anchor result=store.snapshot().find(anchor);
+        assertEquals(420,result.x);assertEquals(350,result.y);assertEquals(8,result.padding);assertTrue(result.border);assertTrue(result.background);
+        refresh(panel);assertSame(x,spinner(panel,"anchorX"));assertEquals(350,spinner(panel,"anchorY").getValue());
+        long revision=store.revision();refresh(panel);flush();assertEquals(revision,store.revision());
+    }
+    @Test public void freeMemberOffsetsSaveWithoutASeparateButton()throws Exception {
+        press();drag(255,255);release(255,255);flush();frame();AnchorPanel panel=panel();
+        SwingUtilities.invokeAndWait(()->{spinner(panel,"memberX").setValue(70);spinner(panel,"memberY").setValue(80);});flush();frame();
+        AnchorLayout.Member member=store.snapshot().find(anchor).members.get(0);assertEquals(70,member.x);assertEquals(80,member.y);
+        assertEquals(new Point(270,280),control.bounds.getLocation());
+    }
+    private void moveAndResize(String id) {
+        frame();Rectangle before=new Rectangle(coordinator.snapshot().geometry.anchors.get(id)),header=AnchorEditor.headerBounds(before,coordinator.snapshot().canvas);
+        int x=header.x+10,y=header.y+8;
+        assertTrue(mice.processMousePressed(event(MouseEvent.MOUSE_PRESSED,x,y)).isConsumed());drag(x+25,y+35);frame();release(x+25,y+35);flush();frame();
+        Rectangle moved=new Rectangle(coordinator.snapshot().geometry.anchors.get(id));assertEquals(before.x+25,moved.x);assertEquals(before.y+35,moved.y);
+        x=moved.x+moved.width-3;y=moved.y+moved.height-3;
+        assertTrue(mice.processMousePressed(event(MouseEvent.MOUSE_PRESSED,x,y)).isConsumed());drag(x+40,y+45);frame();release(x+40,y+45);flush();frame();
+        Rectangle sized=coordinator.snapshot().geometry.anchors.get(id);assertEquals(moved.width+40,sized.width);assertEquals(moved.height+45,sized.height);
+    }
+    private AnchorPanel panel()throws Exception {
+        AnchorPanel[] result=new AnchorPanel[1];SwingUtilities.invokeAndWait(()->result[0]=new AnchorPanel(coordinator,new AnchorTransfers(),new AnchorTemplates(),new ExternalAnchorAdapter()));return result[0];
+    }
+    private static void refresh(AnchorPanel panel)throws Exception {
+        SwingUtilities.invokeAndWait(()->{try{var method=AnchorPanel.class.getDeclaredMethod("refresh");method.setAccessible(true);method.invoke(panel);}catch(Exception failure){throw new AssertionError(failure);}});
+    }
+    private static javax.swing.JButton button(java.awt.Container parent,String text){return (javax.swing.JButton)find(parent,c->c instanceof javax.swing.JButton && text.equals(((javax.swing.JButton)c).getText()));}
+    private static javax.swing.JCheckBox check(java.awt.Container parent,String text){return (javax.swing.JCheckBox)find(parent,c->c instanceof javax.swing.JCheckBox && text.equals(((javax.swing.JCheckBox)c).getText()));}
+    private static javax.swing.JSpinner spinner(java.awt.Container parent,String name){return (javax.swing.JSpinner)find(parent,c->c instanceof javax.swing.JSpinner && name.equals(c.getName()));}
+    private static java.awt.Component find(java.awt.Container parent,java.util.function.Predicate<java.awt.Component> match) {
+        for(java.awt.Component child:parent.getComponents()) {
+            if(match.test(child))return child;
+            if(child instanceof java.awt.Container){java.awt.Component found=find((java.awt.Container)child,match);if(found!=null)return found;}
+        }
+        return null;
+    }
     private List<String> order(){return store.snapshot().find(anchor).members.stream().map(member->member.target).collect(java.util.stream.Collectors.toList());}
 }

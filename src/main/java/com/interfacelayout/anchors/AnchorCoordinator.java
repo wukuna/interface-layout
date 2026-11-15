@@ -180,7 +180,7 @@ public final class AnchorCoordinator
         boolean scaled=real!=null && surface!=null && real.width>0 && real.height>0 && surface.width>0 && surface.height>0;
         return new Snapshot(session,layout,result,targets,store.error()==null?message:store.error(),store.canUndo(),revision,new Dimension(client.getCanvasWidth(),client.getCanvasHeight()),inputAllowed(),editing?com.interfacelayout.util.InterfaceWindows.bounds(client):Collections.emptyList(),inputEpoch,scaled?(double)real.width/surface.width:1,scaled?(double)real.height/surface.height:1);
     }
-    private boolean inputAllowed(){return client.getGameState()==net.runelite.api.GameState.LOGGED_IN && !client.isMenuOpen() && !client.isWidgetSelected() && !client.isDraggingWidget();}
+    private boolean inputAllowed(){return client.getGameState()==net.runelite.api.GameState.LOGGED_IN && !client.isMenuOpen() && !client.isWidgetSelected() && !(client.isDraggingWidget() && client.getDraggedWidget()!=null);}
     private void send(String name,Map<String,Object> extra)
     {
         Map<String,Object> data=new LinkedHashMap<>(extra);data.put("version",1);data.put("session",session);
