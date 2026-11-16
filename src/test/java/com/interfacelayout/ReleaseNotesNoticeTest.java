@@ -44,7 +44,8 @@ public class ReleaseNotesNoticeTest
         verify(chat,times(1)).queue(messages.capture());
         String message=messages.getValue().getRuneLiteFormattedMessage();
         assertTrue(message.contains("Updates:<br>* "));
-        assertEquals(7,message.split("<br>\\* ",-1).length-1);
+        assertEquals(8,message.split("<br>\\* ",-1).length-1);
+        assertTrue(message.contains("numeric infoboxes under each orb's settings"));
         assertTrue(message.contains("Prayer reminders and saved layouts"));
         assertFalse(message.contains("Recent updates"));
         assertFalse(message.contains("1. "));

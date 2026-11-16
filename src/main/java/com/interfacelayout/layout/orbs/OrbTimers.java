@@ -63,6 +63,12 @@ final class OrbTimers
     private final PrayerDrainClock prayer = new PrayerDrainClock();
     private long lastTick;
     private boolean ready;
+    private final RunEnergyClock run = new RunEnergyClock();
+    private final PrayerRegenerationClock regeneration = new PrayerRegenerationClock();
+    private int currentHitpoints, maximumHitpoints, healing = 1;
+    private int specialEnergy, currentPrayer, maximumPrayer;
+    static final Color RUN_COLOR = new Color(239, 208, 87);
+    static final Color REGENERATION_COLOR = new Color(139, 231, 174);
 
     void reset()
     {
@@ -74,6 +80,8 @@ final class OrbTimers
         specialActive = false;
         lightbearer = false;
         prayer.reset();
+        run.reset();
+        regeneration.reset();
         ready = false;
     }
 
@@ -92,13 +100,17 @@ final class OrbTimers
             lightbearer = equipped;
         }
         specialPeriod = lightbearer ? 25 : 50;
-        specialActive = client.getVarpValue(VarPlayerID.SA_ENERGY) < 1000;
+        specialEnergy = Math.max(0, Math.min(1000, client.getVarpValue(VarPlayerID.SA_ENERGY)));
+        specialActive = specialEnergy < 1000;
         specialTicks = specialActive ? (specialTicks + 1) % specialPeriod : 0;
 
-        hpPeriod = client.isPrayerActive(Prayer.RAPID_HEAL) ? 50 : 100;
+        boolean hpCape = worn(equipment, ItemID.SKILLCAPE_HITPOINTS) || worn(equipment, ItemID.SKILLCAPE_MAX_WORN);
+        hpPeriod = client.isPrayerActive(Prayer.RAPID_HEAL) || hpCape ? 50 : 100;
+        healing = worn(equipment, ItemID.JEWL_BRACELET_REGEN) ? 2 : 1;
         hpTicks = (hpTicks + 1) % hpPeriod;
-        hpDirection = Integer.compare(client.getRealSkillLevel(Skill.HITPOINTS),
-            client.getBoostedSkillLevel(Skill.HITPOINTS));
+        currentHitpoints = client.getBoostedSkillLevel(Skill.HITPOINTS);
+        maximumHitpoints = client.getRealSkillLevel(Skill.HITPOINTS);
+        hpDirection = Integer.compare(maximumHitpoints, currentHitpoints);
 
         int drain = PrayerDrain.rate(client);
         int points = client.getBoostedSkillLevel(Skill.PRAYER);
@@ -112,7 +124,12 @@ final class OrbTimers
                 if (stats != null && stats.getEquipment() != null) bonus += stats.getEquipment().getPrayer();
             }
         }
-        prayer.tick(drain,60+2*bonus,points);
+        maximumPrayer = client.getRealSkillLevel(Skill.PRAYER);
+        int restored = regeneration.tick(client.getVarbitValue(net.runelite.api.gameval.VarbitID.PRAYER_REGENERATION_POTION_TIMER));
+        if (restored > 0 && currentPrayer >= maximumPrayer && points >= maximumPrayer) restored = -1;
+        currentPrayer = points;
+        prayer.tick(drain,60+2*bonus,points,restored);
+        run.tick(client);
         lastTick = now;
         ready = true;
     }
@@ -129,6 +146,7 @@ final class OrbTimers
         if (component == InterfaceID.Orbs.ORB_SPECENERGY && specialActive)
             return Math.min(1, (specialTicks + fraction) / specialPeriod);
         if (component == InterfaceID.Orbs.ORB_PRAYER)return prayer.progress(fraction);
+        if (component == InterfaceID.Orbs.ORB_RUNENERGY)return run.progress(fraction);
         return 0;
     }
 
@@ -138,6 +156,12 @@ final class OrbTimers
     }
 
     void paint(Graphics2D graphics,Rectangle circle,int component,InterfaceLayoutConfig config,long now,int currentPrayer,int maximumPrayer)
+    {
+        paintDrain(graphics,circle,component,config,now,currentPrayer,maximumPrayer);
+        paintRegeneration(graphics,circle,null,component,config,now);
+    }
+
+    private void paintDrain(Graphics2D graphics,Rectangle circle,int component,InterfaceLayoutConfig config,long now,int currentPrayer,int maximumPrayer)
     {
         Color color = color(component, config);
         if (color == null) return;
@@ -170,6 +194,7 @@ final class OrbTimers
         Color color = color(component, config);
         if (color != null) NativeOrbTimers.paint(graphics,inset,number,component,config,color,
             progress(component,now),currentPrayer,maximumPrayer);
+        paintRegeneration(graphics,inset,number,component,config,now);
     }
 
     private static Color color(int component, InterfaceLayoutConfig config)
@@ -178,7 +203,60 @@ final class OrbTimers
         if (component == InterfaceID.Orbs.ORB_HEALTH && config.orbHitpointsTimer()) return HITPOINTS_COLOR;
         if (component == InterfaceID.Orbs.ORB_SPECENERGY && config.orbSpecialTimer()) return SPECIAL_COLOR;
         if (component == InterfaceID.Orbs.ORB_PRAYER && config.orbPrayerTimer()) return PRAYER_COLOR;
+        if (component == InterfaceID.Orbs.ORB_RUNENERGY && config.orbRunTimer()) return RUN_COLOR;
         return null;
+    }
+
+    private static boolean worn(ItemContainer equipment,int base)
+    {
+        if(equipment==null || equipment.getItems()==null)return false;
+        int mapped=net.runelite.client.game.ItemVariationMapping.map(base);
+        for(Item item:equipment.getItems())if(item!=null && item.getId()>0
+            && net.runelite.client.game.ItemVariationMapping.map(item.getId())==mapped)return true;
+        return false;
+    }
+
+    private double fraction(long now)
+    {
+        return Math.max(0,Math.min(1,(now-lastTick)/(double)TICK_NANOS));
+    }
+
+    double seconds(OrbTimerKind kind,long now)
+    {
+        if(!ready)return -1;
+        double fraction=fraction(now);
+        switch(kind)
+        {
+            case HP_NEXT:
+            case HP_FULL:
+                if(hpDirection<=0 || currentHitpoints<=0)return -1;
+                int heals=(maximumHitpoints-currentHitpoints+healing-1)/healing;
+                return Math.max(0,hpPeriod-Math.max(0,hpTicks)-fraction
+                    +(kind==OrbTimerKind.HP_FULL?(heals-1)*hpPeriod:0))*.6;
+            case SPECIAL_NEXT:
+            case SPECIAL_FULL:
+                if(!specialActive)return -1;
+                int restores=(1000-specialEnergy+99)/100;
+                return Math.max(0,specialPeriod-specialTicks-fraction
+                    +(kind==OrbTimerKind.SPECIAL_FULL?(restores-1)*specialPeriod:0))*.6;
+            case RUN_FULL:return run.recoverySeconds(fraction);
+            case RUN_EMPTY:return run.depletionSeconds(fraction);
+            case PRAYER_RESTORE:
+                double ticks=regeneration.nextTicks(fraction);
+                return ticks<0?-1:ticks*.6;
+            case PRAYER_EMPTY:
+                double empty=prayer.emptyTicks(currentPrayer,maximumPrayer,regeneration.nextTicks(0),regeneration.remainingRestores());
+                if(empty>=0 && regeneration.active() && !Double.isFinite(regeneration.nextTicks(0)))return Double.NaN;
+                return empty<0?-1:Math.max(0,empty-fraction)*.6;
+            default:return -1;
+        }
+    }
+
+    private void paintRegeneration(Graphics2D graphics,Rectangle bounds,Rectangle number,int component,
+        InterfaceLayoutConfig config,long now)
+    {
+        if(ready && component==InterfaceID.Orbs.ORB_PRAYER && !config.disableOrbTimers() && config.orbPrayerRegenerationTimer())
+            NativeOrbTimers.paintRegeneration(graphics,bounds,number,config,REGENERATION_COLOR,regeneration.progress(fraction(now)));
     }
 
     static void paintWedge(Graphics2D graphics, Rectangle inset, Color color, double progress)

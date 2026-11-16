@@ -96,6 +96,44 @@ final class NativeOrbTimers
         } finally {draw.dispose();}
     }
 
+    static void paintRegeneration(Graphics2D graphics,Rectangle bounds,Rectangle number,InterfaceLayoutConfig config,
+        Color color,double progress)
+    {
+        if(progress<=0 || !Double.isFinite(progress))return;
+        Rectangle inset=new Rectangle(bounds);
+        if(number==null)inset.grow(-5,-5);
+        NativeTimerStyle style=OrbTimerStyles.resolve(config,InterfaceID.Orbs.ORB_PRAYER);
+        Graphics2D draw=(Graphics2D)graphics.create();
+        try {
+            draw.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+            if(style==NativeTimerStyle.TAG_METERS) {
+                Rectangle bar=number==null?new Rectangle(bounds.x+6,bounds.y+bounds.height+2,bounds.width-12,2):tagBounds(inset,number);
+                if(config.orbPrayerTimer())bar.y+=config.prayerOrbDisplay()==PrayerDisplay.BOTH?6:3;
+                meter(draw,bar,color,progress);
+            } else {
+                inset.grow(-4,-4);
+                if(inset.width<8 || inset.height<8)return;
+                double radius=Math.min(inset.width,inset.height)/2.0;
+                if(style==NativeTimerStyle.QUIET_RIMS)ring(draw,inset,radius,color,progress,1.4f);
+                else if(style==NativeTimerStyle.EIGHT_SLICES)segments(draw,inset,radius,color,progress);
+                else OrbTimers.paintWedge(draw,inset,color,progress);
+            }
+        } finally {draw.dispose();}
+    }
+
+    static int extraHeight(InterfaceLayoutConfig config,int component)
+    {
+        if(config.disableOrbTimers() || OrbTimerStyles.resolve(config,component)!=NativeTimerStyle.TAG_METERS)return 0;
+        if(component==InterfaceID.Orbs.ORB_PRAYER) {
+            int rows=config.orbPrayerTimer()?(config.prayerOrbDisplay()==PrayerDisplay.BOTH?2:1):0;
+            if(config.orbPrayerRegenerationTimer())rows++;
+            return rows==0?0:1+rows*3;
+        }
+        boolean enabled=component==InterfaceID.Orbs.ORB_HEALTH?config.orbHitpointsTimer():
+            component==InterfaceID.Orbs.ORB_RUNENERGY?config.orbRunTimer():config.orbSpecialTimer();
+        return enabled?4:0;
+    }
+
     private static void ring(Graphics2D draw,Rectangle inset,double radius,Color color,double value,float width)
     {
         draw.setColor(color);draw.setStroke(new BasicStroke(width));

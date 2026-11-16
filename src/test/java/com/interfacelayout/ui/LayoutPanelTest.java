@@ -40,12 +40,12 @@ public class LayoutPanelTest
 
     @Test public void eachOrbHasFourChoicesInBothLayoutsAndOnlyTheChosenKeyIsWritten() throws Exception
     {
-        setup();
+        setup();when(config.orbRunTimer()).thenReturn(true);
         for(boolean circles:new boolean[]{false,true}) {
             when(config.hideOrbTabs()).thenReturn(circles);
             SwingUtilities.invokeAndWait(()->{
                 InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);button(panel,"Orbs").doClick();expand(panel);
-                for(String key:new String[]{"hitpointsTimerStyle","prayerTimerStyle","specialTimerStyle"}) {
+                for(String key:new String[]{"hitpointsTimerStyle","prayerTimerStyle","specialTimerStyle","runTimerStyle"}) {
                     JComboBox<?> choice=(JComboBox<?>)control(panel,key);assertTrue(visible(choice));assertEquals(4,choice.getItemCount());
                 }
                 ((JComboBox<?>)control(panel,"hitpointsTimerStyle")).setSelectedItem(NativeTimerStyle.EIGHT_SLICES);
@@ -65,6 +65,24 @@ public class LayoutPanelTest
             JComponent rim=control(panel,"orbRim");assertFalse(visible(rim));
             when(config.minimapFrame()).thenReturn(InterfaceLayoutConfig.MinimapFrame.CIRCULAR);panel.refresh();assertTrue(visible(rim));
             when(config.minimapFrame()).thenReturn(InterfaceLayoutConfig.MinimapFrame.NATIVE);panel.refresh();assertFalse(visible(rim));
+        });
+        assertTrue(pending.isEmpty());
+    }
+
+    @Test public void potionStyleDoesNotRequireDrainAndInfoboxesDoNotRequireRings() throws Exception
+    {
+        setup();when(config.orbPrayerTimer()).thenReturn(false);
+        when(config.orbPrayerRegenerationTimer()).thenReturn(true);
+        SwingUtilities.invokeAndWait(()->{
+            InterfaceLayoutPanel panel=new InterfaceLayoutPanel(config,settings);button(panel,"Orbs").doClick();expand(panel);
+            assertTrue(visible(control(panel,"prayerTimerStyle")));
+            assertFalse(visible(control(panel,"prayerOrbDisplay")));
+            when(config.disableOrbTimers()).thenReturn(true);panel.refresh();
+            assertFalse(visible(control(panel,"prayerTimerStyle")));
+            for(String key:List.of("hpNextInfoBox","hpFullInfoBox","specialNextInfoBox","specialFullInfoBox",
+                "runFullInfoBox","runEmptyInfoBox","prayerEmptyInfoBox","prayerRegenerationInfoBox")) {
+                JCheckBox box=(JCheckBox)control(panel,key);assertTrue(visible(box));assertFalse(box.isSelected());
+            }
         });
         assertTrue(pending.isEmpty());
     }

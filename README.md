@@ -10,7 +10,7 @@ Arrange RuneLite around the way you play. Move menu bars, detach tabs into rows 
 - **Keep your artwork:** **Resource pack** is the default icon source, including custom spellbooks. **Faithful contours** is an optional style and a fallback for missing pack replacements.
 - **Position map controls:** move and anchor the native minimap, free orbs and compass in resizable modes.
 - **Use circular rims:** Silver or Dark grey frames, or no custom rim, with optional number-only, icon-only or combined circular-orb contents.
-- **Track orb timers:** Optional inner rings for HP regeneration, special energy and prayer drain, including Rapid Heal, Lightbearer and equipment prayer bonus. The outer prayer potion-dose reminder stays separate.
+- **Track orb timers:** Optional Beta meters for HP, run energy, special energy, prayer drain and prayer-potion regeneration. Choose separate numeric infoboxes for the next restoration, full recovery or depletion. The outer prayer potion-dose reminder stays separate.
 - **Save each display mode:** Fixed, Resizable Classic and Resizable Modern keep separate menu layouts.
 - **Control visibility:** hide individual tabs, map controls and decorative borders, with shortcuts and resets.
 
@@ -90,9 +90,25 @@ Free-position controls and menu groups follow their saved screen edge or center 
 
 **Orbs → Orb appearance** offers **Number tabs** or **Circles only**. **Orbs → Special attack** contains the optional shield special orb and extra special-attack meter. The extra meter sits below the special orb in Circles only, separated from its timer. **General → Equipment · Beta** contains the optional enhanced equipment panel and reduced tooltips; native equipment slots and the expanded equipment window remain unchanged.
 
-Under **Orbs → Hitpoints / Prayer / Special attack**, choose **Inset sweep**, **Tag meters**, **Quiet rims** or **Eight slices** independently for HP, Prayer and Special. All four styles work with Number tabs and Circles only. HP and Special show regeneration progress. Prayer's countdown empties counterclockwise toward the next point drained, follows active prayers and equipped prayer bonus, and stops when prayers are inactive.
+Under **Orbs → Hitpoints / Prayer / Run energy / Special attack**, choose **Inset sweep**, **Tag meters**, **Quiet rims** or **Eight slices** independently for each orb. All four styles work with Number tabs and Circles only. HP and Special show regeneration progress. Prayer's countdown empties counterclockwise toward the next point drained, follows active prayers and equipped prayer bonus, and stops when prayers are inactive.
 
 Prayer **Tag meters** and **Eight slices** can display the actual remaining prayer amount, the next-point drain countdown, or both. The blue inset and native prayer symbol stay visible. Existing circular prayer rings retain their appearance until a different style is selected. Native low-prayer flashes and existing potion-dose reminders retain their settings. Timers do not require Regeneration Meter; timing is estimated, especially when enabling mid-session or rapidly changing prayers.
+
+
+The gold **Run energy** timer fills toward the next energy percentage while recovering and empties while draining. Recovery accounts for current Agility and Graceful equipment; depletion follows observed energy loss, including stamina and Ring of Endurance effects. It pauses when energy is unchanged and ignores large potion boosts.
+
+**Prayer → Potion regeneration meter** adds a separate green meter for the next prayer-regeneration-potion restoration. It uses the selected prayer style without replacing drain, remaining amount or dose reminders. The prayer-empty estimate includes known remaining potion restores. When enabled mid-potion, it waits for the next server duration change to synchronize.
+
+Each resource section has independent, off-by-default infobox choices. They work even when orb timers are disabled:
+
+| Resource | Optional numeric infoboxes |
+| --- | --- |
+| Hitpoints | Next regeneration; full recovery |
+| Special attack | Next 10%; full recovery |
+| Run energy | Full recovery; time until empty |
+| Prayer | Time until empty; next potion restoration |
+
+Infobox icons distinguish next restoration (**N**), full recovery (**F**), depletion (**E**) and potion restoration (**+**). Inactive or completed countdowns disappear. Run recovery shows **Paused** when energy is not recovering; an unknown potion phase shows **Sync**. These are estimates for your own character under current conditions: HP assumes no further damage, and run depletion does not predict changes of route or future stamina expiry. RuneLite's infobox controls can move or group them, including through Interface Layout anchors.
 
 ## Guide, compatibility and support
 

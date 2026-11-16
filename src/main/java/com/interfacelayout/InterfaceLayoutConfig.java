@@ -75,6 +75,39 @@ public interface InterfaceLayoutConfig extends Config
     @ConfigItem(keyName="specialTimerStyle",name="Special timer style",description="Beta timer style for the special-attack orb.",hidden=true)
     default OrbTimerStyle specialTimerStyle() {return OrbTimerStyle.CURRENT;}
 
+    @ConfigItem(keyName="orbRunTimer",name="Run energy timer",description="Show recovery or depletion toward the next percentage point in the run orb.",hidden=true)
+    default boolean orbRunTimer() {return false;}
+
+    @ConfigItem(keyName="orbPrayerRegenerationTimer",name="Prayer regeneration timer",description="Show a separate green meter toward the next prayer-regeneration potion pulse.",hidden=true)
+    default boolean orbPrayerRegenerationTimer() {return false;}
+
+    @ConfigItem(keyName="hpNextInfoBox",name="HP next regeneration infobox",description="Show time until the next natural hitpoints restoration.",hidden=true)
+    default boolean hpNextInfoBox() {return false;}
+
+    @ConfigItem(keyName="hpFullInfoBox",name="HP full recovery infobox",description="Estimate time until full hitpoints with current natural regeneration and equipment.",hidden=true)
+    default boolean hpFullInfoBox() {return false;}
+
+    @ConfigItem(keyName="specialNextInfoBox",name="Special next regeneration infobox",description="Show time until the next 10 percent special-energy restoration.",hidden=true)
+    default boolean specialNextInfoBox() {return false;}
+
+    @ConfigItem(keyName="specialFullInfoBox",name="Special full recovery infobox",description="Estimate time until full special energy.",hidden=true)
+    default boolean specialFullInfoBox() {return false;}
+
+    @ConfigItem(keyName="runFullInfoBox",name="Run full recovery infobox",description="Estimate time until full run energy while recovering; pause while running.",hidden=true)
+    default boolean runFullInfoBox() {return false;}
+
+    @ConfigItem(keyName="runEmptyInfoBox",name="Run depletion infobox",description="Estimate time until run energy runs out using the observed depletion rate.",hidden=true)
+    default boolean runEmptyInfoBox() {return false;}
+
+    @ConfigItem(keyName="prayerEmptyInfoBox",name="Prayer depletion infobox",description="Estimate time until prayer runs out with current prayers, bonus and known potion regeneration.",hidden=true)
+    default boolean prayerEmptyInfoBox() {return false;}
+
+    @ConfigItem(keyName="prayerRegenerationInfoBox",name="Prayer regeneration infobox",description="Show time until the next prayer-regeneration potion pulse.",hidden=true)
+    default boolean prayerRegenerationInfoBox() {return false;}
+
+    @ConfigItem(keyName="runTimerStyle",name="Run timer style",description="Beta timer style for the run-energy orb.",hidden=true)
+    default OrbTimerStyle runTimerStyle() {return OrbTimerStyle.CURRENT;}
+
     @ConfigItem(keyName="disableOrbTimers",name="Disable orb timers",description="Pause custom orb timers without changing individual timer choices.",hidden=true)
     default boolean disableOrbTimers() {return false;}
 

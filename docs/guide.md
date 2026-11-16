@@ -23,6 +23,8 @@ Choose **Inset sweep**, **Tag meters**, **Quiet rims** or **Eight slices** indep
 
 The screenshots and recordings below use the earlier settings layout. Menu arrangement, artwork and visibility are now together in Menu Tabs. Minimap and orb settings are together in Orbs, with each orb’s timer and mirror controls in its own section. Anchors has its own tab; General contains equipment, borders, editing and resets. Visibility checkboxes mean shown; older screenshots use inverse Hide checkboxes.
 
+Run energy has the same four styles in gold. Prayer-potion regeneration uses a separate green meter. Each resource section also offers independent numeric infoboxes: HP and Special next/full, Run full/empty, and Prayer empty/next potion restore. Infoboxes are off by default and do not require the rings. See [Beta timers and infoboxes](../README.md#beta-appearance-and-timers) for synchronization and estimate limits.
+
 ## Features
 
 - **Free-position controls** — move and anchor the native minimap, orbs and compass in resizable modes.

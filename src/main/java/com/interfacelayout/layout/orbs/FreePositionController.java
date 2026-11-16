@@ -293,10 +293,9 @@ public class FreePositionController
         if(config.hideOrbTabs() && fill!=null)
         {
             Rectangle circle=artwork.aroundFill(WidgetGeometry.bounds(fill),sprites.getPadded(fill));
-            boolean timer=!config.disableOrbTimers() && (orb==OrbOrder.HITPOINTS && config.orbHitpointsTimer()
-                || orb==OrbOrder.PRAYER && config.orbPrayerTimer() || orb==OrbOrder.SPECIAL && config.orbSpecialTimer());
-            boolean tag=timer && OrbTimerStyles.resolve(config,target.getComponentId())==InterfaceLayoutConfig.NativeTimerStyle.TAG_METERS;
-            Rectangle visible=new Rectangle(circle);if(tag)visible.height+=orb==OrbOrder.PRAYER && config.prayerOrbDisplay()==InterfaceLayoutConfig.PrayerDisplay.BOTH?7:4;
+            int timerHeight=NativeOrbTimers.extraHeight(config,target.getComponentId());
+            boolean tag=timerHeight>0;
+            Rectangle visible=new Rectangle(circle);visible.height+=timerHeight;
             if(orb==OrbOrder.SPECIAL && !config.hideExtraSpecialAttackBar())
             {
                 CircularSpecialMeter meter=CircularSpecialMeter.capture(widget,circle,tag?7:3,sprites);

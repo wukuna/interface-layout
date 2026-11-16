@@ -27,6 +27,7 @@ final class ReleaseNotesNotice
         "Enable Edit anchors and use your RuneLite drag hotkey to attach compatible controls, overlays and infobox groups; drag outside to detach.",
         "Move, resize, lock and reorder anchors and members, with Undo and optional shared templates.",
         "Choose Normal, Free placement or Compact orbs, with four Beta timer styles and separate prayer amount and drain displays.",
+        "Add run-energy and prayer-regeneration meters, with optional numeric infoboxes under each orb's settings.",
         "Prayer reminders and saved layouts are preserved; minimap, compass and special-attack positioning are more reliable.",
         "Reduced repeated orb and overlay work."
     };

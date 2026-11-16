@@ -115,7 +115,7 @@ public final class InterfaceLayoutPanel extends PluginPanel
             ()->config.hideOrbTabs()?"Circles only":"Number tabs",v->settings.set("hideOrbTabs",v.equals("Circles only")));
         JPanel circular=controls.when(p,config::hideOrbTabs);
         controls.choice(circular,"orbContent","Orb contents",OrbContent.values(),config::orbContent);
-        controls.toggle(p,"disableOrbTimers","Enable Beta timers",config::disableOrbTimers,true);
+        controls.toggle(p,"disableOrbTimers","Enable Beta orb timers",config::disableOrbTimers,true);
         JPanel map=controls.section(p,"Minimap & compass",true);
         controls.toggle(map,"hideMinimap","Show minimap",config::hideMinimap,true);
         controls.toggle(map,"hideCompass","Show compass",config::hideCompass,true);
@@ -135,22 +135,36 @@ public final class InterfaceLayoutPanel extends PluginPanel
         controls.toggle(hp,"hideHp","Show hitpoints orb",config::hideHp,true);
         mirror(hp,"mirrorHitpoints",config::mirrorHitpoints);
         timer(hp,"orbHitpointsTimer",config::orbHitpointsTimer,"hitpointsTimerStyle",InterfaceID.Orbs.ORB_HEALTH);
+        controls.toggle(hp,"hpNextInfoBox","Infobox: next regeneration",config::hpNextInfoBox,false);
+        controls.toggle(hp,"hpFullInfoBox","Infobox: full recovery",config::hpFullInfoBox,false);
         JPanel prayer=controls.section(p,"Prayer",false);
         controls.toggle(prayer,"hidePrayer","Show prayer orb",config::hidePray,true);
         mirror(prayer,"mirrorPrayer",config::mirrorPrayer);
-        JPanel prayerTimer=timer(prayer,"orbPrayerTimer",config::orbPrayerTimer,"prayerTimerStyle",InterfaceID.Orbs.ORB_PRAYER);
-        JPanel prayerDisplay=controls.when(prayerTimer,()->OrbTimerStyles.resolve(config,InterfaceID.Orbs.ORB_PRAYER)==NativeTimerStyle.TAG_METERS
-            || OrbTimerStyles.resolve(config,InterfaceID.Orbs.ORB_PRAYER)==NativeTimerStyle.EIGHT_SLICES);
+        JPanel prayerTimer=timer(prayer,"orbPrayerTimer",config::orbPrayerTimer,"prayerTimerStyle",InterfaceID.Orbs.ORB_PRAYER,
+            ()->config.orbPrayerTimer() || config.orbPrayerRegenerationTimer());
+        JPanel prayerDisplay=controls.when(prayerTimer,()->config.orbPrayerTimer()
+            && (OrbTimerStyles.resolve(config,InterfaceID.Orbs.ORB_PRAYER)==NativeTimerStyle.TAG_METERS
+            || OrbTimerStyles.resolve(config,InterfaceID.Orbs.ORB_PRAYER)==NativeTimerStyle.EIGHT_SLICES));
         controls.choice(prayerDisplay,"prayerOrbDisplay","Prayer display",PrayerDisplay.values(),config::prayerOrbDisplay);
         controls.tooltip("prayerOrbDisplay","Amount tracks remaining prayer; Countdown tracks the next point drained. Both uses two tag meters, or amount slices with a thin countdown arc.");
         controls.tooltip("orbPrayerTimer","Native low-prayer flashes and potion-dose reminders keep their own settings.");
+        controls.toggle(controls.when(prayer,()->!config.disableOrbTimers()),"orbPrayerRegenerationTimer","Potion regeneration meter",config::orbPrayerRegenerationTimer,false);
+        controls.tooltip("orbPrayerRegenerationTimer","Uses the selected prayer style in a separate green inner meter. Synchronizes to the next game update after login; leaves drain and dose reminders intact.");
+        controls.toggle(prayer,"prayerEmptyInfoBox","Infobox: time until empty",config::prayerEmptyInfoBox,false);
+        controls.toggle(prayer,"prayerRegenerationInfoBox","Infobox: next potion restore",config::prayerRegenerationInfoBox,false);
         JPanel run=controls.section(p,"Run energy",false);
         controls.toggle(run,"hideRun","Show run energy orb",config::hideRun,true);
         mirror(run,"mirrorRun",config::mirrorRun);
+        timer(run,"orbRunTimer",config::orbRunTimer,"runTimerStyle",InterfaceID.Orbs.ORB_RUNENERGY);
+        controls.tooltip("orbRunTimer","Gold progress toward the next energy percentage: fills while recovering, empties while draining. Pauses when energy does not change.");
+        controls.toggle(run,"runFullInfoBox","Infobox: full recovery",config::runFullInfoBox,false);
+        controls.toggle(run,"runEmptyInfoBox","Infobox: time until empty",config::runEmptyInfoBox,false);
         JPanel special=controls.section(p,"Special attack",false);
         controls.toggle(special,"hideSpec","Show special attack orb",config::hideSpec,true);
         mirror(special,"mirrorSpecial",config::mirrorSpecial);
         timer(special,"orbSpecialTimer",config::orbSpecialTimer,"specialTimerStyle",InterfaceID.Orbs.ORB_SPECENERGY);
+        controls.toggle(special,"specialNextInfoBox","Infobox: next regeneration",config::specialNextInfoBox,false);
+        controls.toggle(special,"specialFullInfoBox","Infobox: full recovery",config::specialFullInfoBox,false);
         JPanel specialExtras=controls.when(special,()->!config.hideSpec());
         controls.toggle(specialExtras,"showShieldSpecialOrb","Shield special orb · Beta",config::showShieldSpecialOrb,false);
         controls.toggle(specialExtras,"hideExtraSpecialAttackBar","Extra special-attack bar",config::hideExtraSpecialAttackBar,true);
@@ -190,9 +204,15 @@ public final class InterfaceLayoutPanel extends PluginPanel
     }
     private JPanel timer(JPanel p,String key,java.util.function.BooleanSupplier enabled,String style,int component)
     {
+        return timer(p,key,enabled,style,component,enabled);
+    }
+
+    private JPanel timer(JPanel p,String key,java.util.function.BooleanSupplier enabled,String style,int component,
+        java.util.function.BooleanSupplier styleEnabled)
+    {
         JPanel timers=controls.when(p,()->!config.disableOrbTimers());
         controls.toggle(timers,key,"Show Beta timer",enabled,false);
-        JPanel options=controls.when(timers,enabled);
+        JPanel options=controls.when(timers,styleEnabled);
         controls.choice(options,style,"Timer style",NativeTimerStyle.values(),()->OrbTimerStyles.resolve(config,component),
             value->settings.set(style,OrbTimerStyle.valueOf(value.name())));
         controls.tooltip(style,"Inset sweep shades the orb; Tag meters use small bars; Quiet rims use a thin arc; Eight slices use wedges. All styles support number tabs and circles. Tag meters sit below circles.");

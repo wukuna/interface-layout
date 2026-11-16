@@ -48,6 +48,7 @@ public final class CircularOrbs extends Overlay {
     @Inject NativeOrbTimerCompatibility nativeTimerCompatibility;
     @Inject ShieldSpecialOrb shield;
     @Inject net.runelite.client.game.ItemManager itemManager;
+    @Inject OrbTimerInfoBoxes infoBoxes;
     final OrbTimers timers = new OrbTimers();
     private final Map<Widget,Integer> opacities=new IdentityHashMap<>();
     private final Set<Widget> coveredWidgets=Collections.newSetFromMap(new IdentityHashMap<>());
@@ -80,7 +81,7 @@ public final class CircularOrbs extends Overlay {
     public CircularOrbs() {setPosition(OverlayPosition.DYNAMIC);setLayer(OverlayLayer.ABOVE_WIDGETS);setPriority(Overlay.PRIORITY_HIGHEST);}
     public Overlay frames() {return frames;}
     public void start() {running=true;generation++;if(drawManager!=null)drawManager.registerEveryFrameListener(afterFrame);}
-    public void stop() {if(drawManager!=null)drawManager.unregisterEveryFrameListener(afterFrame);running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation){scriptDepth=0;restore();compass.clear(client);timers.reset();if(soulreaper!=null)soulreaper.restore();if(nativeTimerCompatibility!=null)nativeTimerCompatibility.restore();artwork.clear();}});}
+    public void stop() {if(infoBoxes!=null)infoBoxes.clear();if(drawManager!=null)drawManager.unregisterEveryFrameListener(afterFrame);running=false;int token=++generation;thread.invoke(()->{if(!running && token==generation){scriptDepth=0;restore();compass.clear(client);timers.reset();if(soulreaper!=null)soulreaper.restore();if(nativeTimerCompatibility!=null)nativeTimerCompatibility.restore();artwork.clear();}});}
     public void releaseForLayout() {restore();}
     public void refreshAfterLayout() {refresh();}
     public boolean covers(Widget widget) {
@@ -108,12 +109,13 @@ public final class CircularOrbs extends Overlay {
     }
     @Subscribe public void onGameStateChanged(GameStateChanged event) {
         if(event.getGameState()==GameState.LOGIN_SCREEN || event.getGameState()==GameState.HOPPING)timers.reset();
-        if(event.getGameState()!=GameState.LOGGED_IN){scriptDepth=0;restore();compass.clear(client);if(soulreaper!=null)soulreaper.restore();if(nativeTimerCompatibility!=null)nativeTimerCompatibility.restore();}
+        if(event.getGameState()!=GameState.LOGGED_IN){if(infoBoxes!=null)infoBoxes.clear();scriptDepth=0;restore();compass.clear(client);if(soulreaper!=null)soulreaper.restore();if(nativeTimerCompatibility!=null)nativeTimerCompatibility.restore();}
     }
     @Subscribe public void onGameTick(GameTick event) {
         if(running && client.getGameState()==GameState.LOGGED_IN) {
             if(timerGeneration!=generation){timers.reset();timerGeneration=generation;}
             timers.tick(client,itemManager,System.nanoTime());
+            if(infoBoxes!=null)infoBoxes.refresh(timers);
         }
     }
     @Subscribe public void onVarbitChanged(VarbitChanged event) {
@@ -136,9 +138,16 @@ public final class CircularOrbs extends Overlay {
         thread.invoke(()->{if(running && token==generation){restore();if(soulreaper!=null)soulreaper.restore();}});
     }
     @Subscribe(priority=4) public void onConfigChanged(ConfigChanged event) {
-        if(OrbConstants.ConfigGroup.GROUP_NAME.equals(event.getGroup()))releaseBeforeLayout();
+        if(OrbConstants.ConfigGroup.GROUP_NAME.equals(event.getGroup())) {
+            releaseBeforeLayout();
+            int token=generation;
+            thread.invokeLater(()->{if(running && token==generation && infoBoxes!=null)infoBoxes.refresh(timers);});
+        }
     }
-    @Subscribe(priority=4) public void onProfileChanged(ProfileChanged event) {releaseBeforeLayout();}
+    @Subscribe(priority=4) public void onProfileChanged(ProfileChanged event) {
+        releaseBeforeLayout();
+        if(infoBoxes!=null)infoBoxes.clear();
+    }
     @Subscribe public void onPluginChanged(net.runelite.client.events.PluginChanged event) {
         int token=generation;
         thread.invokeLater(()->{
@@ -193,10 +202,9 @@ public final class CircularOrbs extends Overlay {
             Rectangle circle=artwork.aroundFill(fill,sprites.getPadded(indicator));
             if(soulreaper!=null && orb==Orbs.SPEC_ORB_CONTAINER)soulreaper.anchor(circle);
             Widget button=client.getWidget(orb.getButtonId());
-            boolean tagTimer=!config.disableOrbTimers() && OrbTimerStyles.resolve(config,parent.getId())==InterfaceLayoutConfig.NativeTimerStyle.TAG_METERS
-                && (orb==Orbs.HP_ORB_CONTAINER && config.orbHitpointsTimer() || orb==Orbs.PRAYER_ORB_CONTAINER && config.orbPrayerTimer()
-                || orb==Orbs.SPEC_ORB_CONTAINER && config.orbSpecialTimer());
-            Rectangle footprint=new Rectangle(circle);if(tagTimer)footprint.height+=orb==Orbs.PRAYER_ORB_CONTAINER && config.prayerOrbDisplay()==InterfaceLayoutConfig.PrayerDisplay.BOTH?7:4;
+            int timerHeight=NativeOrbTimers.extraHeight(config,parent.getId());
+            boolean tagTimer=timerHeight>0;
+            Rectangle footprint=new Rectangle(circle);footprint.height+=timerHeight;
             if(orb==Orbs.SPEC_ORB_CONTAINER)captureSpecialMeter(parent,circle,tagTimer?7:3,windows);
             CircularOrbLayers layers=CircularOrbLayers.capture(parent,backing,button,icon,sprites,this::hide);
             View v=new View(parent,sprites.get(icon),circle,WidgetGeometry.bounds(parent),layers,

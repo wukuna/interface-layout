@@ -12,7 +12,8 @@ public final class OrbTimerStyles
     public static NativeTimerStyle resolve(InterfaceLayoutConfig config,int component)
     {
         OrbTimerStyle selected=component==InterfaceID.Orbs.ORB_HEALTH?config.hitpointsTimerStyle():
-            component==InterfaceID.Orbs.ORB_PRAYER?config.prayerTimerStyle():config.specialTimerStyle();
+            component==InterfaceID.Orbs.ORB_PRAYER?config.prayerTimerStyle():
+            component==InterfaceID.Orbs.ORB_RUNENERGY?config.runTimerStyle():config.specialTimerStyle();
         if(selected!=null && selected!=OrbTimerStyle.CURRENT)return NativeTimerStyle.valueOf(selected.name());
         if(config.hideOrbTabs())return NativeTimerStyle.QUIET_RIMS;
         NativeTimerStyle legacy=config.nativeOrbTimerStyle();

@@ -149,6 +149,9 @@ public class MenuStoneControllerTest
         GameframeCoordinator coordinator = Guice.createInjector(new AbstractModule() {
             @Override protected void configure()
             {
+                bind(InterfaceLayoutPlugin.class).toProvider(InterfaceLayoutPlugin::new);
+                bind(net.runelite.client.ui.overlay.infobox.InfoBoxManager.class).toInstance(mock(net.runelite.client.ui.overlay.infobox.InfoBoxManager.class));
+                bind(net.runelite.client.game.SpriteManager.class).toInstance(mock(net.runelite.client.game.SpriteManager.class));
                 bind(Client.class).toInstance(client);
                 bind(net.runelite.client.game.ItemManager.class).toInstance(mock(net.runelite.client.game.ItemManager.class));
                 bind(InterfaceLayoutConfig.class).toInstance(config);
